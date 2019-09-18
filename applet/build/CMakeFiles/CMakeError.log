@@ -1,24 +1,24 @@
 Determining if the pthread_create exist failed with the following output:
-Change Dir: /home/lucas/Documents/Semester project/proj_dyn/build/CMakeFiles/CMakeTmp
+Change Dir: /home/lucas/Documents/Semester project/HairSimulation/applet/build/CMakeFiles/CMakeTmp
 
-Run Build Command:"/usr/bin/make" "cmTC_b41f4/fast"
-/usr/bin/make -f CMakeFiles/cmTC_b41f4.dir/build.make CMakeFiles/cmTC_b41f4.dir/build
-make[1]: Entering directory '/home/lucas/Documents/Semester project/proj_dyn/build/CMakeFiles/CMakeTmp'
-Building C object CMakeFiles/cmTC_b41f4.dir/CheckSymbolExists.c.o
-/usr/bin/cc    -o CMakeFiles/cmTC_b41f4.dir/CheckSymbolExists.c.o   -c "/home/lucas/Documents/Semester project/proj_dyn/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c"
-Linking C executable cmTC_b41f4
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_b41f4.dir/link.txt --verbose=1
-/usr/bin/cc      -rdynamic CMakeFiles/cmTC_b41f4.dir/CheckSymbolExists.c.o  -o cmTC_b41f4 
-CMakeFiles/cmTC_b41f4.dir/CheckSymbolExists.c.o: In function `main':
+Run Build Command:"/usr/bin/make" "cmTC_2ce82/fast"
+/usr/bin/make -f CMakeFiles/cmTC_2ce82.dir/build.make CMakeFiles/cmTC_2ce82.dir/build
+make[1]: Entering directory '/home/lucas/Documents/Semester project/HairSimulation/applet/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_2ce82.dir/CheckSymbolExists.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_2ce82.dir/CheckSymbolExists.c.o   -c "/home/lucas/Documents/Semester project/HairSimulation/applet/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c"
+Linking C executable cmTC_2ce82
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_2ce82.dir/link.txt --verbose=1
+/usr/bin/cc      -rdynamic CMakeFiles/cmTC_2ce82.dir/CheckSymbolExists.c.o  -o cmTC_2ce82 
+CMakeFiles/cmTC_2ce82.dir/CheckSymbolExists.c.o: In function `main':
 CheckSymbolExists.c:(.text+0x1b): undefined reference to `pthread_create'
 collect2: error: ld returned 1 exit status
-CMakeFiles/cmTC_b41f4.dir/build.make:97: recipe for target 'cmTC_b41f4' failed
-make[1]: *** [cmTC_b41f4] Error 1
-make[1]: Leaving directory '/home/lucas/Documents/Semester project/proj_dyn/build/CMakeFiles/CMakeTmp'
-Makefile:126: recipe for target 'cmTC_b41f4/fast' failed
-make: *** [cmTC_b41f4/fast] Error 2
+CMakeFiles/cmTC_2ce82.dir/build.make:97: recipe for target 'cmTC_2ce82' failed
+make[1]: *** [cmTC_2ce82] Error 1
+make[1]: Leaving directory '/home/lucas/Documents/Semester project/HairSimulation/applet/build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_2ce82/fast' failed
+make: *** [cmTC_2ce82/fast] Error 2
 
-File /home/lucas/Documents/Semester project/proj_dyn/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+File /home/lucas/Documents/Semester project/HairSimulation/applet/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
 /* */
 #include <pthread.h>
 
@@ -34,22 +34,22 @@ int main(int argc, char** argv)
 }
 
 Determining if the function pthread_create exists in the pthreads failed with the following output:
-Change Dir: /home/lucas/Documents/Semester project/proj_dyn/build/CMakeFiles/CMakeTmp
+Change Dir: /home/lucas/Documents/Semester project/HairSimulation/applet/build/CMakeFiles/CMakeTmp
 
-Run Build Command:"/usr/bin/make" "cmTC_f2efc/fast"
-/usr/bin/make -f CMakeFiles/cmTC_f2efc.dir/build.make CMakeFiles/cmTC_f2efc.dir/build
-make[1]: Entering directory '/home/lucas/Documents/Semester project/proj_dyn/build/CMakeFiles/CMakeTmp'
-Building C object CMakeFiles/cmTC_f2efc.dir/CheckFunctionExists.c.o
-/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_f2efc.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.10/Modules/CheckFunctionExists.c
-Linking C executable cmTC_f2efc
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_f2efc.dir/link.txt --verbose=1
-/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_f2efc.dir/CheckFunctionExists.c.o  -o cmTC_f2efc -lpthreads 
+Run Build Command:"/usr/bin/make" "cmTC_f1a0d/fast"
+/usr/bin/make -f CMakeFiles/cmTC_f1a0d.dir/build.make CMakeFiles/cmTC_f1a0d.dir/build
+make[1]: Entering directory '/home/lucas/Documents/Semester project/HairSimulation/applet/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_f1a0d.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_f1a0d.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.10/Modules/CheckFunctionExists.c
+Linking C executable cmTC_f1a0d
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_f1a0d.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_f1a0d.dir/CheckFunctionExists.c.o  -o cmTC_f1a0d -lpthreads 
 /usr/bin/ld: cannot find -lpthreads
 collect2: error: ld returned 1 exit status
-CMakeFiles/cmTC_f2efc.dir/build.make:97: recipe for target 'cmTC_f2efc' failed
-make[1]: *** [cmTC_f2efc] Error 1
-make[1]: Leaving directory '/home/lucas/Documents/Semester project/proj_dyn/build/CMakeFiles/CMakeTmp'
-Makefile:126: recipe for target 'cmTC_f2efc/fast' failed
-make: *** [cmTC_f2efc/fast] Error 2
+CMakeFiles/cmTC_f1a0d.dir/build.make:97: recipe for target 'cmTC_f1a0d' failed
+make[1]: *** [cmTC_f1a0d] Error 1
+make[1]: Leaving directory '/home/lucas/Documents/Semester project/HairSimulation/applet/build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_f1a0d/fast' failed
+make: *** [cmTC_f1a0d/fast] Error 2
 
 

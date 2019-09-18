@@ -6,5 +6,5 @@ C_FLAGS = -O3 -DNDEBUG   -Wall
 
 C_DEFINES = -D_GLFW_USE_CONFIG_H
 
-C_INCLUDES = -I"/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/include" -I"/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/src" -I"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" 
+C_INCLUDES = -I"/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/include" -I"/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/src" -I"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" 
 

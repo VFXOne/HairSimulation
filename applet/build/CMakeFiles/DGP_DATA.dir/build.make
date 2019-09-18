@@ -43,10 +43,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = "/home/lucas/Documents/Semester project/proj_dyn"
+CMAKE_SOURCE_DIR = "/home/lucas/Documents/Semester project/HairSimulation/applet"
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = "/home/lucas/Documents/Semester project/proj_dyn/build"
+CMAKE_BINARY_DIR = "/home/lucas/Documents/Semester project/HairSimulation/applet/build"
 
 # Utility rule file for DGP_DATA.
 
@@ -67,6 +67,6 @@ CMakeFiles/DGP_DATA.dir/clean:
 .PHONY : CMakeFiles/DGP_DATA.dir/clean
 
 CMakeFiles/DGP_DATA.dir/depend:
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build" && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" "/home/lucas/Documents/Semester project/proj_dyn" "/home/lucas/Documents/Semester project/proj_dyn" "/home/lucas/Documents/Semester project/proj_dyn/build" "/home/lucas/Documents/Semester project/proj_dyn/build" "/home/lucas/Documents/Semester project/proj_dyn/build/CMakeFiles/DGP_DATA.dir/DependInfo.cmake" --color=$(COLOR)
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build" && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" "/home/lucas/Documents/Semester project/HairSimulation/applet" "/home/lucas/Documents/Semester project/HairSimulation/applet" "/home/lucas/Documents/Semester project/HairSimulation/applet/build" "/home/lucas/Documents/Semester project/HairSimulation/applet/build" "/home/lucas/Documents/Semester project/HairSimulation/applet/build/CMakeFiles/DGP_DATA.dir/DependInfo.cmake" --color=$(COLOR)
 .PHONY : CMakeFiles/DGP_DATA.dir/depend
 

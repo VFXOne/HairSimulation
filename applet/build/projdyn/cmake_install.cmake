@@ -1,4 +1,4 @@
-# Install script for directory: /home/lucas/Documents/Semester project/proj_dyn/projdyn
+# Install script for directory: /home/lucas/Documents/Semester project/HairSimulation/applet/projdyn
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

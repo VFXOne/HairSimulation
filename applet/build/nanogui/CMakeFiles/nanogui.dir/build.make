@@ -43,10 +43,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = "/home/lucas/Documents/Semester project/proj_dyn"
+CMAKE_SOURCE_DIR = "/home/lucas/Documents/Semester project/HairSimulation/applet"
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = "/home/lucas/Documents/Semester project/proj_dyn/build"
+CMAKE_BINARY_DIR = "/home/lucas/Documents/Semester project/HairSimulation/applet/build"
 
 # Include any dependencies generated for this target.
 include nanogui/CMakeFiles/nanogui.dir/depend.make
@@ -62,51 +62,51 @@ nanogui_OBJECTS =
 
 # External object files for target nanogui
 nanogui_EXTERNAL_OBJECTS = \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/CMakeFiles/nanogui-obj.dir/ext/nanovg/src/nanovg.c.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/CMakeFiles/nanogui-obj.dir/nanogui_resources.cpp.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/CMakeFiles/nanogui-obj.dir/src/glutil.cpp.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/CMakeFiles/nanogui-obj.dir/src/common.cpp.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/CMakeFiles/nanogui-obj.dir/src/widget.cpp.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/CMakeFiles/nanogui-obj.dir/src/theme.cpp.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/CMakeFiles/nanogui-obj.dir/src/layout.cpp.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/CMakeFiles/nanogui-obj.dir/src/screen.cpp.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/CMakeFiles/nanogui-obj.dir/src/label.cpp.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/CMakeFiles/nanogui-obj.dir/src/window.cpp.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/CMakeFiles/nanogui-obj.dir/src/popup.cpp.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/CMakeFiles/nanogui-obj.dir/src/checkbox.cpp.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/CMakeFiles/nanogui-obj.dir/src/button.cpp.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/CMakeFiles/nanogui-obj.dir/src/popupbutton.cpp.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/CMakeFiles/nanogui-obj.dir/src/combobox.cpp.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/CMakeFiles/nanogui-obj.dir/src/progressbar.cpp.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/CMakeFiles/nanogui-obj.dir/src/slider.cpp.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/CMakeFiles/nanogui-obj.dir/src/messagedialog.cpp.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/CMakeFiles/nanogui-obj.dir/src/textbox.cpp.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/CMakeFiles/nanogui-obj.dir/src/imagepanel.cpp.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/CMakeFiles/nanogui-obj.dir/src/imageview.cpp.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/CMakeFiles/nanogui-obj.dir/src/vscrollpanel.cpp.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/CMakeFiles/nanogui-obj.dir/src/colorwheel.cpp.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/CMakeFiles/nanogui-obj.dir/src/colorpicker.cpp.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/CMakeFiles/nanogui-obj.dir/src/graph.cpp.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/CMakeFiles/nanogui-obj.dir/src/stackedwidget.cpp.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/CMakeFiles/nanogui-obj.dir/src/tabheader.cpp.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/CMakeFiles/nanogui-obj.dir/src/tabwidget.cpp.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/CMakeFiles/nanogui-obj.dir/src/glcanvas.cpp.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/CMakeFiles/nanogui-obj.dir/src/serializer.cpp.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/context.c.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/init.c.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/input.c.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/monitor.c.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/vulkan.c.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/window.c.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/x11_init.c.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/x11_monitor.c.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/x11_window.c.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/xkb_unicode.c.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/linux_joystick.c.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/posix_time.c.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/posix_tls.c.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/glx_context.c.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/egl_context.c.o"
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/CMakeFiles/nanogui-obj.dir/ext/nanovg/src/nanovg.c.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/CMakeFiles/nanogui-obj.dir/nanogui_resources.cpp.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/CMakeFiles/nanogui-obj.dir/src/glutil.cpp.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/CMakeFiles/nanogui-obj.dir/src/common.cpp.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/CMakeFiles/nanogui-obj.dir/src/widget.cpp.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/CMakeFiles/nanogui-obj.dir/src/theme.cpp.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/CMakeFiles/nanogui-obj.dir/src/layout.cpp.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/CMakeFiles/nanogui-obj.dir/src/screen.cpp.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/CMakeFiles/nanogui-obj.dir/src/label.cpp.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/CMakeFiles/nanogui-obj.dir/src/window.cpp.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/CMakeFiles/nanogui-obj.dir/src/popup.cpp.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/CMakeFiles/nanogui-obj.dir/src/checkbox.cpp.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/CMakeFiles/nanogui-obj.dir/src/button.cpp.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/CMakeFiles/nanogui-obj.dir/src/popupbutton.cpp.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/CMakeFiles/nanogui-obj.dir/src/combobox.cpp.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/CMakeFiles/nanogui-obj.dir/src/progressbar.cpp.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/CMakeFiles/nanogui-obj.dir/src/slider.cpp.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/CMakeFiles/nanogui-obj.dir/src/messagedialog.cpp.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/CMakeFiles/nanogui-obj.dir/src/textbox.cpp.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/CMakeFiles/nanogui-obj.dir/src/imagepanel.cpp.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/CMakeFiles/nanogui-obj.dir/src/imageview.cpp.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/CMakeFiles/nanogui-obj.dir/src/vscrollpanel.cpp.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/CMakeFiles/nanogui-obj.dir/src/colorwheel.cpp.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/CMakeFiles/nanogui-obj.dir/src/colorpicker.cpp.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/CMakeFiles/nanogui-obj.dir/src/graph.cpp.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/CMakeFiles/nanogui-obj.dir/src/stackedwidget.cpp.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/CMakeFiles/nanogui-obj.dir/src/tabheader.cpp.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/CMakeFiles/nanogui-obj.dir/src/tabwidget.cpp.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/CMakeFiles/nanogui-obj.dir/src/glcanvas.cpp.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/CMakeFiles/nanogui-obj.dir/src/serializer.cpp.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/context.c.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/init.c.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/input.c.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/monitor.c.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/vulkan.c.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/window.c.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/x11_init.c.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/x11_monitor.c.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/x11_window.c.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/xkb_unicode.c.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/linux_joystick.c.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/posix_time.c.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/posix_tls.c.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/glx_context.c.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/egl_context.c.o"
 
 nanogui/libnanogui.a: nanogui/CMakeFiles/nanogui-obj.dir/ext/nanovg/src/nanovg.c.o
 nanogui/libnanogui.a: nanogui/CMakeFiles/nanogui-obj.dir/nanogui_resources.cpp.o
@@ -155,9 +155,9 @@ nanogui/libnanogui.a: nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/glx
 nanogui/libnanogui.a: nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/egl_context.c.o
 nanogui/libnanogui.a: nanogui/CMakeFiles/nanogui.dir/build.make
 nanogui/libnanogui.a: nanogui/CMakeFiles/nanogui.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir="/home/lucas/Documents/Semester project/proj_dyn/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_1) "Linking CXX static library libnanogui.a"
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui" && $(CMAKE_COMMAND) -P CMakeFiles/nanogui.dir/cmake_clean_target.cmake
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui" && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/nanogui.dir/link.txt --verbose=$(VERBOSE)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir="/home/lucas/Documents/Semester project/HairSimulation/applet/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_1) "Linking CXX static library libnanogui.a"
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui" && $(CMAKE_COMMAND) -P CMakeFiles/nanogui.dir/cmake_clean_target.cmake
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui" && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/nanogui.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
 nanogui/CMakeFiles/nanogui.dir/build: nanogui/libnanogui.a
@@ -169,10 +169,10 @@ nanogui/CMakeFiles/nanogui.dir/requires:
 .PHONY : nanogui/CMakeFiles/nanogui.dir/requires
 
 nanogui/CMakeFiles/nanogui.dir/clean:
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui" && $(CMAKE_COMMAND) -P CMakeFiles/nanogui.dir/cmake_clean.cmake
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui" && $(CMAKE_COMMAND) -P CMakeFiles/nanogui.dir/cmake_clean.cmake
 .PHONY : nanogui/CMakeFiles/nanogui.dir/clean
 
 nanogui/CMakeFiles/nanogui.dir/depend:
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build" && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" "/home/lucas/Documents/Semester project/proj_dyn" "/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui" "/home/lucas/Documents/Semester project/proj_dyn/build" "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui" "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/CMakeFiles/nanogui.dir/DependInfo.cmake" --color=$(COLOR)
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build" && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" "/home/lucas/Documents/Semester project/HairSimulation/applet" "/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui" "/home/lucas/Documents/Semester project/HairSimulation/applet/build" "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui" "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/CMakeFiles/nanogui.dir/DependInfo.cmake" --color=$(COLOR)
 .PHONY : nanogui/CMakeFiles/nanogui.dir/depend
 

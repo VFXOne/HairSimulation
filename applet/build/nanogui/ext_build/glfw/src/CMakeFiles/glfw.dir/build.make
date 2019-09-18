@@ -43,10 +43,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = "/home/lucas/Documents/Semester project/proj_dyn"
+CMAKE_SOURCE_DIR = "/home/lucas/Documents/Semester project/HairSimulation/applet"
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = "/home/lucas/Documents/Semester project/proj_dyn/build"
+CMAKE_BINARY_DIR = "/home/lucas/Documents/Semester project/HairSimulation/applet/build"
 
 # Include any dependencies generated for this target.
 include nanogui/ext_build/glfw/src/CMakeFiles/glfw.dir/depend.make
@@ -62,21 +62,21 @@ glfw_OBJECTS =
 
 # External object files for target glfw
 glfw_EXTERNAL_OBJECTS = \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/context.c.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/init.c.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/input.c.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/monitor.c.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/vulkan.c.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/window.c.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/x11_init.c.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/x11_monitor.c.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/x11_window.c.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/xkb_unicode.c.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/linux_joystick.c.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/posix_time.c.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/posix_tls.c.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/glx_context.c.o" \
-"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/egl_context.c.o"
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/context.c.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/init.c.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/input.c.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/monitor.c.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/vulkan.c.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/window.c.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/x11_init.c.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/x11_monitor.c.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/x11_window.c.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/xkb_unicode.c.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/linux_joystick.c.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/posix_time.c.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/posix_tls.c.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/glx_context.c.o" \
+"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/egl_context.c.o"
 
 nanogui/ext_build/glfw/src/libglfw3.a: nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/context.c.o
 nanogui/ext_build/glfw/src/libglfw3.a: nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/init.c.o
@@ -95,9 +95,9 @@ nanogui/ext_build/glfw/src/libglfw3.a: nanogui/ext_build/glfw/src/CMakeFiles/glf
 nanogui/ext_build/glfw/src/libglfw3.a: nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/egl_context.c.o
 nanogui/ext_build/glfw/src/libglfw3.a: nanogui/ext_build/glfw/src/CMakeFiles/glfw.dir/build.make
 nanogui/ext_build/glfw/src/libglfw3.a: nanogui/ext_build/glfw/src/CMakeFiles/glfw.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir="/home/lucas/Documents/Semester project/proj_dyn/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_1) "Linking C static library libglfw3.a"
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" && $(CMAKE_COMMAND) -P CMakeFiles/glfw.dir/cmake_clean_target.cmake
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/glfw.dir/link.txt --verbose=$(VERBOSE)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir="/home/lucas/Documents/Semester project/HairSimulation/applet/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_1) "Linking C static library libglfw3.a"
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" && $(CMAKE_COMMAND) -P CMakeFiles/glfw.dir/cmake_clean_target.cmake
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/glfw.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
 nanogui/ext_build/glfw/src/CMakeFiles/glfw.dir/build: nanogui/ext_build/glfw/src/libglfw3.a
@@ -109,10 +109,10 @@ nanogui/ext_build/glfw/src/CMakeFiles/glfw.dir/requires:
 .PHONY : nanogui/ext_build/glfw/src/CMakeFiles/glfw.dir/requires
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw.dir/clean:
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" && $(CMAKE_COMMAND) -P CMakeFiles/glfw.dir/cmake_clean.cmake
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" && $(CMAKE_COMMAND) -P CMakeFiles/glfw.dir/cmake_clean.cmake
 .PHONY : nanogui/ext_build/glfw/src/CMakeFiles/glfw.dir/clean
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw.dir/depend:
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build" && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" "/home/lucas/Documents/Semester project/proj_dyn" "/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/src" "/home/lucas/Documents/Semester project/proj_dyn/build" "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw.dir/DependInfo.cmake" --color=$(COLOR)
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build" && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" "/home/lucas/Documents/Semester project/HairSimulation/applet" "/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/src" "/home/lucas/Documents/Semester project/HairSimulation/applet/build" "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw.dir/DependInfo.cmake" --color=$(COLOR)
 .PHONY : nanogui/ext_build/glfw/src/CMakeFiles/glfw.dir/depend
 

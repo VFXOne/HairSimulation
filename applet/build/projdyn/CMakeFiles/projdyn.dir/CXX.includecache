@@ -1592,41 +1592,41 @@ typeinfo
 surface_mesh/Vector.h
 -
 
-/home/lucas/Documents/Semester project/proj_dyn/projdyn/main.cpp
+/home/lucas/Documents/Semester project/HairSimulation/applet/projdyn/main.cpp
 viewer.h
-/home/lucas/Documents/Semester project/proj_dyn/projdyn/viewer.h
+/home/lucas/Documents/Semester project/HairSimulation/applet/projdyn/viewer.h
 projdyn_api.h
-/home/lucas/Documents/Semester project/proj_dyn/projdyn/projdyn_api.h
+/home/lucas/Documents/Semester project/HairSimulation/applet/projdyn/projdyn_api.h
 thread
 -
 chrono
 -
 
-/home/lucas/Documents/Semester project/proj_dyn/projdyn/projdyn.h
+/home/lucas/Documents/Semester project/HairSimulation/applet/projdyn/projdyn.h
 projdyn_types.h
-/home/lucas/Documents/Semester project/proj_dyn/projdyn/projdyn_types.h
+/home/lucas/Documents/Semester project/HairSimulation/applet/projdyn/projdyn_types.h
 memory
 -
 iostream
 -
 
-/home/lucas/Documents/Semester project/proj_dyn/projdyn/projdyn_api.cpp
+/home/lucas/Documents/Semester project/HairSimulation/applet/projdyn/projdyn_api.cpp
 projdyn_api.h
-/home/lucas/Documents/Semester project/proj_dyn/projdyn/projdyn_api.h
+/home/lucas/Documents/Semester project/HairSimulation/applet/projdyn/projdyn_api.h
 thread
 -
 projdyn.h
-/home/lucas/Documents/Semester project/proj_dyn/projdyn/projdyn.h
+/home/lucas/Documents/Semester project/HairSimulation/applet/projdyn/projdyn.h
 nanogui/slider.h
 -
 viewer.h
-/home/lucas/Documents/Semester project/proj_dyn/projdyn/viewer.h
+/home/lucas/Documents/Semester project/HairSimulation/applet/projdyn/viewer.h
 
-/home/lucas/Documents/Semester project/proj_dyn/projdyn/projdyn_api.h
+/home/lucas/Documents/Semester project/HairSimulation/applet/projdyn/projdyn_api.h
 projdyn_types.h
-/home/lucas/Documents/Semester project/proj_dyn/projdyn/projdyn_types.h
+/home/lucas/Documents/Semester project/HairSimulation/applet/projdyn/projdyn_types.h
 
-/home/lucas/Documents/Semester project/proj_dyn/projdyn/projdyn_types.h
+/home/lucas/Documents/Semester project/HairSimulation/applet/projdyn/projdyn_types.h
 Eigen/Dense
 -
 Eigen/Sparse
@@ -1634,7 +1634,7 @@ Eigen/Sparse
 memory
 -
 
-/home/lucas/Documents/Semester project/proj_dyn/projdyn/viewer.h
+/home/lucas/Documents/Semester project/HairSimulation/applet/projdyn/viewer.h
 nanogui/opengl.h
 -
 nanogui/glutil.h

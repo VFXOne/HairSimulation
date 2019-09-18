@@ -1,4 +1,4 @@
-# Install script for directory: /home/lucas/Documents/Semester project/proj_dyn/externals/surface_mesh
+# Install script for directory: /home/lucas/Documents/Semester project/HairSimulation/applet/externals/surface_mesh
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

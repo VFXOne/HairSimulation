@@ -305,10 +305,10 @@ projdyn/CMakeFiles/projdyn.dir/main.cpp.o
  ../externals/surface_mesh/surface_mesh/Vector.h
  ../externals/surface_mesh/surface_mesh/properties.h
  ../externals/surface_mesh/surface_mesh/types.h
- /home/lucas/Documents/Semester project/proj_dyn/projdyn/main.cpp
- /home/lucas/Documents/Semester project/proj_dyn/projdyn/projdyn_api.h
- /home/lucas/Documents/Semester project/proj_dyn/projdyn/projdyn_types.h
- /home/lucas/Documents/Semester project/proj_dyn/projdyn/viewer.h
+ /home/lucas/Documents/Semester project/HairSimulation/applet/projdyn/main.cpp
+ /home/lucas/Documents/Semester project/HairSimulation/applet/projdyn/projdyn_api.h
+ /home/lucas/Documents/Semester project/HairSimulation/applet/projdyn/projdyn_types.h
+ /home/lucas/Documents/Semester project/HairSimulation/applet/projdyn/viewer.h
 projdyn/CMakeFiles/projdyn.dir/projdyn_api.cpp.o
  ../externals/nanogui/ext/eigen/Eigen/Cholesky
  ../externals/nanogui/ext/eigen/Eigen/Core
@@ -614,8 +614,8 @@ projdyn/CMakeFiles/projdyn.dir/projdyn_api.cpp.o
  ../externals/surface_mesh/surface_mesh/Vector.h
  ../externals/surface_mesh/surface_mesh/properties.h
  ../externals/surface_mesh/surface_mesh/types.h
- /home/lucas/Documents/Semester project/proj_dyn/projdyn/projdyn.h
- /home/lucas/Documents/Semester project/proj_dyn/projdyn/projdyn_api.cpp
- /home/lucas/Documents/Semester project/proj_dyn/projdyn/projdyn_api.h
- /home/lucas/Documents/Semester project/proj_dyn/projdyn/projdyn_types.h
- /home/lucas/Documents/Semester project/proj_dyn/projdyn/viewer.h
+ /home/lucas/Documents/Semester project/HairSimulation/applet/projdyn/projdyn.h
+ /home/lucas/Documents/Semester project/HairSimulation/applet/projdyn/projdyn_api.cpp
+ /home/lucas/Documents/Semester project/HairSimulation/applet/projdyn/projdyn_api.h
+ /home/lucas/Documents/Semester project/HairSimulation/applet/projdyn/projdyn_types.h
+ /home/lucas/Documents/Semester project/HairSimulation/applet/projdyn/viewer.h

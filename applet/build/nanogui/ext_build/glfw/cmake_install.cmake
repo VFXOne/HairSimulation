@@ -1,4 +1,4 @@
-# Install script for directory: /home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw
+# Install script for directory: /home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -39,7 +39,7 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src/cmake_install.cmake")
+  include("/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src/cmake_install.cmake")
 
 endif()
 

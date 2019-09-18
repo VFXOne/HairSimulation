@@ -1,4 +1,4 @@
-# Install script for directory: /home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/src
+# Install script for directory: /home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/src
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

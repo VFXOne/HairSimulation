@@ -7,11 +7,11 @@ C_FLAGS = -O3 -DNDEBUG
 
 C_DEFINES = -DCORO_SJLJ
 
-C_INCLUDES = -I"/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/eigen" -I"/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/include" -I"/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/nanovg/src" -I"/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/include" -I"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui" -I"/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/coro" 
+C_INCLUDES = -I"/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/eigen" -I"/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/include" -I"/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/nanovg/src" -I"/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/include" -I"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui" -I"/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/coro" 
 
 CXX_FLAGS =  -std=c++11 -w -Wall -Wextra -std=c++14 -O3 -DNDEBUG  
 
 CXX_DEFINES = -DCORO_SJLJ
 
-CXX_INCLUDES = -I"/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/eigen" -I"/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/include" -I"/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/nanovg/src" -I"/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/include" -I"/home/lucas/Documents/Semester project/proj_dyn/build/nanogui" -I"/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/coro" 
+CXX_INCLUDES = -I"/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/eigen" -I"/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/include" -I"/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/nanovg/src" -I"/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/include" -I"/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui" -I"/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/coro" 
 

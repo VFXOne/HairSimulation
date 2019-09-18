@@ -6,15 +6,15 @@
 
 #IncludeRegexTransform: 
 
-/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/nanovg/src/fontstash.h
+/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/nanovg/src/fontstash.h
 ft2build.h
 -
 math.h
 -
 stb_truetype.h
-/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/nanovg/src/stb_truetype.h
+/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/nanovg/src/stb_truetype.h
 
-/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/nanovg/src/nanovg.c
+/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/nanovg/src/nanovg.c
 stdlib.h
 -
 stdio.h
@@ -24,17 +24,17 @@ math.h
 memory.h
 -
 nanovg.h
-/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/nanovg/src/nanovg.h
+/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/nanovg/src/nanovg.h
 fontstash.h
-/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/nanovg/src/fontstash.h
+/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/nanovg/src/fontstash.h
 stb_image.h
-/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/nanovg/src/stb_image.h
+/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/nanovg/src/stb_image.h
 
-/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/nanovg/src/nanovg.h
+/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/nanovg/src/nanovg.h
 
-/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/nanovg/src/stb_image.h
+/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/nanovg/src/stb_image.h
 stb_image.h
-/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/nanovg/src/stb_image.h
+/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/nanovg/src/stb_image.h
 stdio.h
 -
 stdarg.h
@@ -60,13 +60,13 @@ intrin.h
 arm_neon.h
 -
 
-/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/nanovg/src/stb_truetype.h
+/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/nanovg/src/stb_truetype.h
 stb_truetype.h
-/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/nanovg/src/stb_truetype.h
+/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/nanovg/src/stb_truetype.h
 stdio.h
 -
 stb_truetype.h
-/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/nanovg/src/stb_truetype.h
+/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/nanovg/src/stb_truetype.h
 math.h
 -
 math.h

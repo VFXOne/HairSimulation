@@ -43,10 +43,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = "/home/lucas/Documents/Semester project/proj_dyn"
+CMAKE_SOURCE_DIR = "/home/lucas/Documents/Semester project/HairSimulation/applet"
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = "/home/lucas/Documents/Semester project/proj_dyn/build"
+CMAKE_BINARY_DIR = "/home/lucas/Documents/Semester project/HairSimulation/applet/build"
 
 # Include any dependencies generated for this target.
 include nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/depend.make
@@ -59,16 +59,16 @@ include nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/flags.make
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/context.c.o: nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/flags.make
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/context.c.o: ../externals/nanogui/ext/glfw/src/context.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir="/home/lucas/Documents/Semester project/proj_dyn/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_1) "Building C object nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/context.c.o"
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/glfw_objects.dir/context.c.o   -c "/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/src/context.c"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir="/home/lucas/Documents/Semester project/HairSimulation/applet/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_1) "Building C object nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/context.c.o"
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/glfw_objects.dir/context.c.o   -c "/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/src/context.c"
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/context.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/glfw_objects.dir/context.c.i"
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E "/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/src/context.c" > CMakeFiles/glfw_objects.dir/context.c.i
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E "/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/src/context.c" > CMakeFiles/glfw_objects.dir/context.c.i
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/context.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/glfw_objects.dir/context.c.s"
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S "/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/src/context.c" -o CMakeFiles/glfw_objects.dir/context.c.s
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S "/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/src/context.c" -o CMakeFiles/glfw_objects.dir/context.c.s
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/context.c.o.requires:
 
@@ -83,16 +83,16 @@ nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/context.c.o.provides.buil
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/init.c.o: nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/flags.make
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/init.c.o: ../externals/nanogui/ext/glfw/src/init.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir="/home/lucas/Documents/Semester project/proj_dyn/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_2) "Building C object nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/init.c.o"
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/glfw_objects.dir/init.c.o   -c "/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/src/init.c"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir="/home/lucas/Documents/Semester project/HairSimulation/applet/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_2) "Building C object nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/init.c.o"
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/glfw_objects.dir/init.c.o   -c "/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/src/init.c"
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/init.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/glfw_objects.dir/init.c.i"
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E "/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/src/init.c" > CMakeFiles/glfw_objects.dir/init.c.i
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E "/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/src/init.c" > CMakeFiles/glfw_objects.dir/init.c.i
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/init.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/glfw_objects.dir/init.c.s"
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S "/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/src/init.c" -o CMakeFiles/glfw_objects.dir/init.c.s
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S "/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/src/init.c" -o CMakeFiles/glfw_objects.dir/init.c.s
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/init.c.o.requires:
 
@@ -107,16 +107,16 @@ nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/init.c.o.provides.build: 
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/input.c.o: nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/flags.make
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/input.c.o: ../externals/nanogui/ext/glfw/src/input.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir="/home/lucas/Documents/Semester project/proj_dyn/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_3) "Building C object nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/input.c.o"
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/glfw_objects.dir/input.c.o   -c "/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/src/input.c"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir="/home/lucas/Documents/Semester project/HairSimulation/applet/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_3) "Building C object nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/input.c.o"
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/glfw_objects.dir/input.c.o   -c "/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/src/input.c"
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/input.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/glfw_objects.dir/input.c.i"
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E "/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/src/input.c" > CMakeFiles/glfw_objects.dir/input.c.i
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E "/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/src/input.c" > CMakeFiles/glfw_objects.dir/input.c.i
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/input.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/glfw_objects.dir/input.c.s"
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S "/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/src/input.c" -o CMakeFiles/glfw_objects.dir/input.c.s
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S "/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/src/input.c" -o CMakeFiles/glfw_objects.dir/input.c.s
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/input.c.o.requires:
 
@@ -131,16 +131,16 @@ nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/input.c.o.provides.build:
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/monitor.c.o: nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/flags.make
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/monitor.c.o: ../externals/nanogui/ext/glfw/src/monitor.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir="/home/lucas/Documents/Semester project/proj_dyn/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_4) "Building C object nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/monitor.c.o"
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/glfw_objects.dir/monitor.c.o   -c "/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/src/monitor.c"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir="/home/lucas/Documents/Semester project/HairSimulation/applet/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_4) "Building C object nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/monitor.c.o"
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/glfw_objects.dir/monitor.c.o   -c "/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/src/monitor.c"
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/monitor.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/glfw_objects.dir/monitor.c.i"
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E "/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/src/monitor.c" > CMakeFiles/glfw_objects.dir/monitor.c.i
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E "/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/src/monitor.c" > CMakeFiles/glfw_objects.dir/monitor.c.i
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/monitor.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/glfw_objects.dir/monitor.c.s"
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S "/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/src/monitor.c" -o CMakeFiles/glfw_objects.dir/monitor.c.s
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S "/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/src/monitor.c" -o CMakeFiles/glfw_objects.dir/monitor.c.s
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/monitor.c.o.requires:
 
@@ -155,16 +155,16 @@ nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/monitor.c.o.provides.buil
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/vulkan.c.o: nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/flags.make
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/vulkan.c.o: ../externals/nanogui/ext/glfw/src/vulkan.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir="/home/lucas/Documents/Semester project/proj_dyn/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_5) "Building C object nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/vulkan.c.o"
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/glfw_objects.dir/vulkan.c.o   -c "/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/src/vulkan.c"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir="/home/lucas/Documents/Semester project/HairSimulation/applet/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_5) "Building C object nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/vulkan.c.o"
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/glfw_objects.dir/vulkan.c.o   -c "/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/src/vulkan.c"
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/vulkan.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/glfw_objects.dir/vulkan.c.i"
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E "/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/src/vulkan.c" > CMakeFiles/glfw_objects.dir/vulkan.c.i
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E "/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/src/vulkan.c" > CMakeFiles/glfw_objects.dir/vulkan.c.i
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/vulkan.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/glfw_objects.dir/vulkan.c.s"
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S "/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/src/vulkan.c" -o CMakeFiles/glfw_objects.dir/vulkan.c.s
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S "/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/src/vulkan.c" -o CMakeFiles/glfw_objects.dir/vulkan.c.s
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/vulkan.c.o.requires:
 
@@ -179,16 +179,16 @@ nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/vulkan.c.o.provides.build
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/window.c.o: nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/flags.make
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/window.c.o: ../externals/nanogui/ext/glfw/src/window.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir="/home/lucas/Documents/Semester project/proj_dyn/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_6) "Building C object nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/window.c.o"
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/glfw_objects.dir/window.c.o   -c "/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/src/window.c"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir="/home/lucas/Documents/Semester project/HairSimulation/applet/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_6) "Building C object nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/window.c.o"
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/glfw_objects.dir/window.c.o   -c "/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/src/window.c"
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/window.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/glfw_objects.dir/window.c.i"
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E "/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/src/window.c" > CMakeFiles/glfw_objects.dir/window.c.i
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E "/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/src/window.c" > CMakeFiles/glfw_objects.dir/window.c.i
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/window.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/glfw_objects.dir/window.c.s"
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S "/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/src/window.c" -o CMakeFiles/glfw_objects.dir/window.c.s
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S "/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/src/window.c" -o CMakeFiles/glfw_objects.dir/window.c.s
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/window.c.o.requires:
 
@@ -203,16 +203,16 @@ nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/window.c.o.provides.build
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/x11_init.c.o: nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/flags.make
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/x11_init.c.o: ../externals/nanogui/ext/glfw/src/x11_init.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir="/home/lucas/Documents/Semester project/proj_dyn/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_7) "Building C object nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/x11_init.c.o"
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/glfw_objects.dir/x11_init.c.o   -c "/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/src/x11_init.c"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir="/home/lucas/Documents/Semester project/HairSimulation/applet/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_7) "Building C object nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/x11_init.c.o"
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/glfw_objects.dir/x11_init.c.o   -c "/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/src/x11_init.c"
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/x11_init.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/glfw_objects.dir/x11_init.c.i"
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E "/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/src/x11_init.c" > CMakeFiles/glfw_objects.dir/x11_init.c.i
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E "/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/src/x11_init.c" > CMakeFiles/glfw_objects.dir/x11_init.c.i
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/x11_init.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/glfw_objects.dir/x11_init.c.s"
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S "/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/src/x11_init.c" -o CMakeFiles/glfw_objects.dir/x11_init.c.s
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S "/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/src/x11_init.c" -o CMakeFiles/glfw_objects.dir/x11_init.c.s
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/x11_init.c.o.requires:
 
@@ -227,16 +227,16 @@ nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/x11_init.c.o.provides.bui
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/x11_monitor.c.o: nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/flags.make
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/x11_monitor.c.o: ../externals/nanogui/ext/glfw/src/x11_monitor.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir="/home/lucas/Documents/Semester project/proj_dyn/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_8) "Building C object nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/x11_monitor.c.o"
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/glfw_objects.dir/x11_monitor.c.o   -c "/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/src/x11_monitor.c"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir="/home/lucas/Documents/Semester project/HairSimulation/applet/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_8) "Building C object nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/x11_monitor.c.o"
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/glfw_objects.dir/x11_monitor.c.o   -c "/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/src/x11_monitor.c"
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/x11_monitor.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/glfw_objects.dir/x11_monitor.c.i"
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E "/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/src/x11_monitor.c" > CMakeFiles/glfw_objects.dir/x11_monitor.c.i
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E "/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/src/x11_monitor.c" > CMakeFiles/glfw_objects.dir/x11_monitor.c.i
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/x11_monitor.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/glfw_objects.dir/x11_monitor.c.s"
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S "/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/src/x11_monitor.c" -o CMakeFiles/glfw_objects.dir/x11_monitor.c.s
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S "/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/src/x11_monitor.c" -o CMakeFiles/glfw_objects.dir/x11_monitor.c.s
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/x11_monitor.c.o.requires:
 
@@ -251,16 +251,16 @@ nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/x11_monitor.c.o.provides.
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/x11_window.c.o: nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/flags.make
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/x11_window.c.o: ../externals/nanogui/ext/glfw/src/x11_window.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir="/home/lucas/Documents/Semester project/proj_dyn/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_9) "Building C object nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/x11_window.c.o"
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/glfw_objects.dir/x11_window.c.o   -c "/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/src/x11_window.c"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir="/home/lucas/Documents/Semester project/HairSimulation/applet/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_9) "Building C object nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/x11_window.c.o"
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/glfw_objects.dir/x11_window.c.o   -c "/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/src/x11_window.c"
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/x11_window.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/glfw_objects.dir/x11_window.c.i"
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E "/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/src/x11_window.c" > CMakeFiles/glfw_objects.dir/x11_window.c.i
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E "/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/src/x11_window.c" > CMakeFiles/glfw_objects.dir/x11_window.c.i
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/x11_window.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/glfw_objects.dir/x11_window.c.s"
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S "/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/src/x11_window.c" -o CMakeFiles/glfw_objects.dir/x11_window.c.s
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S "/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/src/x11_window.c" -o CMakeFiles/glfw_objects.dir/x11_window.c.s
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/x11_window.c.o.requires:
 
@@ -275,16 +275,16 @@ nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/x11_window.c.o.provides.b
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/xkb_unicode.c.o: nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/flags.make
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/xkb_unicode.c.o: ../externals/nanogui/ext/glfw/src/xkb_unicode.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir="/home/lucas/Documents/Semester project/proj_dyn/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_10) "Building C object nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/xkb_unicode.c.o"
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/glfw_objects.dir/xkb_unicode.c.o   -c "/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/src/xkb_unicode.c"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir="/home/lucas/Documents/Semester project/HairSimulation/applet/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_10) "Building C object nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/xkb_unicode.c.o"
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/glfw_objects.dir/xkb_unicode.c.o   -c "/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/src/xkb_unicode.c"
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/xkb_unicode.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/glfw_objects.dir/xkb_unicode.c.i"
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E "/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/src/xkb_unicode.c" > CMakeFiles/glfw_objects.dir/xkb_unicode.c.i
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E "/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/src/xkb_unicode.c" > CMakeFiles/glfw_objects.dir/xkb_unicode.c.i
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/xkb_unicode.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/glfw_objects.dir/xkb_unicode.c.s"
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S "/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/src/xkb_unicode.c" -o CMakeFiles/glfw_objects.dir/xkb_unicode.c.s
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S "/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/src/xkb_unicode.c" -o CMakeFiles/glfw_objects.dir/xkb_unicode.c.s
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/xkb_unicode.c.o.requires:
 
@@ -299,16 +299,16 @@ nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/xkb_unicode.c.o.provides.
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/linux_joystick.c.o: nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/flags.make
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/linux_joystick.c.o: ../externals/nanogui/ext/glfw/src/linux_joystick.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir="/home/lucas/Documents/Semester project/proj_dyn/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_11) "Building C object nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/linux_joystick.c.o"
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/glfw_objects.dir/linux_joystick.c.o   -c "/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/src/linux_joystick.c"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir="/home/lucas/Documents/Semester project/HairSimulation/applet/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_11) "Building C object nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/linux_joystick.c.o"
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/glfw_objects.dir/linux_joystick.c.o   -c "/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/src/linux_joystick.c"
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/linux_joystick.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/glfw_objects.dir/linux_joystick.c.i"
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E "/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/src/linux_joystick.c" > CMakeFiles/glfw_objects.dir/linux_joystick.c.i
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E "/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/src/linux_joystick.c" > CMakeFiles/glfw_objects.dir/linux_joystick.c.i
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/linux_joystick.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/glfw_objects.dir/linux_joystick.c.s"
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S "/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/src/linux_joystick.c" -o CMakeFiles/glfw_objects.dir/linux_joystick.c.s
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S "/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/src/linux_joystick.c" -o CMakeFiles/glfw_objects.dir/linux_joystick.c.s
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/linux_joystick.c.o.requires:
 
@@ -323,16 +323,16 @@ nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/linux_joystick.c.o.provid
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/posix_time.c.o: nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/flags.make
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/posix_time.c.o: ../externals/nanogui/ext/glfw/src/posix_time.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir="/home/lucas/Documents/Semester project/proj_dyn/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_12) "Building C object nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/posix_time.c.o"
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/glfw_objects.dir/posix_time.c.o   -c "/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/src/posix_time.c"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir="/home/lucas/Documents/Semester project/HairSimulation/applet/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_12) "Building C object nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/posix_time.c.o"
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/glfw_objects.dir/posix_time.c.o   -c "/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/src/posix_time.c"
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/posix_time.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/glfw_objects.dir/posix_time.c.i"
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E "/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/src/posix_time.c" > CMakeFiles/glfw_objects.dir/posix_time.c.i
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E "/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/src/posix_time.c" > CMakeFiles/glfw_objects.dir/posix_time.c.i
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/posix_time.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/glfw_objects.dir/posix_time.c.s"
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S "/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/src/posix_time.c" -o CMakeFiles/glfw_objects.dir/posix_time.c.s
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S "/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/src/posix_time.c" -o CMakeFiles/glfw_objects.dir/posix_time.c.s
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/posix_time.c.o.requires:
 
@@ -347,16 +347,16 @@ nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/posix_time.c.o.provides.b
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/posix_tls.c.o: nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/flags.make
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/posix_tls.c.o: ../externals/nanogui/ext/glfw/src/posix_tls.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir="/home/lucas/Documents/Semester project/proj_dyn/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_13) "Building C object nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/posix_tls.c.o"
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/glfw_objects.dir/posix_tls.c.o   -c "/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/src/posix_tls.c"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir="/home/lucas/Documents/Semester project/HairSimulation/applet/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_13) "Building C object nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/posix_tls.c.o"
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/glfw_objects.dir/posix_tls.c.o   -c "/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/src/posix_tls.c"
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/posix_tls.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/glfw_objects.dir/posix_tls.c.i"
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E "/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/src/posix_tls.c" > CMakeFiles/glfw_objects.dir/posix_tls.c.i
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E "/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/src/posix_tls.c" > CMakeFiles/glfw_objects.dir/posix_tls.c.i
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/posix_tls.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/glfw_objects.dir/posix_tls.c.s"
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S "/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/src/posix_tls.c" -o CMakeFiles/glfw_objects.dir/posix_tls.c.s
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S "/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/src/posix_tls.c" -o CMakeFiles/glfw_objects.dir/posix_tls.c.s
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/posix_tls.c.o.requires:
 
@@ -371,16 +371,16 @@ nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/posix_tls.c.o.provides.bu
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/glx_context.c.o: nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/flags.make
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/glx_context.c.o: ../externals/nanogui/ext/glfw/src/glx_context.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir="/home/lucas/Documents/Semester project/proj_dyn/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_14) "Building C object nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/glx_context.c.o"
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/glfw_objects.dir/glx_context.c.o   -c "/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/src/glx_context.c"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir="/home/lucas/Documents/Semester project/HairSimulation/applet/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_14) "Building C object nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/glx_context.c.o"
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/glfw_objects.dir/glx_context.c.o   -c "/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/src/glx_context.c"
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/glx_context.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/glfw_objects.dir/glx_context.c.i"
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E "/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/src/glx_context.c" > CMakeFiles/glfw_objects.dir/glx_context.c.i
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E "/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/src/glx_context.c" > CMakeFiles/glfw_objects.dir/glx_context.c.i
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/glx_context.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/glfw_objects.dir/glx_context.c.s"
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S "/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/src/glx_context.c" -o CMakeFiles/glfw_objects.dir/glx_context.c.s
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S "/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/src/glx_context.c" -o CMakeFiles/glfw_objects.dir/glx_context.c.s
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/glx_context.c.o.requires:
 
@@ -395,16 +395,16 @@ nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/glx_context.c.o.provides.
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/egl_context.c.o: nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/flags.make
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/egl_context.c.o: ../externals/nanogui/ext/glfw/src/egl_context.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir="/home/lucas/Documents/Semester project/proj_dyn/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_15) "Building C object nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/egl_context.c.o"
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/glfw_objects.dir/egl_context.c.o   -c "/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/src/egl_context.c"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir="/home/lucas/Documents/Semester project/HairSimulation/applet/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_15) "Building C object nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/egl_context.c.o"
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/glfw_objects.dir/egl_context.c.o   -c "/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/src/egl_context.c"
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/egl_context.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/glfw_objects.dir/egl_context.c.i"
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E "/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/src/egl_context.c" > CMakeFiles/glfw_objects.dir/egl_context.c.i
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E "/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/src/egl_context.c" > CMakeFiles/glfw_objects.dir/egl_context.c.i
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/egl_context.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/glfw_objects.dir/egl_context.c.s"
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S "/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/src/egl_context.c" -o CMakeFiles/glfw_objects.dir/egl_context.c.s
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S "/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/src/egl_context.c" -o CMakeFiles/glfw_objects.dir/egl_context.c.s
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/egl_context.c.o.requires:
 
@@ -460,10 +460,10 @@ nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/requires: nanogui/ext_bui
 .PHONY : nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/requires
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/clean:
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" && $(CMAKE_COMMAND) -P CMakeFiles/glfw_objects.dir/cmake_clean.cmake
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" && $(CMAKE_COMMAND) -P CMakeFiles/glfw_objects.dir/cmake_clean.cmake
 .PHONY : nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/clean
 
 nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/depend:
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build" && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" "/home/lucas/Documents/Semester project/proj_dyn" "/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/src" "/home/lucas/Documents/Semester project/proj_dyn/build" "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src" "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/DependInfo.cmake" --color=$(COLOR)
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build" && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" "/home/lucas/Documents/Semester project/HairSimulation/applet" "/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/src" "/home/lucas/Documents/Semester project/HairSimulation/applet/build" "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src" "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/DependInfo.cmake" --color=$(COLOR)
 .PHONY : nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/depend
 

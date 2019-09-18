@@ -48,10 +48,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = "/home/lucas/Documents/Semester project/proj_dyn"
+CMAKE_SOURCE_DIR = "/home/lucas/Documents/Semester project/HairSimulation/applet"
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = "/home/lucas/Documents/Semester project/proj_dyn/build"
+CMAKE_BINARY_DIR = "/home/lucas/Documents/Semester project/HairSimulation/applet/build"
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -126,14 +126,14 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build" && $(CMAKE_COMMAND) -E cmake_progress_start "/home/lucas/Documents/Semester project/proj_dyn/build/CMakeFiles" "/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/ext_build/glfw/CMakeFiles/progress.marks"
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build" && $(MAKE) -f CMakeFiles/Makefile2 nanogui/ext_build/glfw/all
-	$(CMAKE_COMMAND) -E cmake_progress_start "/home/lucas/Documents/Semester project/proj_dyn/build/CMakeFiles" 0
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build" && $(CMAKE_COMMAND) -E cmake_progress_start "/home/lucas/Documents/Semester project/HairSimulation/applet/build/CMakeFiles" "/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/ext_build/glfw/CMakeFiles/progress.marks"
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build" && $(MAKE) -f CMakeFiles/Makefile2 nanogui/ext_build/glfw/all
+	$(CMAKE_COMMAND) -E cmake_progress_start "/home/lucas/Documents/Semester project/HairSimulation/applet/build/CMakeFiles" 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build" && $(MAKE) -f CMakeFiles/Makefile2 nanogui/ext_build/glfw/clean
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build" && $(MAKE) -f CMakeFiles/Makefile2 nanogui/ext_build/glfw/clean
 .PHONY : clean
 
 # The main clean target
@@ -143,17 +143,17 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build" && $(MAKE) -f CMakeFiles/Makefile2 nanogui/ext_build/glfw/preinstall
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build" && $(MAKE) -f CMakeFiles/Makefile2 nanogui/ext_build/glfw/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build" && $(MAKE) -f CMakeFiles/Makefile2 nanogui/ext_build/glfw/preinstall
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build" && $(MAKE) -f CMakeFiles/Makefile2 nanogui/ext_build/glfw/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build" && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build" && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
 # Help Target
@@ -179,6 +179,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd "/home/lucas/Documents/Semester project/proj_dyn/build" && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd "/home/lucas/Documents/Semester project/HairSimulation/applet/build" && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

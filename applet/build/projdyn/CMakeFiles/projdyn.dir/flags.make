@@ -6,5 +6,5 @@ CXX_FLAGS =  -std=c++11 -w -O3 -DNDEBUG
 
 CXX_DEFINES = -DEIGEN_DONT_PARALLELIZE
 
-CXX_INCLUDES = -I"/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/include" -I"/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/nanovg/src" -I"/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/glfw/include" -I"/home/lucas/Documents/Semester project/proj_dyn/externals/surface_mesh" -I"/home/lucas/Documents/Semester project/proj_dyn/externals/nanogui/ext/eigen" 
+CXX_INCLUDES = -I"/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/include" -I"/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/nanovg/src" -I"/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/glfw/include" -I"/home/lucas/Documents/Semester project/HairSimulation/applet/externals/surface_mesh" -I"/home/lucas/Documents/Semester project/HairSimulation/applet/externals/nanogui/ext/eigen" 
 

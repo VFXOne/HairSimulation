@@ -1,4 +1,4 @@
-# Install script for directory: /home/lucas/Documents/Semester project/proj_dyn
+# Install script for directory: /home/lucas/Documents/Semester project/HairSimulation/applet
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -39,9 +39,9 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("/home/lucas/Documents/Semester project/proj_dyn/build/nanogui/cmake_install.cmake")
-  include("/home/lucas/Documents/Semester project/proj_dyn/build/externals/surface_mesh/cmake_install.cmake")
-  include("/home/lucas/Documents/Semester project/proj_dyn/build/projdyn/cmake_install.cmake")
+  include("/home/lucas/Documents/Semester project/HairSimulation/applet/build/nanogui/cmake_install.cmake")
+  include("/home/lucas/Documents/Semester project/HairSimulation/applet/build/externals/surface_mesh/cmake_install.cmake")
+  include("/home/lucas/Documents/Semester project/HairSimulation/applet/build/projdyn/cmake_install.cmake")
 
 endif()
 
@@ -53,5 +53,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/lucas/Documents/Semester project/proj_dyn/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/lucas/Documents/Semester project/HairSimulation/applet/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
