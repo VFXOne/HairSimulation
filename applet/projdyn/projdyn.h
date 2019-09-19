@@ -16,6 +16,8 @@ namespace ProjDyn {
 		Simulator()
 		{
 			// Construct the simulator object
+			m_hasGrab = false;
+			isReady = false;
 		}
 
 		void setMesh(Positions& pos, Triangles& tris) {
@@ -28,16 +30,32 @@ namespace ProjDyn {
 		}
 
 		bool isInitialized() {
-			return false;
+			return isReady;
 		}
 
 		bool initializeSystem() {
 			// Setup simulation (collect constraints, set up and factorize global step system)
-			return false;
+
+			//isReady = true
+			return isReady;
 		}
 
 		bool step(int num_iterations) {
-			// Perform a simulation step
+			// Perform a simulation step -> PD Algo
+			/*
+			 *s_n = q_n + h * v_n + h*h*M_inv*f_ext;
+			 * q_n_1 = s_n
+			 *
+			 * int step = 0;
+			 * while (step < num_iterations) {
+			 *  for(int i = 0; i < C.length; i++) {//C -> Constraints
+			 *   p[i] = ProjectOnConstraintSet(C[i], q_n_1) //local step
+			 *  }
+			 *  step++:
+			 * }
+			 * q_n_1 = SolveLinearSystem(s_n, p) //global step
+			 * v_n_1 = (q_n_1 - q_n) / h;
+			 */
 			return false;
 		}
 
@@ -62,6 +80,11 @@ namespace ProjDyn {
 		bool m_hasGrab = false;
 		std::vector<unsigned long> m_grabVerts;
 		std::vector<Eigen::Vector3f> m_grabPos;
+
+		const double h = 1.0; //Simulation step size
+
+		//State variables
+		bool isReady;
 
 	};
 

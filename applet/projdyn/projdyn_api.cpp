@@ -26,8 +26,28 @@ bool projdyn_setmesh(Viewer* viewer, bool add_tets) {
 	// The mesh shown in the viewer is a Surface_mesh object
 	surface_mesh::Surface_mesh* mesh = viewer->getMesh();
 
-	// You can convert it into a geometry for your simulation, or use something else
-	// sim.setMesh(...)
+    // Convert surface mesh to Eigen matrices
+    surface_mesh::Surface_mesh* mesh = viewer->getMesh();
+    int j = 0;
+    ProjDyn::Positions vertices(mesh->n_vertices(), 3);
+    ProjDyn::Triangles faces(mesh->n_faces(), 3);
+    for (auto f : mesh->faces()) {
+        int k = 0;
+        for (auto v : mesh->vertices(f)) {
+            faces(j, k) = (ProjDyn::Index)v.idx();
+            ++k;
+        }
+        ++j;
+    }
+    j = 0;
+    for (auto v : mesh->vertices()) {
+        vertices.row(j) << (ProjDyn::Scalar)mesh->position(v).x,
+                (ProjDyn::Scalar)mesh->position(v).y,
+                (ProjDyn::Scalar)mesh->position(v).z;
+        ++j;
+    }
+
+    sim.setMesh(vertices, faces);
 
 	return true;
 }
