@@ -117,8 +117,8 @@ nanogui/preinstall: nanogui/ext_build/glfw/preinstall
 # Target rules for target nanogui/CMakeFiles/nanogui.dir
 
 # All Build rule for target.
-nanogui/CMakeFiles/nanogui.dir/all: nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/all
 nanogui/CMakeFiles/nanogui.dir/all: nanogui/CMakeFiles/nanogui-obj.dir/all
+nanogui/CMakeFiles/nanogui.dir/all: nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/all
 	$(MAKE) -f nanogui/CMakeFiles/nanogui.dir/build.make nanogui/CMakeFiles/nanogui.dir/depend
 	$(MAKE) -f nanogui/CMakeFiles/nanogui.dir/build.make nanogui/CMakeFiles/nanogui.dir/build
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir="/home/lucas/Documents/Semester project/HairSimulation/applet/build/CMakeFiles" --progress-num=17 "Built target nanogui"
