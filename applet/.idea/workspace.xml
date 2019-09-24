@@ -2,13 +2,7 @@
 <project version="4">
   <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true">
     <generated>
-      <config projectName="applet" targetName="nanogui-obj" />
-      <config projectName="applet" targetName="DGP_DATA" />
-      <config projectName="applet" targetName="glfw" />
-      <config projectName="applet" targetName="nanogui" />
-      <config projectName="applet" targetName="projdyn" />
-      <config projectName="applet" targetName="glfw_objects" />
-      <config projectName="applet" targetName="surface_mesh" />
+      <config projectName="Project" targetName="projdyn" />
     </generated>
   </component>
   <component name="CMakeSettings">
@@ -17,11 +11,7 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="97c1c814-b3c8-4106-9761-bbdd99dd31f3" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projdyn/projdyn.h" beforeDir="false" afterPath="$PROJECT_DIR$/projdyn/projdyn.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projdyn/projdyn_api.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/projdyn/projdyn_api.cpp" afterDir="false" />
-    </list>
+    <list default="true" id="97c1c814-b3c8-4106-9761-bbdd99dd31f3" name="Default Changelist" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -56,51 +46,12 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="CMake Application.projdyn">
-    <configuration name="DGP_DATA" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="applet" TARGET_NAME="DGP_DATA" CONFIG_NAME="Debug">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="glfw" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="applet" TARGET_NAME="glfw" CONFIG_NAME="Debug">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="glfw_objects" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="applet" TARGET_NAME="glfw_objects" CONFIG_NAME="Debug">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="nanogui-obj" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="applet" TARGET_NAME="nanogui-obj" CONFIG_NAME="Debug">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="nanogui" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="applet" TARGET_NAME="nanogui" CONFIG_NAME="Debug">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
+  <component name="RunManager">
     <configuration name="projdyn" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" EXPLICIT_BUILD_TARGET_NAME="all">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="surface_mesh" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="applet" TARGET_NAME="surface_mesh" CONFIG_NAME="Debug">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <list>
-      <item itemvalue="CMake Application.DGP_DATA" />
-      <item itemvalue="CMake Application.nanogui" />
-      <item itemvalue="CMake Application.nanogui-obj" />
-      <item itemvalue="CMake Application.glfw" />
-      <item itemvalue="CMake Application.glfw_objects" />
-      <item itemvalue="CMake Application.surface_mesh" />
-      <item itemvalue="CMake Application.projdyn" />
-    </list>
   </component>
   <component name="SvnConfiguration">
     <configuration />
