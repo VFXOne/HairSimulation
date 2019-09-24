@@ -4,6 +4,9 @@
 
 #include <memory>
 #include <iostream>
+#include <OpenMesh/Core/Mesh/TriMesh_ArrayKernelT.hh>
+
+typedef OpenMesh::TriMesh_ArrayKernelT<> OMesh;
 
 namespace ProjDyn {
 	typedef Eigen::SimplicialLDLT<SparseMatrix> SparseSolver;
@@ -23,6 +26,9 @@ namespace ProjDyn {
 		void setMesh(Positions& pos, Triangles& tris) {
 			// Pass the positions of the geometry
 			// Here you will have to introduce edges instead of triangles
+			m = pos.rows();
+			q = pos;
+			std::cout << "m = " << m << std::endl;
 		}
 
 		void resetPositions() {
@@ -36,12 +42,30 @@ namespace ProjDyn {
 		bool initializeSystem() {
 			// Setup simulation (collect constraints, set up and factorize global step system)
 
+			masses_flat = Vector::Ones(m);
+			masses = masses_flat.asDiagonal();
+			masses_inv = masses.inverse();
+			f_ext << 1, 1, 1;
+			f_ext.replicate(m, 1);
+
 			//isReady = true
 			return isReady;
 		}
 
 		bool step(int num_iterations) {
 			// Perform a simulation step -> PD Algo
+
+			Positions s_n = q + h * velocities + h * h * masses_inv * f_ext;
+			Positions q_n_1 = s_n;
+
+			size_t step = 0;
+
+			while (step < num_iterations) {
+			    step++;
+			    //What tf are constraints !?
+
+			}
+
 			/*
 			 *s_n = q_n + h * v_n + h*h*M_inv*f_ext;
 			 * q_n_1 = s_n
@@ -82,9 +106,26 @@ namespace ProjDyn {
 		std::vector<Eigen::Vector3f> m_grabPos;
 
 		const double h = 1.0; //Simulation step size
+		Positions f_ext;
+		size_t m;
+		Positions q;
+		Positions velocities;
+		Vector masses_flat;
+		Matrix masses;
+		Matrix masses_inv;
 
 		//State variables
 		bool isReady;
+
+		//----------------------------------------------
+
+		float ProjectOnConstraintSet(float c_i, Positions q) {
+		    return 0;
+		}
+
+		float SolveLinearSystem(Positions s_n, Positions p) {
+		    return 0;
+		}
 
 	};
 

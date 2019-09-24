@@ -23,14 +23,11 @@ bool projdyn_setmesh(Viewer* viewer, bool add_tets) {
 	// Stop the running simulation
 	projdyn_stop();
 
-	// The mesh shown in the viewer is a Surface_mesh object
-	surface_mesh::Surface_mesh* mesh = viewer->getMesh();
-
     // Convert surface mesh to Eigen matrices
     surface_mesh::Surface_mesh* mesh = viewer->getMesh();
-    int j = 0;
     ProjDyn::Positions vertices(mesh->n_vertices(), 3);
     ProjDyn::Triangles faces(mesh->n_faces(), 3);
+    int j = 0;
     for (auto f : mesh->faces()) {
         int k = 0;
         for (auto v : mesh->vertices(f)) {
@@ -79,7 +76,7 @@ void init_projdyn_gui(Viewer* viewer) {
 		}
 	});
 
-	Label* iterations_label = new Label(pd_win, "Num Loc-Glob Its: ");
+	Label* iterations_label = new Label(pd_win, "Num of Iterations: ");
 	IntBox<int>* iterations_box = new IntBox<int>(pd_win, projdyn_num_iterations);
 	iterations_box->setEditable(true);
 	iterations_box->setCallback([viewer](int num_its) {
