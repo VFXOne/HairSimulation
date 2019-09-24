@@ -13,7 +13,7 @@ typedef ProjDyn::Positions Positions;
 typedef unsigned int Scalar;
 class Constraint {
 public:
-    virtual Positions projectOnConstraintSet() = 0;
+    virtual Positions projectOnConstraintSet(Positions q) = 0;
 
     void initSM(Scalar rows, Scalar cols) {
         m_selectionMatrix = ProjDyn::SparseMatrix(rows, cols);

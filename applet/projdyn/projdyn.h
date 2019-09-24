@@ -28,7 +28,7 @@ namespace ProjDyn {
 			// Here you will have to introduce edges instead of triangles
 			m = pos.rows();
 			q = pos;
-			std::cout << "m = " << m << std::endl;
+			//TODO: Create edges
 		}
 
 		void resetPositions() {
@@ -45,8 +45,10 @@ namespace ProjDyn {
 			masses_flat = Vector::Ones(m);
 			masses = masses_flat.asDiagonal();
 			masses_inv = masses.inverse();
-			f_ext << 1, 1, 1;
+			f_ext << 0, 0, -1;
 			f_ext.replicate(m, 1);
+
+			//TODO: Collect constraints (i.e. create spring constraints for each edges)
 
 			//isReady = true
 			return isReady;
@@ -55,15 +57,24 @@ namespace ProjDyn {
 		bool step(int num_iterations) {
 			// Perform a simulation step -> PD Algo
 
+			size_t numConstraints = constraints->size();
+
 			Positions s_n = q + h * velocities + h * h * masses_inv * f_ext;
 			Positions q_n_1 = s_n;
+			std::vector<Positions> p_i(numConstraints);
 
 			size_t step = 0;
 
 			while (step < num_iterations) {
 			    step++;
-			    //What tf are constraints !?
-
+			    //Local step
+			    for (size_t c_ind = 0; c_ind < numConstraints; c_ind++) {
+			        Constraint* c = constraints->at(c_ind);
+                    p_i[ind] = (c.projectOnConstraintSet(q_n_1))
+			    }
+			    //Global step
+			    //sparseSolver.compute(A).solve(B); to solve Ax=b
+			    //TODO: Figure out how to solve the equation
 			}
 
 			/*
@@ -114,18 +125,10 @@ namespace ProjDyn {
 		Matrix masses;
 		Matrix masses_inv;
 
+		std::vector<ProjDyn::Constraint*>* constraints;
+
 		//State variables
 		bool isReady;
-
-		//----------------------------------------------
-
-		float ProjectOnConstraintSet(float c_i, Positions q) {
-		    return 0;
-		}
-
-		float SolveLinearSystem(Positions s_n, Positions p) {
-		    return 0;
-		}
 
 	};
 
