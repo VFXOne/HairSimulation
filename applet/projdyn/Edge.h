@@ -5,8 +5,6 @@
 #ifndef APPLET_EDGE_H
 #define APPLET_EDGE_H
 #define yeet throw
-#endif //APPLET_EDGE_H
-
 #include "projdyn_types.h"
 
 typedef unsigned int Index;
@@ -74,3 +72,5 @@ protected:
     Index p1;
     Index p2;
 };
+
+#endif //APPLET_EDGE_H
