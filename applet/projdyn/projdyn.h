@@ -5,9 +5,6 @@
 
 #include <memory>
 #include <iostream>
-#include <OpenMesh/Core/Mesh/TriMesh_ArrayKernelT.hh>
-
-typedef OpenMesh::TriMesh_ArrayKernelT<> OMesh;
 
 namespace ProjDyn {
 	typedef Eigen::SimplicialLDLT<SparseMatrix> SparseSolver;

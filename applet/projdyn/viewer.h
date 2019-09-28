@@ -601,7 +601,7 @@ private:
 
         view = nanogui::lookAt(mCamera.eye, mCamera.center, mCamera.up);
 
-        float fH = std::tan(mCamera.viewAngle / 360.0f * M_PI) * mCamera.dnear;
+        float fH = std::tan(mCamera.viewAngle / 360.0f * _P) * mCamera.dnear;
         float fW = fH * (float) mSize.x() / (float) mSize.y();
 
         proj = nanogui::frustum(-fW, fW, -fH, fH, mCamera.dnear, mCamera.dfar);
