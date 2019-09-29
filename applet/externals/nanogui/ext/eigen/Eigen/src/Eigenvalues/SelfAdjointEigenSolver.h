@@ -593,7 +593,7 @@ template<typename SolverType> struct direct_selfadjoint_eigenvalues<SolverType,3
 
     // Compute the eigenvalues by solving for the roots of the polynomial.
     Scalar rho = sqrt(a_over_3);
-    Scalar theta = atan2(sqrt(q),half_b)*s_inv3;  // since sqrt(q) > 0, atan2 is in [0, pi] and theta is in [0, pi/3]
+    Scalar theta = atan2(sqrt(q),half_b)*s_inv3;  // since sqrt(positions) > 0, atan2 is in [0, pi] and theta is in [0, pi/3]
     Scalar cos_theta = cos(theta);
     Scalar sin_theta = sin(theta);
     // roots are already sorted, since cos is monotonically decreasing on [0, pi]

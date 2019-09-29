@@ -265,12 +265,12 @@ void my_stbtt_print(float x, float y, char *text)
    glBegin(GL_QUADS);
    while (*text) {
       if (*text >= 32 && *text < 128) {
-         stbtt_aligned_quad q;
-         stbtt_GetBakedQuad(cdata, 512,512, *text-32, &x,&y,&q,1);//1=opengl & d3d10+,0=d3d9
-         glTexCoord2f(q.s0,q.t1); glVertex2f(q.x0,q.y0);
-         glTexCoord2f(q.s1,q.t1); glVertex2f(q.x1,q.y0);
-         glTexCoord2f(q.s1,q.t0); glVertex2f(q.x1,q.y1);
-         glTexCoord2f(q.s0,q.t0); glVertex2f(q.x0,q.y1);
+         stbtt_aligned_quad positions;
+         stbtt_GetBakedQuad(cdata, 512,512, *text-32, &x,&y,&positions,1);//1=opengl & d3d10+,0=d3d9
+         glTexCoord2f(positions.s0,positions.t1); glVertex2f(positions.x0,positions.y0);
+         glTexCoord2f(positions.s1,positions.t1); glVertex2f(positions.x1,positions.y0);
+         glTexCoord2f(positions.s1,positions.t0); glVertex2f(positions.x1,positions.y1);
+         glTexCoord2f(positions.s0,positions.t0); glVertex2f(positions.x0,positions.y1);
       }
       ++text;
    }
@@ -1806,11 +1806,11 @@ static void stbtt__rasterize_sorted_edges(stbtt__bitmap *result, stbtt__edge *e,
             while (*step && (*step)->next) {
                if ((*step)->x > (*step)->next->x) {
                   stbtt__active_edge *t = *step;
-                  stbtt__active_edge *q = t->next;
+                  stbtt__active_edge *positions = t->next;
 
-                  t->next = q->next;
-                  q->next = t;
-                  *step = q;
+                  t->next = positions->next;
+                  positions->next = t;
+                  *step = positions;
                   changed = 1;
                }
                step = &(*step)->next;

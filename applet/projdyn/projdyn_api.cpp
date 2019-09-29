@@ -136,12 +136,18 @@ bool projdyn_upload_positions(Viewer* viewer) {
 	// In this function you need to extract the vertex positions of the simulation
 	// and send them to the viewer.
 
+	Positions* pos = sim.getPositions();
+
 	// This is done using the 3 x #Verts matrix upload_pos
-	size_t num_verts = 1;
+	size_t num_verts = pos->rows();
 	upload_pos.resize(3, num_verts);
-	upload_pos(0, 0) = 1.;
-	upload_pos(1, 0) = 1.;
-	upload_pos(2, 0) = 1.;
+
+	for (size_t i = 0; i < num_verts; i++) {
+	    ProjDyn::Vector row = pos->row(i);
+	    upload_pos(i, 0) = row(0);
+	    upload_pos(i, 1) = row(1);
+	    upload_pos(i, 2) = row(2);
+	}
 
 	// The matrix is sent to the viewer with this function
 	viewer->updateShaderVertices(upload_pos);

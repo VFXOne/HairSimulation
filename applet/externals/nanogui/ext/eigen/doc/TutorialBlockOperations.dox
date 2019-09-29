@@ -18,11 +18,11 @@ There are two versions, whose syntax is as follows:
 <tr><th>\b %Block \b operation</td>
 <th>Version constructing a \n dynamic-size block expression</th>
 <th>Version constructing a \n fixed-size block expression</th></tr>
-<tr><td>%Block of size <tt>(p,q)</tt>, starting at <tt>(i,j)</tt></td>
+<tr><td>%Block of size <tt>(p,positions)</tt>, starting at <tt>(i,j)</tt></td>
     <td>\code
-matrix.block(i,j,p,q);\endcode </td>
+matrix.block(i,j,p,positions);\endcode </td>
     <td>\code 
-matrix.block<p,q>(i,j);\endcode </td>
+matrix.block<p,positions>(i,j);\endcode </td>
 </tr>
 </table>
 
@@ -112,46 +112,46 @@ The different possibilities are summarized in the following table:
 <tr><th>%Block \b operation</td>
 <th>Version constructing a \n dynamic-size block expression</th>
 <th>Version constructing a \n fixed-size block expression</th></tr>
-<tr><td>Top-left p by q block \link DenseBase::topLeftCorner() * \endlink</td>
+<tr><td>Top-left p by positions block \link DenseBase::topLeftCorner() * \endlink</td>
     <td>\code
-matrix.topLeftCorner(p,q);\endcode </td>
+matrix.topLeftCorner(p,positions);\endcode </td>
     <td>\code 
-matrix.topLeftCorner<p,q>();\endcode </td>
+matrix.topLeftCorner<p,positions>();\endcode </td>
 </tr>
-<tr><td>Bottom-left p by q block
+<tr><td>Bottom-left p by positions block
               \link DenseBase::bottomLeftCorner() * \endlink</td>
     <td>\code
-matrix.bottomLeftCorner(p,q);\endcode </td>
+matrix.bottomLeftCorner(p,positions);\endcode </td>
     <td>\code 
-matrix.bottomLeftCorner<p,q>();\endcode </td>
+matrix.bottomLeftCorner<p,positions>();\endcode </td>
 </tr>
-<tr><td>Top-right p by q block
+<tr><td>Top-right p by positions block
               \link DenseBase::topRightCorner() * \endlink</td>
     <td>\code
-matrix.topRightCorner(p,q);\endcode </td>
+matrix.topRightCorner(p,positions);\endcode </td>
     <td>\code 
-matrix.topRightCorner<p,q>();\endcode </td>
+matrix.topRightCorner<p,positions>();\endcode </td>
 </tr>
-<tr><td>Bottom-right p by q block
+<tr><td>Bottom-right p by positions block
                \link DenseBase::bottomRightCorner() * \endlink</td>
     <td>\code
-matrix.bottomRightCorner(p,q);\endcode </td>
+matrix.bottomRightCorner(p,positions);\endcode </td>
     <td>\code 
-matrix.bottomRightCorner<p,q>();\endcode </td>
+matrix.bottomRightCorner<p,positions>();\endcode </td>
 </tr>
-<tr><td>%Block containing the first q rows
+<tr><td>%Block containing the first positions rows
                    \link DenseBase::topRows() * \endlink</td>
     <td>\code
-matrix.topRows(q);\endcode </td>
+matrix.topRows(positions);\endcode </td>
     <td>\code 
-matrix.topRows<q>();\endcode </td>
+matrix.topRows<positions>();\endcode </td>
 </tr>
-<tr><td>%Block containing the last q rows
+<tr><td>%Block containing the last positions rows
                     \link DenseBase::bottomRows() * \endlink</td>
     <td>\code
-matrix.bottomRows(q);\endcode </td>
+matrix.bottomRows(positions);\endcode </td>
     <td>\code 
-matrix.bottomRows<q>();\endcode </td>
+matrix.bottomRows<positions>();\endcode </td>
 </tr>
 <tr><td>%Block containing the first p columns
                     \link DenseBase::leftCols() * \endlink</td>
@@ -160,12 +160,12 @@ matrix.leftCols(p);\endcode </td>
     <td>\code 
 matrix.leftCols<p>();\endcode </td>
 </tr>
-<tr><td>%Block containing the last q columns
+<tr><td>%Block containing the last positions columns
                     \link DenseBase::rightCols() * \endlink</td>
     <td>\code
-matrix.rightCols(q);\endcode </td>
+matrix.rightCols(positions);\endcode </td>
     <td>\code 
-matrix.rightCols<q>();\endcode </td>
+matrix.rightCols<positions>();\endcode </td>
 </tr>
 </table>
 
