@@ -61,7 +61,7 @@ public:
         m_selectionMatrix.insert(0, m_edge->getSecondPos()) = 1;
     }
 
-    Positions projectOnConstraintSet(Positions q_n) {
+    Positions projectOnConstraintSet(Positions q_n) override {
         Positions edge_coord = (q_n.row(m_edge->getFirstPos()) - q_n.row(m_edge->getSecondPos()));
         double edge_length = edge_coord.norm();
         edge_coord /= edge_length; //Normalize
@@ -69,11 +69,11 @@ public:
         return edge_coord *= target_length;
     }
 
-    ProjDyn::SparseMatrix getSelectionMatrix() {
+    ProjDyn::SparseMatrix getSelectionMatrix() override {
         return m_selectionMatrix;
     }
 
-    ProjDyn::SparseMatrix getSelectionMatrixWeighted() {
+    ProjDyn::SparseMatrix getSelectionMatrixWeighted() override {
         return m_weight * m_selectionMatrix;
     }
 
@@ -93,11 +93,13 @@ public:
         m_constrainedVertex = vertexIndex;
         m_groundCoord = floorCoord;
 
-        initSM(1, m);
-        m_selectionMatrix.insert(0, m_constrainedVertex) = 1;
+        initSM(m, 3);
+        m_selectionMatrix.coeffRef(m_constrainedVertex, 0) = 1;
+        m_selectionMatrix.coeffRef(m_constrainedVertex, 1) = 1;
+        m_selectionMatrix.coeffRef(m_constrainedVertex, 2) = 1;
     }
 
-    Positions projectOnConstraintSet(Positions q_n) {
+    Positions projectOnConstraintSet(Positions q_n) override {
         float pos = q_n(m_constrainedVertex, m_groundCoord);
         Positions targetPos = q_n.row(m_constrainedVertex);
 
@@ -108,11 +110,11 @@ public:
         return targetPos;
     }
 
-    ProjDyn::SparseMatrix getSelectionMatrix() {
+    ProjDyn::SparseMatrix getSelectionMatrix() override {
         return m_selectionMatrix;
     }
 
-    ProjDyn::SparseMatrix getSelectionMatrixWeighted() {
+    ProjDyn::SparseMatrix getSelectionMatrixWeighted() override {
         return m_weight * m_selectionMatrix;
     }
 

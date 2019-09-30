@@ -55,8 +55,6 @@ namespace ProjDyn {
 			f_ext.resize(1, 3);
 			f_ext(2) = gravity;
 			f_ext.replicate(m, 1);
-			A_i = masses.cwiseSqrt(); //take the square root element-wise
-			B_i = A_i;
 
 			addEdgeSpringConstraints();
 			addGroundConstraints();
@@ -75,7 +73,7 @@ namespace ProjDyn {
 			// Perform a simulation step -> PD Algo
             is_simulating = true;
 
-            size_t numConstraints = constraints->size();
+            size_t numConstraints = constraints.size();
 
             Positions s_n = positions + h * velocities + masses_inv * f_ext * h * h;
             Positions positions_updated = s_n;
@@ -87,8 +85,8 @@ namespace ProjDyn {
 			    step++;
 			    //Local step
 			    for (size_t c_ind = 0; c_ind < numConstraints; c_ind++) {
-			        PDConstraint* c = constraints->at(c_ind);
-                    projections[c_ind] = (c->projectOnConstraintSet(positions_updated));
+			        PDConstraint* c = constraints.at(c_ind);
+                    projections[c_ind] = c->projectOnConstraintSet(positions_updated);
 			    }
 			    //Global step
 			    solver.compute(lhs);
@@ -97,8 +95,7 @@ namespace ProjDyn {
 			        return false;
 			    }
 
-			    //rhs = masses_flat * s_n / (h*h);
-
+                //rhs = masses_flat * s_n / (h*h);
                 for (size_t v = 0; v < m; v++) {
                     for (int d = 0; d < 3; d++) {
                         rhs.insert(v, d) += masses_flat(v) * s_n(v, d) / (h*h);
@@ -106,8 +103,9 @@ namespace ProjDyn {
                 }
 
 			    //Factorize right hand side of the system
-			    for (size_t i = 0; i < numConstraints; i++) {
-			        //rhs += constraints->at(i)->getSelectionMatrixWeighted() * A_i.transpose() * B_i * projections[i];
+                for (size_t i = 0; i < numConstraints; i++) {
+                    SparseMatrix S_i = constraints.at(i)->getSelectionMatrixWeighted();
+                    rhs += S_i.cross(projections[i]); //Whyyyyyyyyyyyyyyyyyyyyy !?
 			    }
                 positions_updated = solver.solve(rhs);
 
@@ -182,9 +180,7 @@ namespace ProjDyn {
         SparseMatrix masses_inv;
         SparseMatrix lhs;
         SparseMatrix rhs;
-        SparseMatrix A_i;
-        SparseMatrix B_i;
-		std::vector<PDConstraint*>* constraints;
+		std::vector<PDConstraint*> constraints;
 		SparseSolver solver;
 
 		//State variables
@@ -210,25 +206,25 @@ namespace ProjDyn {
 
 		void addGroundConstraints() {
             //Iterate over all vertices to add the ground constraint
-            for (size_t i = 0; i < positions.size(); i++) {
-                GroundConstraint new_ground_c = GroundConstraint(m, i, 1);
-                constraints->push_back(&new_ground_c);
+            for (size_t i = 0; i < positions.rows(); i++) {
+                GroundConstraint* new_ground_c = new GroundConstraint(m, i, 1);
+                constraints.push_back(new_ground_c);
             }
 		}
 
 		void addEdgeSpringConstraints() {
 		    //Iterate over all edges to add the spring constraint
             for (auto e : edges) {
-                EdgeSpringConstraint new_edge_c = EdgeSpringConstraint(m, &e, 1.0, 0.001, 1.5);
-                constraints->push_back(&new_edge_c);
+                EdgeSpringConstraint* new_edge_c = new EdgeSpringConstraint(m, &e, 1.0, 0.001, 1.5);
+                constraints.push_back(new_edge_c);
             }
 		}
 
         void factorizeLHS() {
 		    //Need to make sure that constraints exists
 		    lhs = masses / (h*h);
-		    for (size_t i = 0; i < constraints->size(); i++) {
-                lhs += constraints->at(i)->getSelectionMatrixWeighted() * A_i.transpose() * A_i * constraints->at(i)->getSelectionMatrix();
+		    for (size_t i = 0; i < constraints.size(); i++) {
+                lhs += constraints.at(i)->getSelectionMatrixWeighted().transpose() * constraints.at(i)->getSelectionMatrix();
 		    }
         }
 
