@@ -3,6 +3,8 @@
 #include "Edge.h"
 #include "PDConstraint.h"
 
+#include<Eigen/Geometry>
+
 #include <memory>
 #include <iostream>
 
@@ -52,14 +54,20 @@ namespace ProjDyn {
 			masses_flat = Vector::Ones(m);
 			masses = masses_flat.asDiagonal();
 			masses_inv = masses.cwiseInverse();
-			f_ext.resize(1, 3);
-			f_ext(2) = gravity;
-			f_ext.replicate(m, 1);
+			f_ext.setZero(m, 3);
+			//Set gravity on z axis m times
+			for (size_t i = 0; i < m; i++) {
+			    f_ext.row(i) << 0, 0, gravity;
+			}
 
 			addEdgeSpringConstraints();
 			addGroundConstraints();
 
-			factorizeLHS();
+            lhs = masses / (h*h);
+            for (size_t i = 0; i < constraints.size(); i++) {
+                lhs += constraints.at(i)->getSelectionMatrixWeighted().transpose() * constraints.at(i)->getSelectionMatrix();
+            }
+
 			rhs.resize(m, 3);
 			rhs.setZero();
 
@@ -76,7 +84,7 @@ namespace ProjDyn {
             size_t numConstraints = constraints.size();
 
             Positions s_n = positions + h * velocities + masses_inv * f_ext * h * h;
-            Positions positions_updated = s_n;
+            Positions positions_updated = Positions(s_n);
             std::vector<Positions> projections(numConstraints);
 
             size_t step = 0;
@@ -86,7 +94,7 @@ namespace ProjDyn {
 			    //Local step
 			    for (size_t c_ind = 0; c_ind < numConstraints; c_ind++) {
 			        PDConstraint* c = constraints.at(c_ind);
-                    projections[c_ind] = c->projectOnConstraintSet(positions_updated);
+                    projections[c_ind] = c->projectOnConstraintSet(&positions_updated);
 			    }
 			    //Global step
 			    solver.compute(lhs);
@@ -98,16 +106,27 @@ namespace ProjDyn {
                 //rhs = masses_flat * s_n / (h*h);
                 for (size_t v = 0; v < m; v++) {
                     for (int d = 0; d < 3; d++) {
-                        rhs.insert(v, d) += masses_flat(v) * s_n(v, d) / (h*h);
+                        rhs.coeffRef(v, d) += masses_flat(v) * s_n(v, d) / (h*h);
                     }
                 }
 
 			    //Factorize right hand side of the system
-                for (size_t i = 0; i < numConstraints; i++) {
-                    SparseMatrix S_i = constraints.at(i)->getSelectionMatrixWeighted();
-                    rhs += S_i.cross(projections[i]); //Whyyyyyyyyyyyyyyyyyyyyy !?
-			    }
-                positions_updated = solver.solve(rhs);
+			    //TODO: Parallelize this
+			    for (size_t d = 0; d < 3; d++) {
+                    for (size_t i = 0; i < numConstraints; i++) {
+                        SparseMatrix S_i_T = constraints.at(i)->getSelectionMatrixWeighted().transpose();
+                        //rhs.col(d) += S_i_T * projections[i].col(d);
+                        for (int k = 0; k < S_i_T.outerSize(); ++k) {
+                            for (SparseMatrix::InnerIterator it(S_i_T, k); it; ++it) {
+                                rhs.coeffRef(it.row(), d) += it.value() * projections[i](it.col(), d);
+                            }
+                        }
+                    }
+                }
+
+			    for (size_t d = 0; d < 3; d++) {
+                    positions_updated.col(d) = solver.solve(rhs.col(d));
+                }
 
                 is_simulating = false;
 
@@ -195,6 +214,7 @@ namespace ProjDyn {
                     //Find the two indexes of an edge
 		            Index t0 = triangles(i, t);
 		            Index t1 = triangles(i, (t + 1) % length);
+		            //TODO: Use pointers
 		            Edge edge = Edge(t0, t1);
 
 		            if (std::find(edges.begin(), edges.end(), edge) == edges.end()) { //Check if the edge already exists
@@ -202,6 +222,7 @@ namespace ProjDyn {
 		            }
 		        }
 		    }
+
 		}
 
 		void addGroundConstraints() {
@@ -215,18 +236,10 @@ namespace ProjDyn {
 		void addEdgeSpringConstraints() {
 		    //Iterate over all edges to add the spring constraint
             for (auto e : edges) {
-                EdgeSpringConstraint* new_edge_c = new EdgeSpringConstraint(m, &e, 1.0, 0.001, 1.5);
+                EdgeSpringConstraint* new_edge_c = new EdgeSpringConstraint(m, e, 1.0, 0.001, 1.5);
                 constraints.push_back(new_edge_c);
             }
 		}
-
-        void factorizeLHS() {
-		    //Need to make sure that constraints exists
-		    lhs = masses / (h*h);
-		    for (size_t i = 0; i < constraints.size(); i++) {
-                lhs += constraints.at(i)->getSelectionMatrixWeighted().transpose() * constraints.at(i)->getSelectionMatrix();
-		    }
-        }
 
 	};
 

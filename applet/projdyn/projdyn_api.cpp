@@ -140,7 +140,7 @@ bool projdyn_upload_positions(Viewer* viewer) {
 
 	// This is done using the 3 x #Verts matrix upload_pos
 	size_t num_verts = pos->rows();
-	upload_pos.resize(3, num_verts);
+	upload_pos.resize(num_verts, 3);
 
 	for (size_t i = 0; i < num_verts; i++) {
 	    ProjDyn::Vector row = pos->row(i);

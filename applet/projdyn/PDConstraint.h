@@ -19,7 +19,7 @@ public:
         m = numVertices;
     }
 
-    virtual Positions projectOnConstraintSet(Positions q) = 0;
+    virtual Positions projectOnConstraintSet(Positions* q) = 0;
 
     virtual ProjDyn::SparseMatrix getSelectionMatrix() = 0;
 
@@ -49,7 +49,7 @@ protected:
 class EdgeSpringConstraint : public PDConstraint {
 public:
 
-    EdgeSpringConstraint(const Scalar m, Edge* edge, const float weight,
+    EdgeSpringConstraint(const Scalar m, Edge edge, const float weight,
             const float rangeMin, const float rangeMax)
     : PDConstraint(m, weight) {
         m_rangeMax = rangeMax;
@@ -57,12 +57,16 @@ public:
         m_edge = edge;
 
         initSM(1, m);
-        m_selectionMatrix.insert(0, m_edge->getFirstPos()) = 1;
-        m_selectionMatrix.insert(0, m_edge->getSecondPos()) = 1;
+        Index i = m_edge.getFirstPos();
+        Index j = m_edge.getSecondPos();
+        m_selectionMatrix.coeffRef(0, m_edge.getFirstPos()) = 1;
+        m_selectionMatrix.coeffRef(0, m_edge.getSecondPos()) = -1;
     }
 
-    Positions projectOnConstraintSet(Positions q_n) override {
-        Positions edge_coord = (q_n.row(m_edge->getFirstPos()) - q_n.row(m_edge->getSecondPos()));
+    Positions projectOnConstraintSet(Positions* q_n) override {
+        int i1 = m_edge.getFirstPos();
+        int i2 = m_edge.getSecondPos();
+        Positions edge_coord = q_n->row(m_edge.getFirstPos()) - q_n->row(m_edge.getSecondPos());
         double edge_length = edge_coord.norm();
         edge_coord /= edge_length; //Normalize
         double target_length = clamp(edge_length, m_rangeMin, m_rangeMax);
@@ -80,7 +84,7 @@ public:
 protected:
     float m_rangeMin;
     float m_rangeMax;
-    Edge* m_edge;
+    Edge m_edge = Edge(0, 1);
 };
 
 class GroundConstraint : public PDConstraint {
@@ -93,15 +97,14 @@ public:
         m_constrainedVertex = vertexIndex;
         m_groundCoord = floorCoord;
 
-        initSM(m, 3);
-        m_selectionMatrix.coeffRef(m_constrainedVertex, 0) = 1;
-        m_selectionMatrix.coeffRef(m_constrainedVertex, 1) = 1;
-        m_selectionMatrix.coeffRef(m_constrainedVertex, 2) = 1;
+        initSM(1, m);
+        m_selectionMatrix.coeffRef(0, m_constrainedVertex) = 1;
     }
 
-    Positions projectOnConstraintSet(Positions q_n) override {
-        float pos = q_n(m_constrainedVertex, m_groundCoord);
-        Positions targetPos = q_n.row(m_constrainedVertex);
+    Positions projectOnConstraintSet(Positions* q_n) override {
+        Positions q = *q_n;
+        float pos = q(m_constrainedVertex, m_groundCoord);
+        Positions targetPos = q.row(m_constrainedVertex);
 
         if (pos <= m_groundCoord) {
             targetPos(0, m_groundCoord) = m_groundHeight;

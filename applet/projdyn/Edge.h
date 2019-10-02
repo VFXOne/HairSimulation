@@ -5,6 +5,7 @@
 #ifndef APPLET_EDGE_H
 #define APPLET_EDGE_H
 #define yeet throw
+
 #include "projdyn_types.h"
 
 typedef unsigned int Index;
@@ -14,7 +15,12 @@ public:
 
     Edge(const Index firstPos, const Index secondPos) {
         //The edge index must be in increasing order
-        if (firstPos == secondPos) yeet std::invalid_argument("Positions cannot have the same values");
+        if (firstPos == secondPos) {
+            std::stringstream error_msg;
+            error_msg << "Positions cannot have the same values: " << firstPos << " and " << secondPos;
+            yeet std::invalid_argument(error_msg.str());
+        }
+
         if (firstPos < secondPos) {
             p1 = firstPos;
             p2 = secondPos;
