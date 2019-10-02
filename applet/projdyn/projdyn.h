@@ -29,15 +29,15 @@ namespace ProjDyn {
 			// Pass the positions of the geometry
 			// Here you will have to introduce edges instead of triangles
 			m = pos.rows();
-            positions = pos;
-            positions_init = pos;
+            positions = Positions(pos);
+            positions_init = Positions(pos);
 			velocities.setZero(pos.rows(), pos.cols());
 			createEdges(tris);
 		}
 
 		void resetPositions() {
 			// Reset vertex positions to initial state and set velocities to 0
-			positions = positions_init;
+			positions = Positions(positions_init);
 			velocities.setZero(positions.rows(), positions.cols());
 		}
 
@@ -51,17 +51,18 @@ namespace ProjDyn {
 			    return false;
 			}
 
-			masses_flat = Vector::Ones(m);
+			masses_flat = Vector::Ones(m) * 0.01;
 			masses = masses_flat.asDiagonal();
 			masses_inv = masses.cwiseInverse();
+
 			f_ext.setZero(m, 3);
 			//Set gravity on z axis m times
 			for (size_t i = 0; i < m; i++) {
 			    f_ext.row(i) << 0, 0, gravity;
 			}
 
-			addEdgeSpringConstraints();
-			addGroundConstraints();
+			//addEdgeSpringConstraints();
+			//addGroundConstraints();
 
             lhs = masses / (h*h);
             for (size_t i = 0; i < constraints.size(); i++) {
@@ -89,21 +90,31 @@ namespace ProjDyn {
 
             size_t step = 0;
 
+            solver.compute(lhs);
+
             while (step < num_iterations) {
-			    step++;
-			    //Local step
-			    for (size_t c_ind = 0; c_ind < numConstraints; c_ind++) {
-			        PDConstraint* c = constraints.at(c_ind);
+                if (true) {
+                    return true;
+                }
+                step++;
+                /****************
+                 ***Local step***
+                 ****************/
+                for (size_t c_ind = 0; c_ind < numConstraints; c_ind++) {
+                    PDConstraint* c = constraints.at(c_ind);
                     projections[c_ind] = c->projectOnConstraintSet(&positions_updated);
-			    }
-			    //Global step
-			    solver.compute(lhs);
+                }
+
+                /*****************
+                 ***Global step***
+                 *****************/
 			    if (solver.info() != Eigen::Success) {
 			        std::cout << "Unable to factorize left hand side" << std::endl;
 			        return false;
 			    }
 
                 //rhs = masses_flat * s_n / (h*h);
+                rhs.setZero();
                 for (size_t v = 0; v < m; v++) {
                     for (int d = 0; d < 3; d++) {
                         rhs.coeffRef(v, d) += masses_flat(v) * s_n(v, d) / (h*h);
@@ -112,19 +123,22 @@ namespace ProjDyn {
 
 			    //Factorize right hand side of the system
 			    //TODO: Parallelize this
-			    for (size_t d = 0; d < 3; d++) {
-                    for (size_t i = 0; i < numConstraints; i++) {
+			    for (size_t i = 0; i < numConstraints; i++) {
                         SparseMatrix S_i_T = constraints.at(i)->getSelectionMatrixWeighted().transpose();
                         //rhs.col(d) += S_i_T * projections[i].col(d);
-                        for (int k = 0; k < S_i_T.outerSize(); ++k) {
-                            for (SparseMatrix::InnerIterator it(S_i_T, k); it; ++it) {
-                                rhs.coeffRef(it.row(), d) += it.value() * projections[i](it.col(), d);
+                    for (size_t d = 0; d < 3; d++) {
+                        for (int k = 0; k < S_i_T.cols(); ++k) {
+                            //for (SparseMatrix::InnerIterator it(S_i_T, k); it; ++it) {
+                            //    rhs.coeffRef(it.row(), d) += it.value() * projections[i](it.row(), d);
+                            //}
+                            for (size_t j = 0; j < S_i_T.rows(); j++) {
+                                rhs.coeffRef(j, d) += S_i_T.coeff(j, k) * projections[i](j, k);
                             }
                         }
                     }
                 }
 
-			    for (size_t d = 0; d < 3; d++) {
+                for (size_t d = 0; d < 3; d++) {
                     positions_updated.col(d) = solver.solve(rhs.col(d));
                 }
 
@@ -132,15 +146,15 @@ namespace ProjDyn {
 
                 if (solver.info() == Eigen::Success) {
                     //Update positions and velocities
-                    positions = positions_updated;
                     velocities = (positions_updated - positions) / h;
+                    positions = Positions(positions_updated);
                     return true;
-			    } else {
+                } else {
                     std::cout << "Unable to solve constraints" << std::endl;
-			        return false;
-			    }
+                    return false;
+                }
+            }
 
-			}
 
 			/*
 			 *s_n = q_n + h * v_n + h*h*M_inv*f_ext;
@@ -208,8 +222,7 @@ namespace ProjDyn {
 
 		void createEdges(Triangles& triangles) {
 		    for (size_t i = 0; i < triangles.rows(); i++) { //iterate over all triangles
-                size_t length = triangles.row(i).size(); //Find size of row
-
+                size_t length = triangles.rows();
                 for (size_t t = 0; t < length; t++) { //iterate over all coordinates
                     //Find the two indexes of an edge
 		            Index t0 = triangles(i, t);
@@ -217,9 +230,9 @@ namespace ProjDyn {
 		            //TODO: Use pointers
 		            Edge edge = Edge(t0, t1);
 
-		            if (std::find(edges.begin(), edges.end(), edge) == edges.end()) { //Check if the edge already exists
-		                edges.push_back(edge);
-		            }
+                    edges.push_back(edge);
+                    //if (std::find(edges.begin(), edges.end(), edge) == edges.end()) { //Check if the edge already exists
+		            //}
 		        }
 		    }
 
@@ -228,7 +241,7 @@ namespace ProjDyn {
 		void addGroundConstraints() {
             //Iterate over all vertices to add the ground constraint
             for (size_t i = 0; i < positions.rows(); i++) {
-                GroundConstraint* new_ground_c = new GroundConstraint(m, i, 1);
+                GroundConstraint* new_ground_c = new GroundConstraint(m, i, 1.0);
                 constraints.push_back(new_ground_c);
             }
 		}

@@ -21,12 +21,18 @@ public:
             yeet std::invalid_argument(error_msg.str());
         }
 
-        if (firstPos < secondPos) {
+        bool ordered = false;
+        if (ordered) {
+            if (firstPos < secondPos) {
+                p1 = firstPos;
+                p2 = secondPos;
+            } else {
+                p1 = secondPos;
+                p2 = firstPos;
+            }
+        } else {
             p1 = firstPos;
             p2 = secondPos;
-        } else {
-            p1 = secondPos;
-            p2 = firstPos;
         }
     }
 
@@ -71,7 +77,8 @@ public:
     }
 
     friend bool operator==(const Edge& lhs, const Edge& rhs){
-        return lhs.p1 == rhs.p1 && lhs.p2 == rhs.p2;
+        return (lhs.p1 == rhs.p1 && lhs.p2 == rhs.p2) ||
+                (lhs.p1 == rhs.p2 && lhs.p2 == rhs.p1);
     }
 
 protected:
