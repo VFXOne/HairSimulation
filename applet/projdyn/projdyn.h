@@ -27,12 +27,12 @@ namespace ProjDyn {
 
 		void setMesh(Positions& pos, Triangles& tris) {
 			// Pass the positions of the geometry
-			// Here you will have to introduce edges instead of triangles
 			m = pos.rows();
             positions = Positions(pos);
             positions_init = Positions(pos);
 			velocities.setZero(pos.rows(), pos.cols());
 			createEdges(tris);
+			//TODO: Reset the correct variables (dimensions) to fit new mesh
 		}
 
 		void resetPositions() {
@@ -93,9 +93,6 @@ namespace ProjDyn {
             solver.compute(lhs);
 
             while (step < num_iterations) {
-                if (true) {
-                    return true;
-                }
                 step++;
                 /****************
                  ***Local step***
@@ -222,7 +219,7 @@ namespace ProjDyn {
 
 		void createEdges(Triangles& triangles) {
 		    for (size_t i = 0; i < triangles.rows(); i++) { //iterate over all triangles
-                size_t length = triangles.rows();
+                size_t length = triangles.row(i).size();
                 for (size_t t = 0; t < length; t++) { //iterate over all coordinates
                     //Find the two indexes of an edge
 		            Index t0 = triangles(i, t);
@@ -230,9 +227,9 @@ namespace ProjDyn {
 		            //TODO: Use pointers
 		            Edge edge = Edge(t0, t1);
 
-                    edges.push_back(edge);
-                    //if (std::find(edges.begin(), edges.end(), edge) == edges.end()) { //Check if the edge already exists
-		            //}
+                    if (std::find(edges.begin(), edges.end(), edge) == edges.end()) { //Check if the edge already exists
+                        edges.push_back(edge);
+                    }
 		        }
 		    }
 
