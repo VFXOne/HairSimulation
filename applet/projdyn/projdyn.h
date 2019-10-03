@@ -61,8 +61,8 @@ namespace ProjDyn {
 			    f_ext.row(i) << 0, 0, gravity;
 			}
 
-			//addEdgeSpringConstraints();
-			//addGroundConstraints();
+			addEdgeSpringConstraints();
+			addGroundConstraints();
 
             lhs = masses / (h*h);
             for (size_t i = 0; i < constraints.size(); i++) {
@@ -95,15 +95,16 @@ namespace ProjDyn {
             while (step < num_iterations) {
                 step++;
                 /****************
-                 ***Local step***
+                 ** Local step **
                  ****************/
                 for (size_t c_ind = 0; c_ind < numConstraints; c_ind++) {
                     PDConstraint* c = constraints.at(c_ind);
                     projections[c_ind] = c->projectOnConstraintSet(&positions_updated);
+                    Positions p = c->projectOnConstraintSet(&positions_updated);
                 }
 
                 /*****************
-                 ***Global step***
+                 ** Global step **
                  *****************/
 			    if (solver.info() != Eigen::Success) {
 			        std::cout << "Unable to factorize left hand side" << std::endl;
@@ -121,16 +122,18 @@ namespace ProjDyn {
 			    //Factorize right hand side of the system
 			    //TODO: Parallelize this
 			    for (size_t i = 0; i < numConstraints; i++) {
-                        SparseMatrix S_i_T = constraints.at(i)->getSelectionMatrixWeighted().transpose();
-                        //rhs.col(d) += S_i_T * projections[i].col(d);
+                    SparseMatrix S_i_T = constraints.at(i)->getSelectionMatrixWeighted().transpose();
+//                    for (size_t d = 0; d < 3; d++) {
+//                        rhs.col(d) += S_i_T.dot(projections.at(i).col(d));
+//                    }
                     for (size_t d = 0; d < 3; d++) {
                         for (int k = 0; k < S_i_T.cols(); ++k) {
-                            //for (SparseMatrix::InnerIterator it(S_i_T, k); it; ++it) {
-                            //    rhs.coeffRef(it.row(), d) += it.value() * projections[i](it.row(), d);
-                            //}
-                            for (size_t j = 0; j < S_i_T.rows(); j++) {
-                                rhs.coeffRef(j, d) += S_i_T.coeff(j, k) * projections[i](j, k);
+                            for (SparseMatrix::InnerIterator it(S_i_T, k); it; ++it) {
+                                rhs.coeffRef(it.row(), d) += it.value() * projections.at(i)(0, d);
                             }
+                            //for (size_t j = 0; j < S_i_T.rows(); j++) {
+                            //    rhs.coeffRef(j, d) += S_i_T.coeff(j, k) * projections[i](j, k);
+                            //}
                         }
                     }
                 }
@@ -197,7 +200,7 @@ namespace ProjDyn {
         std::vector<unsigned long> m_grabVerts;
         std::vector<Eigen::Vector3f> m_grabPos;
         std::vector<Edge> edges;
-		const double h = 1.0; //Simulation step size
+		const double h = 0.005; //Simulation step size
 		const float gravity = -1.0;
 
         Positions f_ext;
