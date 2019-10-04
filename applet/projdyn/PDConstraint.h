@@ -103,10 +103,10 @@ public:
 
     Positions projectOnConstraintSet(Positions* q_n) override {
         Positions q = *q_n;
-        float pos = q(m_constrainedVertex, m_groundCoord);
+        float coord = q(m_constrainedVertex, m_groundCoord);
         Positions targetPos = q.row(m_constrainedVertex);
 
-        if (pos <= m_groundCoord) {
+        if (coord < m_groundCoord) {
             targetPos(0, m_groundCoord) = m_groundHeight;
         }
 
