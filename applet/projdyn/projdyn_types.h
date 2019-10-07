@@ -17,7 +17,7 @@ namespace ProjDyn {
 	template < int Rows, int Cols, int Options = (Eigen::ColMajor) >
 	using MatrixT = Eigen::Matrix<Scalar, Rows, Cols, Options>; // A typedef of the dense matrix of Eigen.
 
-	typedef MatrixT<Eigen::Dynamic, 3> Positions;				// A n by 3 matrix of scalars, often used for positions or velocities
+	typedef MatrixT<Eigen::Dynamic, 3> Positions;				// A n by 3 matrix of scalars, often used for positions or m_velocities
 	typedef MatrixT<Eigen::Dynamic, 1> Vector;					// Vector of scalars
 	typedef MatrixT<3, 1> Vector3;								// Vector of 3 scalars
 	typedef MatrixT<2, 1> Vector2;								// Vector of 2 scalars

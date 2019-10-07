@@ -19,7 +19,7 @@ public:
         m = numVertices;
     }
 
-    virtual Positions projectOnConstraintSet(Positions* q) = 0;
+    virtual Positions projectOnConstraintSet(Positions& q) = 0;
 
     virtual ProjDyn::SparseMatrix getSelectionMatrix() = 0;
 
@@ -63,10 +63,10 @@ public:
         m_selectionMatrix.coeffRef(0, m_edge.getSecondPos()) = -1;
     }
 
-    Positions projectOnConstraintSet(Positions* q_n) override {
+    Positions projectOnConstraintSet(Positions& q_n) override {
         int i1 = m_edge.getFirstPos();
         int i2 = m_edge.getSecondPos();
-        Positions edge_coord = q_n->row(m_edge.getFirstPos()) - q_n->row(m_edge.getSecondPos());
+        Positions edge_coord = q_n.row(m_edge.getFirstPos()) - q_n.row(m_edge.getSecondPos());
         double edge_length = edge_coord.norm();
         edge_coord /= edge_length; //Normalize
         double target_length = clamp(edge_length, m_rangeMin, m_rangeMax);
@@ -91,7 +91,7 @@ class GroundConstraint : public PDConstraint {
 public:
 
     GroundConstraint(const Scalar m, const Scalar vertexIndex, const float weight,
-            float groundHeight = -2.0, unsigned int floorCoord = 2)
+            float groundHeight = -2.0f, unsigned int floorCoord = 2)
     : PDConstraint(m, weight){
         m_groundHeight = groundHeight;
         m_constrainedVertex = vertexIndex;
@@ -101,12 +101,11 @@ public:
         m_selectionMatrix.coeffRef(0, m_constrainedVertex) = 1;
     }
 
-    Positions projectOnConstraintSet(Positions* q_n) override {
-        Positions q = *q_n;
+    Positions projectOnConstraintSet(Positions& q) override {
         float coord = q(m_constrainedVertex, m_groundCoord);
         Positions targetPos = q.row(m_constrainedVertex);
 
-        if (coord < m_groundCoord) {
+        if (coord < m_groundHeight) {
             targetPos(0, m_groundCoord) = m_groundHeight;
         }
 
