@@ -2,6 +2,7 @@
 
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
+#include <Eigen/Geometry>
 #include <memory>
 
 namespace ProjDyn {
@@ -35,5 +36,11 @@ namespace ProjDyn {
 	typedef SparseMatrixT<> SparseMatrix;						// A column-major sparse matrix.
 	typedef SparseMatrixT<Eigen::RowMajor> SparseMatrixRM;		// A row-major sparse matrix.
 	typedef Eigen::Triplet<Scalar> Triplet;						// A triplet, used in the sparse triplet representation for matrices.
+
+	//Quaternions
+	using Quaternion = Eigen::Quaternionf;
+    template < int Rows, int Cols, int Options = (Eigen::ColMajor) >
+	using MatrixQ = Eigen::Matrix<Quaternion, Rows, Cols, Options>;
+    typedef MatrixQ<Eigen::Dynamic, 1> Orientations;
 
 }

@@ -2,7 +2,6 @@
 #include "projdyn_types.h"
 #include "Edge.h"
 #include "PDConstraint.h"
-#include "Quaternion.h"
 
 #include<Eigen/Geometry>
 
@@ -23,6 +22,7 @@ namespace ProjDyn {
 			m_hasGrab = false;
             is_ready = false;
             is_simulating = false;
+            use_cosserat_rods = false;
             m = 0;
 		}
 
@@ -37,6 +37,7 @@ namespace ProjDyn {
 		}
 
 		void setRods(size_t length, Positions& pos) {
+		    use_cosserat_rods = true;
 		    assert(pos.rows() % length == 0);
 		    cr_m = pos.rows();
 		    cr_positions_init = Positions(pos);
@@ -61,7 +62,10 @@ namespace ProjDyn {
 			    return false;
 			}
 
-            m_masses_flat = Vector::Ones(m) * 0.01;
+			//TODO: Initialize cosserat rods variables
+
+			const float unit_weight = 0.01;
+            m_masses_flat = Vector::Ones(m) * unit_weight;
             m_masses = m_masses_flat.asDiagonal();
             m_masses_inv = m_masses.cwiseInverse();
 
@@ -76,7 +80,7 @@ namespace ProjDyn {
 
             lhs = m_masses / (h * h);
             for (size_t i = 0; i < m_constraints.size(); i++) {
-                lhs += m_constraints.at(i)->getSelectionMatrixWeighted().transpose() * m_constraints.at(i)->getSelectionMatrix();
+                lhs += m_constraints.at(i)->computeLHS();
             }
 
 			rhs.resize(m, 3);
@@ -109,8 +113,8 @@ namespace ProjDyn {
                  ****************/
                 for (size_t c_ind = 0; c_ind < numConstraints; c_ind++) {
                     PDConstraint* c = m_constraints.at(c_ind);
-                    projections[c_ind] = c->projectOnConstraintSet(positions_updated);
-                    Positions p = c->projectOnConstraintSet(positions_updated);
+                    Positions p_i = c->projectOnConstraintSet(positions_updated);
+                    projections[c_ind] = p_i;
                 }
 
                 /*****************
@@ -130,7 +134,7 @@ namespace ProjDyn {
                 }
 
 			    //Factorize right hand side of the system
-			    //TODO: Parallelize this
+			    //TODO: Parallelize this badboi
 			    for (size_t i = 0; i < numConstraints; i++) {
                     SparseMatrix S_i_T = m_constraints.at(i)->getSelectionMatrixWeighted().transpose();
                     for (size_t d = 0; d < 3; d++) {
@@ -152,24 +156,57 @@ namespace ProjDyn {
                     //Update positions and m_velocities
                     m_velocities = (positions_updated - m_positions) / h;
                     m_positions = Positions(positions_updated);
-                    return true;
                 } else {
                     std::cout << "Unable to solve constraints" << std::endl;
                     return false;
                 }
             }
 
-			return false;
+			return true;
 		}
 
         bool CR_step(int num_iterations) {
+
+		    Positions s_x_t = cr_positions + h * cr_velocities + h*h * cr_masses_inv * f_ext;
+		    Positions s_w_t = cr_angular_velocities + h * cr_J_inv * (cr_torques - cr_angular_velocities.cross(cr_J * cr_angular_velocities));
+		    Orientations s_u_t = cr_orientations + h/2 * (cr_orientations * s_w_t); //Might have problem with vector-quaternion multiplication
+
+		    Positions positions_updated = Positions(s_x_t);
+		    Orientations orientations_updated = Orientations(s_u_t);
+
+		    const size_t num_constraints = cr_constraints.size();
+		    Positions projections[num_constraints];
+
+		    size_t step = 0;
+		    while (step < num_iterations) {
+                step++;
+                /****************
+                 ** Local step **
+                 ****************/
+		        for (size_t i = 0; i < num_constraints; i++) {
+		            Quaternion u = Quaternion();
+		            Positions pi = cr_constraints.at(i)->projectOnConstraintSet(positions_updated, orientations_updated, &u);
+		            projections[i] = pi;
+		        }
+
+                /*****************
+                 ** Global step **
+                 *****************/
+		        //Solve the linear system god dammit
+
+		        //At the end:
+		        cr_velocities = (positions_updated - cr_positions) / h;
+		        for (size_t i = 0; i < cr_orientations.rows(); i++) {
+		            cr_angular_velocities.row(i) = (cr_orientations.coeff(i) * orientations_updated.coeff(i)).vec() * 2/h;
+		        }
+		    }
+
 		    /*
 		     * s_x_t = x_t + h*v_t + h*h*M_inv*f_ext
-		     * s_w_t = w_t + h*J_inv*(tau - w_t.cross(J*w_t))
+		     * s_w_t = w_t + h*J_inv*(tau - w_t.cross(J*w_t)) // tau = torques
 		     * s_u_t = u_t + 1/2*h*(u_t {quaternion mult} s_w_t)
 		     * s_t = [s_x_t, s_u_t].tranpose() //Optional because we might distinct the two (positions and quaternions)
 		     * q_t_1 = s_t // original algo
-		     * q_x_t_1 = s_x_t //Our implementation
 		     * q_u_t_1 = s_u_t //Our implementation
 		     *
 		     * for num_iterations times:
@@ -223,11 +260,13 @@ namespace ProjDyn {
         Positions m_positions_init;
         Positions m_positions;
         Positions m_velocities;
+
         Vector m_masses_flat;
         SparseMatrix m_masses;
         SparseMatrix m_masses_inv;
         SparseMatrix lhs;
         SparseMatrix rhs;
+
 		std::vector<PDConstraint*> m_constraints;
 		SparseSolver m_solver;
 
@@ -238,15 +277,23 @@ namespace ProjDyn {
          Positions cr_positions_init;
          Positions cr_positions;
          Positions cr_velocities;
+         Positions cr_angular_velocities;
+         Positions cr_torques;
 
-         std::vector<Quaternion<double>> cr_quaternions;
+         SparseMatrix cr_masses;
+         SparseMatrix cr_masses_inv;
+         SparseMatrix cr_J;
+         SparseMatrix cr_J_inv;
 
-         std::vector<PDConstraint*> cr_constraints;
+         Orientations cr_orientations;
+
+         std::vector<CRConstraint*> cr_constraints;
          SparseSolver cr_solver;
 
 		//State variables
 		bool is_ready;
 		bool is_simulating;
+		bool use_cosserat_rods;
 
 		void createEdges(Triangles& triangles) {
 		    for (size_t i = 0; i < triangles.rows(); i++) { //iterate over all triangles
