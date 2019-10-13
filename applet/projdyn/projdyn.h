@@ -40,6 +40,8 @@ namespace ProjDyn {
 		    use_cosserat_rods = true;
 		    assert(pos.rows() % length == 0);
 		    cr_m = pos.rows();
+		    cr_num_quaternions = cr_m - 1;
+		    cr_size = 3 * cr_m + 4 * cr_num_quaternions;
 		    cr_positions_init = Positions(pos);
 		    cr_positions = Positions(pos);
 
@@ -64,6 +66,9 @@ namespace ProjDyn {
 
 			//TODO: Initialize cosserat rods variables
 
+			/****************
+			 * PD Variables *
+			 ****************/
 			const float unit_weight = 0.01;
             m_masses_flat = Vector::Ones(m) * unit_weight;
             m_masses = m_masses_flat.asDiagonal();
@@ -146,6 +151,7 @@ namespace ProjDyn {
                     }
                 }
 
+			    //TODO: parallelize
                 for (size_t d = 0; d < 3; d++) {
                     positions_updated.col(d) = m_solver.solve(rhs.col(d));
                 }
@@ -167,15 +173,18 @@ namespace ProjDyn {
 
         bool CR_step(int num_iterations) {
 
-		    Positions s_x_t = cr_positions + h * cr_velocities + h*h * cr_masses_inv * f_ext;
-		    Positions s_w_t = cr_angular_velocities + h * cr_J_inv * (cr_torques - cr_angular_velocities.cross(cr_J * cr_angular_velocities));
-		    Orientations s_u_t = cr_orientations + h/2 * (cr_orientations * s_w_t); //Might have problem with vector-quaternion multiplication
-
-		    Positions positions_updated = Positions(s_x_t);
-		    Orientations orientations_updated = Orientations(s_u_t);
-
 		    const size_t num_constraints = cr_constraints.size();
-		    Positions projections[num_constraints];
+		    std::vector<FlatPos> projections(num_constraints);
+
+		    Positions s_x = cr_positions + h*cr_velocities + h*h * cr_masses_inv * f_ext;
+		    Positions cross = Positions(cr_angular_velocities);
+            //TODO: Cross product between w_t and J*w_t element-wise
+
+		    Positions s_w = cr_angular_velocities + h*cr_J_inv * (cr_torques - cross);
+            Orientations s_w_u = pos2quat(s_w);
+		    Orientations s_u = cr_orientations + quatScalarMult(cr_orientations * s_w_u, h / 2);
+
+		    FlatPos q_t = posQuatConcat(s_x, s_u);
 
 		    size_t step = 0;
 		    while (step < num_iterations) {
@@ -184,9 +193,7 @@ namespace ProjDyn {
                  ** Local step **
                  ****************/
 		        for (size_t i = 0; i < num_constraints; i++) {
-		            Quaternion u = Quaternion();
-		            Positions pi = cr_constraints.at(i)->projectOnConstraintSet(positions_updated, orientations_updated, &u);
-		            projections[i] = pi;
+		            projections[i] = cr_constraints.at(i)->projectOnConstraintSet(q_t);
 		        }
 
                 /*****************
@@ -194,11 +201,6 @@ namespace ProjDyn {
                  *****************/
 		        //Solve the linear system god dammit
 
-		        //At the end:
-		        cr_velocities = (positions_updated - cr_positions) / h;
-		        for (size_t i = 0; i < cr_orientations.rows(); i++) {
-		            cr_angular_velocities.row(i) = (cr_orientations.coeff(i) * orientations_updated.coeff(i)).vec() * 2/h;
-		        }
 		    }
 
 		    /*
@@ -248,9 +250,8 @@ namespace ProjDyn {
         std::vector<unsigned long> m_grabVerts;
         std::vector<Eigen::Vector3f> m_grabPos;
         std::vector<Edge> edges;
-		const double h = 0.005; //Simulation step size
+		const double h = 0.05; //Simulation step size
 		const float gravity = -1.0;
-
         Positions f_ext;
 
         /******************
@@ -273,9 +274,12 @@ namespace ProjDyn {
         /***************************
          * Cosserat Rods variables *
          ***************************/
-         size_t cr_m;
+         size_t cr_m; //Donc le nombre de quaternions c'est 4*(cr_m - 1) à partir de la position cr_m
+         size_t cr_num_quaternions;
+         size_t cr_size;
          Positions cr_positions_init;
          Positions cr_positions;
+         FlatPos cr_q; //Une dimension (flat) de taille 3*m + 4*(m-1)
          Positions cr_velocities;
          Positions cr_angular_velocities;
          Positions cr_torques;
@@ -327,6 +331,58 @@ namespace ProjDyn {
                 EdgeSpringConstraint* new_edge_c = new EdgeSpringConstraint(m, e, 1.0, 0.001, 1.5);
                 m_constraints.push_back(new_edge_c);
             }
+		}
+
+		static Orientations pos2quat(Positions p) {
+		    Orientations u(p.rows() - 1);
+		    for (size_t i = 0; i < p.rows() - 1; i++) {
+		        auto pos = p.row(i).normalized();
+                Eigen::MatrixBase<Scalar> vec1 = pos.base();
+                auto next_pos = p.row(i+1).normalized();
+		        Eigen::MatrixBase<Scalar> vec2 = next_pos;
+                u(i) = ProjDyn::Quaternion::FromTwoVectors(vec1, next_pos);
+		    }
+		    return u;
+		}
+
+		static Positions quat2pos(Orientations u) {
+		    Positions p(u.rows() + 1);
+		    for (size_t i = 0; i < u.rows(); i++) {
+
+		    }
+		}
+
+		static Orientations quatScalarMult(Orientations u, Scalar mul) {
+		    Orientations u_m(u.rows());
+		    for (size_t i = 0; i < u.rows(); i++) {
+		        auto quat = u(i);
+		        u_m(i) = ProjDyn::Quaternion(quat.w()*mul,
+		                quat.x()*mul, quat.y()*mul, quat.z()*mul);
+		    }
+		    return u_m;
+		}
+
+		static FlatPos posQuatConcat(Positions pos, Orientations u) {
+		    size_t m = pos.rows();
+		    size_t dim = 3*pos.rows() + 4*u.rows();
+		    FlatPos fp(dim);
+
+		    for (size_t i = 0; i < pos.rows(); i++) {
+		        auto vec = pos.row(i);
+		        fp(i*3) = vec.x();
+		        fp(i*3+1) = vec.y();
+		        fp(i*3+2) = vec.z();
+		    }
+
+		    for (size_t i = 0; i < u.rows(); i++) {
+		        auto quat = u(i);
+		        fp(m + i*4) = quat.w();
+		        fp(m + i*4+1) = quat.x();
+		        fp(m + i*4+2) = quat.y();
+		        fp(m + i*4+3) = quat.z();
+		    }
+
+		    return fp;
 		}
 
 	};

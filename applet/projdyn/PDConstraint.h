@@ -10,6 +10,7 @@
 #include "Edge.h"
 typedef ProjDyn::Positions Positions;
 typedef ProjDyn::Orientations Orientations;
+typedef ProjDyn::FlatPos FlatPos;
 
 typedef unsigned int Scalar;
 class PDConstraint {
@@ -135,61 +136,42 @@ protected:
 class CRConstraint: public PDConstraint {
 public:
 
-    CRConstraint(Scalar numVertices, float weight)
-    : PDConstraint(numVertices, weight){
-        cr_AMatrix.resize(numVertices, numVertices);
-        cr_AMatrix.setIdentity();
-        cr_BMatrix.resize(numVertices, numVertices);
-        cr_BMatrix.setIdentity();
-    }
+    CRConstraint(Scalar m, Scalar weight)
+    : PDConstraint(m, weight) {
 
-    ProjDyn::SparseMatrix getAMatrix() {
-        return cr_AMatrix;
-    }
-
-    ProjDyn::SparseMatrix getBMatrix() {
-        return cr_BMatrix;
     }
 
     Positions projectOnConstraintSet(Positions& q) override {
         throw std::logic_error("Function not implemented for Cosserat Rods. "
-                               "You muse use the one with the quaternions parameter");
+                               "Please use projectOnConstraintSet(ProjDyn::FlatPos& fp)");
     }
 
-    virtual Positions projectOnConstraintSet(Positions& q, Orientations u, ProjDyn::Quaternion *target_u) = 0;
-
-    virtual ProjDyn::SparseMatrix computeLHS() = 0;
-
-    virtual ProjDyn::SparseMatrix computeRHS(Positions p_i, Orientations projected_u) = 0;
-
-
-protected:
-    ProjDyn::SparseMatrix cr_AMatrix;
-    ProjDyn::SparseMatrix cr_BMatrix;
-
+    virtual FlatPos projectOnConstraintSet(FlatPos& fp) = 0;
 };
 
 class BendingTwistingConstraint: public CRConstraint {
+public:
 
     BendingTwistingConstraint(Scalar numVertices, float weight)
     : CRConstraint(numVertices, weight) {
 
     }
 
-    Positions projectOnConstraintSet(Positions& q, Orientations u, ProjDyn::Quaternion *target_u) override {
+    FlatPos projectOnConstraintSet(FlatPos& q) override {
         return q;
     }
 
 };
 
 class StretchShearConstraint: public CRConstraint {
+public:
 
     StretchShearConstraint(Scalar numVertices, float weight)
     : CRConstraint(numVertices,weight) {
 
     }
 
-    Positions projectOnConstraintSet(Positions& q, Orientations u, ProjDyn::Quaternion *target_u) override {
+    FlatPos projectOnConstraintSet(FlatPos& q) override {
         return q;
     }
 };

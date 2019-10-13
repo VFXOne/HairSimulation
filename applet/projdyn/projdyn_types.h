@@ -39,8 +39,12 @@ namespace ProjDyn {
 
 	//Quaternions
 	using Quaternion = Eigen::Quaternionf;
-    template < int Rows, int Cols, int Options = (Eigen::ColMajor) >
-	using MatrixQ = Eigen::Matrix<Quaternion, Rows, Cols, Options>;
-    typedef MatrixQ<Eigen::Dynamic, 1> Orientations;
+    template < int Rows, int Cols>
+	using ArrayQ = Eigen::Array<Quaternion, Rows, Cols>;
+    typedef ArrayQ<Eigen::Dynamic, 1> Orientations;
+
+    template < int Rows, int Cols>
+	using FlatM = Eigen::Array<Scalar, Rows, Cols>;
+    typedef FlatM<Eigen::Dynamic, 1> FlatPos;
 
 }
