@@ -38,13 +38,9 @@ namespace ProjDyn {
 	typedef Eigen::Triplet<Scalar> Triplet;						// A triplet, used in the sparse triplet representation for matrices.
 
 	//Quaternions
-	using Quaternion = Eigen::Quaternionf;
+	using Quaternion = Eigen::Quaterniond;
     template < int Rows, int Cols>
 	using ArrayQ = Eigen::Array<Quaternion, Rows, Cols>;
     typedef ArrayQ<Eigen::Dynamic, 1> Orientations;
-
-    template < int Rows, int Cols>
-	using FlatM = Eigen::Array<Scalar, Rows, Cols>;
-    typedef FlatM<Eigen::Dynamic, 1> FlatPos;
 
 }

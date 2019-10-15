@@ -10,7 +10,7 @@
 #include "Edge.h"
 typedef ProjDyn::Positions Positions;
 typedef ProjDyn::Orientations Orientations;
-typedef ProjDyn::FlatPos FlatPos;
+typedef ProjDyn::Vector Vector;
 
 typedef unsigned int Scalar;
 class PDConstraint {
@@ -146,7 +146,11 @@ public:
                                "Please use projectOnConstraintSet(ProjDyn::FlatPos& fp)");
     }
 
-    virtual FlatPos projectOnConstraintSet(FlatPos& fp) = 0;
+    virtual Vector projectOnConstraintSet(Vector& fp) = 0;
+
+    virtual ProjDyn::SparseMatrix getAiMatrix() = 0;
+
+    virtual ProjDyn::SparseMatrix getBiMatrix() = 0;
 };
 
 class BendingTwistingConstraint: public CRConstraint {
@@ -157,7 +161,7 @@ public:
 
     }
 
-    FlatPos projectOnConstraintSet(FlatPos& q) override {
+    Vector projectOnConstraintSet(Vector& q) override {
         return q;
     }
 
@@ -171,7 +175,7 @@ public:
 
     }
 
-    FlatPos projectOnConstraintSet(FlatPos& q) override {
+    Vector projectOnConstraintSet(Vector& q) override {
         return q;
     }
 };
