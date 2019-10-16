@@ -47,7 +47,7 @@ namespace ProjDyn {
 		    //TODO: Compute initial quaternions
 
 		    cr_velocities.setZero(cr_num_positions, 3);
-		    cr_angular_velocities.setZero(cr_num_positions);
+		    cr_angular_velocities.setZero(cr_num_positions, 3);
 		}
 
 		void resetPositions() {
@@ -103,12 +103,15 @@ namespace ProjDyn {
             rhs.resize(m, 3);
             rhs.setZero();
 
-            //TODO: Initialize cosserat rods variables: M_star, torques, angular velocities,
             if (use_cosserat_rods) {
                 /****************
                  * CR Variables *
                  ****************/
-                Vector masses_flat = Vector::Ones(m) * cr_unit_weight;
+                cr_orientations = quatFromPos(cr_positions);
+                cr_torques.setZero(cr_num_positions, 3);
+                cr_angular_velocities.setZero(cr_num_positions, 3);
+
+                Vector masses_flat = Vector::Ones(3*cr_num_positions) * cr_unit_weight;
                 cr_masses = masses_flat.asDiagonal();
                 cr_masses_inv = cr_masses.cwiseInverse();
 
@@ -124,6 +127,16 @@ namespace ProjDyn {
                 J_flat_quat *= cr_segment_length * cr_density;
                 cr_J_quat = stackDiagonal(J_flat_quat, cr_num_quaternions);
                 cr_J_quat_inv = cr_J_quat.cwiseInverse();
+
+                cr_M_star.resize(cr_size, cr_size);
+                cr_M_star.setZero();
+                //Build M_star matrix
+                for (size_t i = 0; i < cr_num_positions; i++) {
+                    cr_M_star.row(i) = cr_masses.row(i);
+                }
+                for (size_t i = 0; i < cr_num_quaternions; i++) {
+                    cr_M_star.row(i + cr_num_positions) = cr_J_quat.row(i);
+                }
             }
 
 			is_ready = true;
@@ -210,8 +223,7 @@ namespace ProjDyn {
 		    std::vector<Vector> projections(num_constraints);
 
 		    Positions s_x = cr_positions + h*cr_velocities + h*h * cr_masses_inv * f_ext;
-		    Positions cross = Positions(cr_angular_velocities);
-            vectorCross(cr_angular_velocities, cr_J_vec * cr_angular_velocities);
+            Positions cross = vectorCross(cr_angular_velocities, cr_J_vec * cr_angular_velocities);
 
 		    Positions s_w = cr_angular_velocities + h*cr_J_vec_inv * (cr_torques - cross);
             Orientations s_w_u = pos2quat(s_w);
@@ -365,7 +377,7 @@ namespace ProjDyn {
         SparseMatrix cr_J_vec_inv;
         SparseMatrix cr_J_quat;
         SparseMatrix cr_J_quat_inv;
-        SparseMatrixRM cr_M_star; //Là on utilise J_quat
+        SparseMatrixRM cr_M_star;
 
         Orientations cr_orientations;
 
@@ -434,6 +446,26 @@ namespace ProjDyn {
 		        assert(q.w() == 0.0);
 		        pos.row(i) << q.x(), q.y(), q.z();
 		    }
+		}
+
+		static Orientations quatFromPos(Positions pos) {
+		    Orientations quat;
+		    quat.resize(pos.rows() - 1);
+
+		    for (size_t i = 0; i < pos.rows() - 1; i++) {
+		        size_t next_index = i+1;
+                size_t previous_index = i-1;
+                Vector3 v0 = pos.row(previous_index) - pos.row(i);
+                Vector3 v1 = pos.row(i) - pos.row(next_index);
+                if (i == 0) { //The first position always points forward
+                    v0 = Vector3(v1);
+                }
+                Quaternion q;
+                q.FromTwoVectors(v0, v1);
+                quat[i] = q;
+            }
+
+		    return quat;
 		}
 
 		//Can we normalize in place ?
