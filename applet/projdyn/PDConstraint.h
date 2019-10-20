@@ -97,7 +97,7 @@ class GroundConstraint : public PDConstraint {
 public:
 
     GroundConstraint(const Scalar m, const Scalar vertexIndex, const float weight,
-            float groundHeight = -2.0f, unsigned int floorCoord = 2)
+            float groundHeight = -1.0f, unsigned int floorCoord = 2)
     : PDConstraint(m, weight){
         m_groundHeight = groundHeight;
         m_constrainedVertex = vertexIndex;
@@ -172,6 +172,18 @@ public:
 
     StretchShearConstraint(Scalar numVertices, float weight)
     : CRConstraint(numVertices,weight) {
+
+    }
+
+    Vector projectOnConstraintSet(Vector& q) override {
+        return q;
+    }
+};
+
+class FixedPointConstraint: public CRConstraint {
+public:
+    FixedPointConstraint(Scalar numVertices, float weight)
+    : CRConstraint(numVertices, weight) {
 
     }
 

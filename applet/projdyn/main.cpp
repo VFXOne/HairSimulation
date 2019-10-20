@@ -18,7 +18,7 @@ int main(int argc, char** argv) {
 		// Create a new mesh viewer app, which will add a screen to nanogui
 		// The callback function is triggered when loading a new mesh and (re-)initializes the
 		// projective dynamics simulator with the new vertices, faces and tetrahedrons
-		nanogui::ref<Viewer> app = new Viewer("Projective Dynamics", nullptr, projdyn_setmesh);
+		nanogui::ref<Viewer> app = new Viewer("Projective Dynamics for Cosserat Rods", nullptr, projdyn_setmesh);
 		app->setGrabCallbacks(projdyn_grab, projdyn_release_grab);
 
 		init_projdyn_gui(app);

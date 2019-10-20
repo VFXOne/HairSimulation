@@ -108,8 +108,9 @@ public:
 		}
 	}
 
-	void updateShaderVertices(const MatrixXf& vPos) {
+	void updateShaderVertices(const MatrixXf& vPos, const MatrixXf& rPos) {
 		m_updated_shader_verts = vPos;
+		m_updated_rods_pos = rPos;
 		m_reupload_vertices = true;
 	}
 
@@ -413,6 +414,16 @@ public:
             mShaderNormals.setUniform("P", p);
             mShaderNormals.drawIndexed(GL_TRIANGLES, 0, n_faces);
         }
+
+        //Draw the rods
+        /*glBegin(GL_LINES);
+
+        for (size_t i = 0; i < m_updated_rods_pos.cols(); i++) {
+            Vector3f pos = m_updated_rods_pos.col(i);
+            glVertex3f(pos(0), pos(1), pos(2));
+        }
+
+        glEnd();*/
     }
 
     bool scrollEvent(const Vector2i &p, const Vector2f &rel) {
@@ -653,6 +664,9 @@ private:
 	// in the next drawContents() call.
 	// Can be set using updateShaderVertices()
 	MatrixXf m_updated_shader_verts;
+
+	//Same for the rods variables
+	MatrixXf m_updated_rods_pos;
 
 	// Flag that will be set to true when new vertex positions have been povided via updateShaderVertices
 	// which need to be re-uploaded at the beginning of the next drawContents() call

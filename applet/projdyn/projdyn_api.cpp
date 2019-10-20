@@ -7,7 +7,7 @@
 // Global variables used by the callback functions
 int projdyn_num_iterations = PROJDYN_NUM_ITS_INITIAL;
 ProjDyn::Simulator sim;
-Eigen::MatrixXf upload_pos;
+Eigen::MatrixXf upload_pos, upload_rods;
 std::thread projdyn_thread;
 bool projdyn_active = false;
 
@@ -49,7 +49,22 @@ bool projdyn_setmesh(Viewer* viewer, bool add_tets) {
 	return true;
 }
 
+//Initialize the rods
+bool setRods() {
+
+    ProjDyn::Positions pos;
+    pos.resize(3, 3);
+    pos <<  5.0, 0.0, 0.0,
+            5.0, 0.0, 1.0,
+            5.0, 0.0, 2.0;
+
+    sim.setRods(pos);
+
+    return true;
+}
+
 void init_projdyn_gui(Viewer* viewer) {
+    //Simulation panel
 	Window* pd_win = new Window(viewer, "Simulation Controls");
 	pd_win->setPosition(Vector2i(15, 230));
 	pd_win->setLayout(new GroupLayout());
@@ -82,6 +97,16 @@ void init_projdyn_gui(Viewer* viewer) {
 	iterations_box->setCallback([viewer](int num_its) {
 		projdyn_num_iterations = num_its;
 	});
+
+    //Cosserat rods variables
+    Window* cr_win = new Window(viewer, "Cosserat Rods Controls");
+    cr_win->setPosition(Vector2i(15, 480));
+    cr_win->setLayout(new GroupLayout());
+
+    Button* set_cr = new Button(cr_win, "Create rods");
+    set_cr->setCallback([viewer]() {
+        setRods();
+    });
 
 	viewer->performLayout();
 }
@@ -138,19 +163,33 @@ bool projdyn_upload_positions(Viewer* viewer) {
 
 	Positions* pos = sim.getPositions();
 
-	// This is done using the 3 x #Verts matrix upload_pos
-	size_t num_verts = pos->rows();
-	upload_pos.resize(3, num_verts  );
+    // This is done using the 3 x #Verts matrix upload_pos
+    size_t num_verts = pos->rows();
+    upload_pos.resize(3, num_verts  );
 
-	for (size_t i = 0; i < num_verts; i++) {
-	    ProjDyn::Vector row = pos->row(i);
-	    upload_pos(0, i) = pos->coeff(i, 0);
-	    upload_pos(1, i) = pos->coeff(i, 1);
-	    upload_pos(2, i) = pos->coeff(i,2);
-	}
+    //Copy the transpose of the matrix because different storage order
+    for (size_t i = 0; i < num_verts; i++) {
+        upload_pos(0, i) = pos->coeff(i, 0);
+        upload_pos(1, i) = pos->coeff(i, 1);
+        upload_pos(2, i) = pos->coeff(i,2);
+    }
+
+    if (sim.isUsingCR()) {
+        Positions* rods_pos = sim.getRodsPositions();
+        cout << "Rods pos: " << rods_pos << endl;
+        size_t num_rods = rods_pos->rows();
+        upload_rods.resize(3, num_rods);
+
+        for (size_t i = 0; i < num_rods; i++) {
+            upload_rods(0, i) = rods_pos->coeff(i, 0);
+            upload_rods(1, i) = rods_pos->coeff(i, 1);
+            upload_rods(2, i) = rods_pos->coeff(i,2);
+        }
+    }
+
 
 	// The matrix is sent to the viewer with this function
-	viewer->updateShaderVertices(upload_pos);
+	viewer->updateShaderVertices(upload_pos, upload_rods);
 
 	return true;
 }
