@@ -38,8 +38,10 @@ namespace ProjDyn {
 
 		//For now only one rod allowed
 		void setRods(Positions& pos) {
+		    assert(pos.rows() >= 2 && "There must be at least one segment (two positions)");
 		    use_cosserat_rods = true;
             cr_num_positions = pos.rows();
+            cr_segment_length = (pos.row(1) - pos.row(0)).norm();
             cr_num_flat_pos = 3 * (cr_num_positions - 1);
             cr_num_coord = 3 * cr_num_positions;
 		    cr_num_quaternions = cr_num_positions - 1;
@@ -96,6 +98,7 @@ namespace ProjDyn {
 
             //addEdgeSpringConstraints();
             addGroundConstraints();
+            addSSConstraints();
 
             lhs = m_masses / (h * h);
             for (auto c: m_constraints) {
@@ -129,18 +132,26 @@ namespace ProjDyn {
 
                 const float j_val = M_PI*cr_radius/4;
                 Vector J_flat_vec;
-                J_flat_vec.resize(3);
+                J_flat_vec.setZero(3);
                 J_flat_vec << j_val, j_val, j_val*2;
                 J_flat_vec *= cr_segment_length * cr_density;
                 cr_J_vec = stackDiagonal(J_flat_vec, cr_num_positions - 1);
-                cr_J_vec_inv = cr_J_vec.cwiseInverse();
+                Vector J_flat_vec_inv;
+                J_flat_vec_inv.setZero(3);
+                J_flat_vec_inv << 1/j_val, 1/j_val, 1/(j_val*2);
+                J_flat_vec_inv /= cr_segment_length * cr_density;
+                cr_J_vec_inv = stackDiagonal(J_flat_vec_inv, cr_num_positions - 1);
 
                 Vector J_flat_quat;
-                J_flat_quat.resize(4);
+                J_flat_quat.setZero(4);
                 J_flat_quat << 0, j_val, j_val, j_val*2;
                 J_flat_quat *= cr_segment_length * cr_density;
                 cr_J_quat = stackDiagonal(J_flat_quat, cr_num_quaternions);
-                cr_J_quat_inv = cr_J_quat.cwiseInverse();
+                Vector J_flat_quat_inv;
+                J_flat_quat_inv.setZero(4);
+                J_flat_quat_inv << 0, 1/j_val, 1/j_val, 1/(j_val*2);
+                J_flat_quat_inv /= cr_segment_length * cr_density;
+                cr_J_quat_inv = stackDiagonal(J_flat_quat_inv, cr_num_quaternions);
 
                 cr_M_star.resize(cr_size, cr_size);
                 cr_M_star.setZero();
@@ -241,11 +252,12 @@ namespace ProjDyn {
 		    std::vector<Vector> projections(num_constraints);
 
 		    Vector s_x = cr_positions + h*cr_velocities + h * h * cr_masses_inv * cr_f_ext;
-		    std::cout << "J dim: " << cr_J_vec.rows() << " x " << cr_J_vec.cols() << std::endl;
             Vector cross = vectorCross(cr_angular_velocities, cr_J_vec * cr_angular_velocities);
 
 		    Vector s_w = cr_angular_velocities + h*cr_J_vec_inv * (cr_torques - cross);
             Orientations s_w_u = pos2quat(s_w);
+            Vector temp1;
+            temp1 = quat2pos(cr_orientations);
 		    Orientations s_u = pos2quat(quat2pos(cr_orientations) + h/2 * quat2pos(cr_orientations * s_w_u));
 
 		    Vector s_t = posQuatConcat(s_x, s_u);
@@ -281,7 +293,7 @@ namespace ProjDyn {
 		        for (size_t i = 0; i < num_constraints; i++) {
 		            auto c = cr_constraints.at(i);
 		            cr_rhs += c->getSelectionMatrixWeighted().transpose()
-		                    * c->getAiMatrix().transpose() * c->getAiMatrix()
+		                    * c->getAiMatrix().transpose() * c->getBiMatrix()
 		                    * projections.at(i);
 		        }
 
@@ -296,7 +308,7 @@ namespace ProjDyn {
                 //Update velocities and angular velocities
                 Orientations new_quat;
                 Vector new_pos;
-                separatePosQuat(&cr_q_t, new_pos, new_quat, cr_num_positions);
+                separatePosQuat(&cr_q_t, new_pos, new_quat, cr_num_positions * 3);
                 cr_velocities = (new_pos - cr_positions) / h;
                 cr_positions = Vector(new_pos);
                 cr_angular_velocities = 2/h * quat2pos(conjugateQuat(cr_orientations) * new_quat);
@@ -327,8 +339,8 @@ namespace ProjDyn {
 
 		Positions* getRodsPositions() {
 		    //TODO: maybe set the positions to a global variable because we take the pointer of it...
-		    Positions pos = vec2pos(cr_positions);
-		    return &pos;
+		    upload_pos = vec2pos(cr_positions);
+		    return &upload_pos;
 		}
 
 	protected:
@@ -405,6 +417,7 @@ namespace ProjDyn {
 		bool is_ready;
 		bool is_simulating;
 		bool use_cosserat_rods;
+		Positions upload_pos;
 
 		void createEdges(Triangles& triangles) {
 		    for (size_t i = 0; i < triangles.rows(); i++) { //iterate over all triangles
@@ -440,6 +453,14 @@ namespace ProjDyn {
             }
 		}
 
+		void addSSConstraints() {
+		    for (size_t i = 0; i < cr_num_positions - 1; i++) {
+		        auto new_c = new StretchShearConstraint(cr_size, 1.0, i*3,
+		                cr_num_positions*3 + i*4, cr_segment_length);
+		        cr_constraints.push_back(new_c);
+		    }
+		}
+
 		//Create imaginary parts of quaternions from vectors. Real part is 0
 		static Orientations pos2quat(Vector p) {
 		    //The size of the vector must a multiple of 3
@@ -454,17 +475,18 @@ namespace ProjDyn {
 		}
 
 		//Creates vectors from the imaginary part of the quaternions
-		static Vector quat2pos(Orientations quat) {
+		static Vector quat2pos(const Orientations quat) {
 		    Vector pos;
 		    pos.setZero(quat.size() * 3);
 		    for (size_t i = 0; i < quat.size(); i++) {
 		        auto q = quat[i].normalized();
 		        //The real part must be null
-		        assert(q.w() == 0.0);
+		        //assert(q.w() == 0.0);
 		        pos[i*3] = q.x();
 		        pos[i*3 + 1] = q.y();
 		        pos[i*3 + 2] = q.z();
 		    }
+		    return pos;
 		}
 
 		static Positions vec2pos(Vector p) {

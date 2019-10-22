@@ -54,9 +54,9 @@ bool setRods() {
 
     ProjDyn::Positions pos;
     pos.resize(3, 3);
-    pos <<  5.0, 0.0, 0.0,
-            5.0, 0.0, 1.0,
-            5.0, 0.0, 2.0;
+    pos <<  1.0, 1.0, 1.0,
+            2.0, 2.0, 2.0,
+            3.0, 3.0, 3.0;
 
     sim.setRods(pos);
 

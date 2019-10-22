@@ -27,19 +27,20 @@ public:
 
     virtual ProjDyn::SparseMatrix getSelectionMatrixWeighted() = 0;
 
-    void initSM(Scalar rows, Scalar cols) {
-        m_selectionMatrix = ProjDyn::SparseMatrix(rows, cols);
-        m_selectionMatrix.setZero();
-    }
-
     ProjDyn::SparseMatrix computeLHS() {
         return m_weight*m_selectionMatrix.transpose() * m_selectionMatrix;
     }
 
 protected:
+
     ProjDyn::SparseMatrix m_selectionMatrix;
     float m_weight;
     Scalar m;
+
+    void initSM(Scalar rows, Scalar cols) {
+        m_selectionMatrix = ProjDyn::SparseMatrix(rows, cols);
+        m_selectionMatrix.setZero();
+    }
 
     double clamp(const double x, const double min, const double max) {
         if (x <= min) {
@@ -151,38 +152,120 @@ public:
     virtual ProjDyn::SparseMatrix getAiMatrix() = 0;
 
     virtual ProjDyn::SparseMatrix getBiMatrix() = 0;
-};
 
-class BendingTwistingConstraint: public CRConstraint {
-public:
-
-    BendingTwistingConstraint(Scalar numVertices, float weight)
-    : CRConstraint(numVertices, weight) {
-
-    }
-
-    Vector projectOnConstraintSet(Vector& q) override {
-        return q;
-    }
-
+protected:
+    ProjDyn::SparseMatrix A_i;
+    ProjDyn::SparseMatrix B_i;
 };
 
 class StretchShearConstraint: public CRConstraint {
 public:
 
-    StretchShearConstraint(Scalar numVertices, float weight)
-    : CRConstraint(numVertices,weight) {
+    StretchShearConstraint(size_t num_coord, float weight, size_t pos_index, size_t quat_index, Scalar segment_length)
+            : CRConstraint(num_coord,weight) {
+
+        seg_length = segment_length;
+        p_index = pos_index;
+        q_index = quat_index;
+
+        A_i.resize(7, 10);
+        A_i.setZero();
+        Scalar x = 1/seg_length;
+        A_i.coeffRef(0,0) = x;
+        A_i.coeffRef(1,1) = x;
+        A_i.coeffRef(2,2) = x;
+        A_i.coeffRef(0,3) = -x;
+        A_i.coeffRef(1,4) = -x;
+        A_i.coeffRef(2,5) = -x;
+        A_i.coeffRef(3,6) = 1;
+        A_i.coeffRef(4,7) = 1;
+        A_i.coeffRef(5,8) = 1;
+        A_i.coeffRef(6,9) = 1;
+
+        B_i.resize(7, 7);
+        B_i.setZero();
+        B_i.coeffRef(0,0) = 1;
+        B_i.coeffRef(1,1) = 1;
+        B_i.coeffRef(2,2) = 1;
+        B_i.coeffRef(4, 4) = 1;
+        B_i.coeffRef(5, 5) = 1;
+        B_i.coeffRef(6, 6) = 1;
+
+        initSM(10, num_coord);
+        m_selectionMatrix.coeffRef(0,p_index + 3) = 1; //To get x_n_1
+        m_selectionMatrix.coeffRef(1,p_index + 4) = 1;
+        m_selectionMatrix.coeffRef(2,p_index + 5) = 1;
+        m_selectionMatrix.coeffRef(3,p_index) = 1;
+        m_selectionMatrix.coeffRef(4,p_index + 1) = 1;
+        m_selectionMatrix.coeffRef(5,p_index + 2) = 1;
+        m_selectionMatrix.coeffRef(6,q_index) = 1;
+        m_selectionMatrix.coeffRef(7,q_index + 1) = 1;
+        m_selectionMatrix.coeffRef(8,q_index + 2) = 1;
+        m_selectionMatrix.coeffRef(9,q_index + 3) = 1;
+    }
+
+    Vector projectOnConstraintSet(Vector& q) override {
+        ProjDyn::Vector3 x_n, x_n_1, x_f, d_3;
+        ProjDyn::Quaternion u_n, diff_u_n, u_n_star;
+
+        Vector p_i;
+        p_i.resize(7);
+
+        x_n << q.coeff(p_index), q.coeff(p_index + 1), q.coeff(p_index + 2);
+        x_n_1 << q.coeff(p_index + 3), q.coeff(p_index + 4), q.coeff(p_index + 5);
+        x_f = (x_n_1 - x_n) / seg_length;
+
+        u_n = ProjDyn::Quaternion(q.coeff(q_index), q.coeff(q_index+1), q.coeff(q_index+2), q.coeff(q_index+3));
+        d_3 = u_n.toRotationMatrix() * ProjDyn::Vector3(0,0,1);
+        diff_u_n = ProjDyn::Quaternion::FromTwoVectors(d_3, x_f);
+
+        u_n_star = u_n * diff_u_n;
+
+        p_i << d_3.coeff(0), d_3.coeff(1), d_3.coeff(2),
+                u_n_star.w(), u_n_star.x(),u_n_star.y(), u_n_star.z();
+
+        return p_i;
+    }
+
+    ProjDyn::SparseMatrix getAiMatrix() override {
+        return A_i;
+    }
+
+    ProjDyn::SparseMatrix getBiMatrix() override {
+        return B_i;
+    }
+
+    ProjDyn::SparseMatrix getSelectionMatrix() override {
+        return m_selectionMatrix;
+    }
+
+    ProjDyn::SparseMatrix getSelectionMatrixWeighted() override {
+        return m_weight * m_selectionMatrix;
+    }
+
+protected:
+    Scalar seg_length;
+    size_t q_index;
+    size_t p_index;
+};
+
+class BendingTwistingConstraint: public CRConstraint {
+public:
+
+    BendingTwistingConstraint(size_t num_coord, float weight)
+    : CRConstraint(num_coord, weight) {
 
     }
 
     Vector projectOnConstraintSet(Vector& q) override {
         return q;
     }
+
 };
 
 class FixedPointConstraint: public CRConstraint {
 public:
-    FixedPointConstraint(Scalar numVertices, float weight)
+    FixedPointConstraint(size_t numVertices, float weight)
     : CRConstraint(numVertices, weight) {
 
     }

@@ -416,14 +416,20 @@ public:
         }
 
         //Draw the rods
-        /*glBegin(GL_LINES);
 
-        for (size_t i = 0; i < m_updated_rods_pos.cols(); i++) {
+        if (m_updated_rods_pos.rows() < 2) {
+            return;
+        }
+        for (size_t i = 0; i < m_updated_rods_pos.cols() - 1; i++) {
+            glBegin(GL_LINES);
             Vector3f pos = m_updated_rods_pos.col(i);
+            Vector3f pos2 = m_updated_rods_pos.col(i+1);
+            std::cout << "rod pos: [" << pos(0)<<", "<<pos(1)<<", "<<pos(2)<<"]"<<std::endl;
             glVertex3f(pos(0), pos(1), pos(2));
+            glVertex3f(pos2(0), pos2(1), pos2(2));
+            glEnd();
         }
 
-        glEnd();*/
     }
 
     bool scrollEvent(const Vector2i &p, const Vector2f &rel) {
