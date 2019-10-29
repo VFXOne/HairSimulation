@@ -108,11 +108,16 @@ public:
 		}
 	}
 
-	void updateShaderVertices(const MatrixXf& vPos, const MatrixXf& rPos) {
-		m_updated_shader_verts = vPos;
-		m_updated_rods_pos = rPos;
-		m_reupload_vertices = true;
-	}
+	void updateShaderVertices(const MatrixXf& vPos) {
+        m_updated_shader_verts = vPos;
+        m_reupload_vertices = true;
+    }
+
+	void updateShaderRods(const MatrixXf& vTan, const MatrixXf& rPos) {
+        m_updated_rods_pos = rPos;
+        m_updated_rods_tangents = vTan;
+        m_reupload_vertices = true;
+    }
 
     void meshProcess() {
         Point default_normal(0.0, 1.0, 0.0);
@@ -371,7 +376,7 @@ public:
 
 		if (m_reupload_vertices) {
 			mShader.uploadAttrib("position", m_updated_shader_verts);
-			m_reupload_vertices = false;
+			//m_reupload_vertices = false;
 		}
 
         Eigen::Matrix4f model, view, proj;
@@ -415,24 +420,140 @@ public:
             mShaderNormals.drawIndexed(GL_TRIANGLES, 0, n_faces);
         }
 
-        //Draw the rods
+        //Draw the rods if necessary
+        if (m_reupload_vertices) {
+            createCurveGeometry();
+            m_reupload_vertices = false;
+        }
+    }
 
-        if (m_updated_rods_pos.rows() < 2) {
-            return;
+    Vector3f evalCurve(const Vector3f *P, const float &t)
+    {
+        float b0 = (1 - t) * (1 - t) * (1 - t);
+        float b1 = 3 * t * (1 - t) * (1 - t);
+        float b2 = 3 * t * t * (1 - t);
+        Vector3f v;
+        v << P->x() * b0, P->y() * b1, P->z() * b2;
+        return v;
+    }
+
+    void createCurveGeometry() {
+        uint32_t ndivs = 3;
+        uint32_t ncurves = m_updated_rods_pos.cols() - 1;
+        size_t curveNumPts = m_updated_rods_pos.size();
+        Vector3f pts;
+
+        //std::vector<Vector3f []> P(new Vector3f[(ndivs + 1) * ndivs * ncurves + 1]);
+        MatrixXf P_, N_, st_;
+        P_.resize(3, (ndivs + 1) * ndivs * ncurves + 1);
+        //std::vector<Vector3f []> N(new Vector3f[(ndivs + 1) * ndivs * ncurves + 1]);
+        N_.resize(3, (ndivs + 1) * ndivs * ncurves + 1);
+        //std::vector<Vector2f []> st(new Vector2f[(ndivs + 1) * ndivs * ncurves + 1]);
+        st_.resize(2, (ndivs + 1) * ndivs * ncurves + 1);
+
+        for (uint32_t i = 0; i < ncurves; ++i) {
+            for (uint32_t j = 0; j < ndivs; ++j) {
+                pts = m_updated_rods_pos.col(i);
+                float s = j / (float)ndivs;
+                Vector3f pt = evalCurve(&pts, s);
+                Vector3f tangent = m_updated_rods_tangents.col(i).normalized();
+
+                uint8_t maxAxis;
+                if (std::abs(tangent.x()) > std::abs(tangent.y()))
+                    if (std::abs(tangent.x()) > std::abs(tangent.z()))
+                        maxAxis = 0;
+                    else
+                        maxAxis = 2;
+                else if (std::abs(tangent.y()) > std::abs(tangent.z()))
+                    maxAxis = 1;
+                else
+                    maxAxis = 2;
+
+                Vector3f up, forward, right;
+
+                switch (maxAxis) {
+                    case 0:
+                    case 1:
+                        up = tangent;
+                        forward = Vector3f(0, 0, 1);
+                        right = up.cross(forward);
+                        forward = right.cross(up);
+                        break;
+                    case 2:
+                        up = tangent;
+                        right = Vector3f(0, 0, 1);
+                        forward = right.cross(up);
+                        right = up.cross(forward);
+                        break;
+                    default:
+                        break;
+                };
+
+                float sNormalized = (i * ndivs + j) / float(ndivs * ncurves);
+                float rad = 0.1 * (1 - sNormalized);
+                for (uint32_t k = 0; k <= ndivs; ++k) {
+                    float t = k / (float)ndivs;
+                    float theta = t * 2 * M_PI;
+                    Vector3f pc(cos(theta) * rad, 0, sin(theta) * rad);
+                    float x = pc.x() * right.x() + pc.y() * up.x() + pc.z() * forward.x();
+                    float y = pc.x() * right.y() + pc.y() * up.y() + pc.z() * forward.y();
+                    float z = pc.x() * right.z() + pc.y() * up.z() + pc.z() * forward.z();
+                    //P[i * (ndivs + 1) * ndivs + j * (ndivs + 1) + k] = Vector3f(pt.x() + x, pt.y() + y, pt.z() + z);
+                    P_.col(i * (ndivs + 1) * ndivs + j * (ndivs + 1) + k) = Vector3f(pt.x() + x, pt.y() + y, pt.z() + z);
+                    //N[i * (ndivs + 1) * ndivs + j * (ndivs + 1) + k] = Vector3f(x, y, z).normalize();
+                    N_.col(i * (ndivs + 1) * ndivs + j * (ndivs + 1) + k) = Vector3f(x, y, z).normalized();
+                    //st[i * (ndivs + 1) * ndivs + j * (ndivs + 1) + k] = Vector2f(sNormalized , t);
+                    st_.col(i * (ndivs + 1) * ndivs + j * (ndivs + 1) + k) = Vector2f(sNormalized , t);
+                }
+            }
         }
-        for (size_t i = 0; i < m_updated_rods_pos.cols() - 1; i++) {
-            glBegin(GL_LINES);
-            Vector3f pos = m_updated_rods_pos.col(i);
-            Vector3f pos2 = m_updated_rods_pos.col(i+1);
-            std::cout << "rod pos: [" << pos(0)<<", "<<pos(1)<<", "<<pos(2)<<"]"<<std::endl;
-            glVertex3f(pos(0), pos(1), pos(2));
-            glVertex3f(pos2(0), pos2(1), pos2(2));
-            glEnd();
+        P_.col((ndivs + 1) * ndivs * ncurves) = m_updated_rods_pos.col(ncurves);
+        N_.col((ndivs + 1) * ndivs * ncurves) = (m_updated_rods_pos.col(ncurves - 1) - m_updated_rods_pos.col(ncurves)).normalized();
+        st_.col((ndivs + 1) * ndivs * ncurves) = Vector2f(1, 0.5);
+        uint32_t numFaces = ndivs * ndivs * ncurves;
+        MatrixXf verts;
+        verts.resize(3, numFaces);
+        for (uint32_t i = 0; i < numFaces; ++i)
+            verts.coeffRef(i) = (i < (numFaces - ndivs)) ? 4 : 3;
+        MatrixXf vertIndices;
+        vertIndices.resize(4, ndivs * ndivs * ncurves * 4 + ndivs * 3);
+        uint32_t nf = 0, ix = 0;
+        for (uint32_t k = 0; k < ncurves; ++k) {
+            for (uint32_t j = 0; j < ndivs; ++j) {
+                if (k == (ncurves - 1) && j == (ndivs - 1)) { break; }
+                for (uint32_t i = 0; i < ndivs; ++i) {
+                    //vertIndices[ix] = nf;
+                    //vertIndices[ix + 1] = nf + (ndivs + 1);
+                    //vertIndices[ix + 2] = nf + (ndivs + 1) + 1;
+                    //vertIndices[ix + 3] = nf + 1;
+                    vertIndices.col(ix) << nf, nf + (ndivs + 1), nf + (ndivs + 1) + 1, nf + 1;
+                    ix += 4;
+                    ++nf;
+                }
+                nf++;
+            }
         }
+
+        for (uint32_t i = 0; i < ndivs; ++i) {
+            vertIndices.coeffRef(ix) = nf;
+            vertIndices.coeffRef(ix + 1) = (ndivs + 1) * ndivs * ncurves;
+            vertIndices.coeffRef(ix + 2) = nf + 1;
+            ix += 3;
+            nf++;
+        }
+
+        //Now we bind the shader !
+        mShader.bind();
+        mShader.uploadIndices(vertIndices);
+        mShader.uploadAttrib("position", P_);
+        mShader.uploadAttrib("normal", N_);
+        Vector3f colors(0.0, 0.0, 0.88);
+        mShader.setUniform("intensity", colors);
+        mShader.drawIndexed(GL_QUADS, 0, numFaces);
 
     }
 
-    bool scrollEvent(const Vector2i &p, const Vector2f &rel) {
+        bool scrollEvent(const Vector2i &p, const Vector2f &rel) {
         if (!Screen::scrollEvent(p, rel)) {
             mCamera.zoom = max(0.1, mCamera.zoom * (rel.y() > 0 ? 1.1 : 0.9));
             repaint();
@@ -673,6 +794,7 @@ private:
 
 	//Same for the rods variables
 	MatrixXf m_updated_rods_pos;
+	MatrixXf m_updated_rods_tangents;
 
 	// Flag that will be set to true when new vertex positions have been povided via updateShaderVertices
 	// which need to be re-uploaded at the beginning of the next drawContents() call

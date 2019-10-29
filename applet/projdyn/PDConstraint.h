@@ -265,14 +265,49 @@ public:
 
 class FixedPointConstraint: public CRConstraint {
 public:
-    FixedPointConstraint(size_t numVertices, float weight)
-    : CRConstraint(numVertices, weight) {
+    FixedPointConstraint(size_t num_coord, float weight, size_t pos_index, ProjDyn::Vector3 fixed_pos)
+    : CRConstraint(num_coord, weight) {
+        p_index = pos_index;
+        f_pos = fixed_pos;
 
+        A_i.resize(3, 3);
+        A_i.setIdentity();
+
+        B_i.resize(3, 3);
+        B_i.setIdentity();
+
+        initSM(3, num_coord);
+        m_selectionMatrix.coeffRef(0, p_index);
+        m_selectionMatrix.coeffRef(1, p_index+1);
+        m_selectionMatrix.coeffRef(2, p_index+2);
     }
 
     Vector projectOnConstraintSet(Vector& q) override {
-        return q;
+        Vector p_i;
+        p_i.resize(3);
+        p_i << f_pos.x(), f_pos.y(), f_pos.z();
+        return p_i;
     }
+
+    ProjDyn::SparseMatrix getAiMatrix() override {
+        return A_i;
+    }
+
+    ProjDyn::SparseMatrix getBiMatrix() override {
+        return B_i;
+    }
+
+    ProjDyn::SparseMatrix getSelectionMatrix() override {
+        return m_selectionMatrix;
+    }
+
+    ProjDyn::SparseMatrix getSelectionMatrixWeighted() override {
+        return m_weight * m_selectionMatrix;
+    }
+
+protected:
+    size_t p_index;
+    ProjDyn::Vector3 f_pos;
 };
 
 #endif //APPLET_PDCONSTRAINT_H

@@ -99,6 +99,7 @@ namespace ProjDyn {
             //addEdgeSpringConstraints();
             addGroundConstraints();
             addSSConstraints();
+            addFixedPosConstraint();
 
             lhs = m_masses / (h * h);
             for (auto c: m_constraints) {
@@ -343,6 +344,18 @@ namespace ProjDyn {
 		    return &upload_pos;
 		}
 
+		Positions* getRodsTangents() {
+		    upload_tan = vec2pos(cr_positions);
+		    const size_t n = upload_tan.rows();
+		    for (size_t i = 0; i < n - 1; i++) {
+		        upload_tan.row(i) = (upload_tan.row(i+1) - upload_tan.row(i)) / cr_segment_length;
+		    }
+
+		    upload_tan.row(n - 1) = upload_tan.row(n - 2); //The last segment has the same tangent as the previous one
+
+		    return &upload_tan;
+		}
+
 	protected:
 
         // If m_hasGrab is true, vertices with the indices in m_grabVerts will be forced
@@ -418,6 +431,7 @@ namespace ProjDyn {
 		bool is_simulating;
 		bool use_cosserat_rods;
 		Positions upload_pos;
+		Positions upload_tan;
 
 		void createEdges(Triangles& triangles) {
 		    for (size_t i = 0; i < triangles.rows(); i++) { //iterate over all triangles
@@ -459,6 +473,13 @@ namespace ProjDyn {
 		                cr_num_positions*3 + i*4, cr_segment_length);
 		        cr_constraints.push_back(new_c);
 		    }
+		}
+
+		void addFixedPosConstraint() {
+		    Vector3 p;
+		    p << cr_positions.coeff(0, 0), cr_positions.coeff(0, 1), cr_positions.coeff(0, 1);
+		    auto fpc = new FixedPointConstraint(cr_size, 1.0,0, p);
+		    cr_constraints.push_back(fpc);
 		}
 
 		//Create imaginary parts of quaternions from vectors. Real part is 0
