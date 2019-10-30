@@ -54,9 +54,9 @@ bool setRods() {
 
     ProjDyn::Positions pos;
     pos.resize(3, 3);
-    pos <<  1.0, 1.0, 1.0,
-            2.0, 2.0, 2.0,
-            3.0, 3.0, 3.0;
+    pos <<  0.0, 1.0, 0.0,
+            1.0, 1.0, 0.0,
+            2.0, 1.0, 0.0;
 
     sim.setRods(pos);
 
@@ -176,9 +176,10 @@ bool projdyn_upload_positions(Viewer* viewer) {
 
     if (sim.isUsingCR()) {
         Positions* rods_pos = sim.getRodsPositions();
-        cout << "Rods pos: " << rods_pos << endl;
         size_t num_rods = rods_pos->rows();
         upload_rods.resize(3, num_rods);
+
+        std::cout << "Rods pos: \n" << *rods_pos << std::endl;
 
         for (size_t i = 0; i < num_rods; i++) {
             upload_rods(0, i) = rods_pos->coeff(i, 0);

@@ -98,8 +98,8 @@ namespace ProjDyn {
 
             //addEdgeSpringConstraints();
             addGroundConstraints();
-            addSSConstraints();
-            addFixedPosConstraint();
+            //addSSConstraints();
+            //addFixedPosConstraint();
 
             lhs = m_masses / (h * h);
             for (auto c: m_constraints) {
