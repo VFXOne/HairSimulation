@@ -376,6 +376,48 @@ public:
             "   createline(2);\n"
             "}"
         );
+
+        rShaderLines.init(
+            "normal_shader",
+            /* Vertex shader */
+            "#version 330\n\n"
+            "in vec3 position;\n"
+            "uniform mat4 MV;\n"
+            "uniform mat4 P;\n"
+
+			"out VS_OUT {\n"
+            "    mat3 normal_mat;\n"
+            "} vs_out;\n"
+            "void main() {\n"
+            "    gl_Position = vec4(position, 1.0);\n"
+            "    vs_out.normal_mat = mat3(transpose(inverse(MV)));\n"
+            "}",
+            /* Fragment shader */
+            "#version 330\n\n"
+            "out vec4 frag_color;\n"
+            "void main() {\n"
+            "   frag_color = vec4(0.0, 0.0, 1.0, 1.0);\n"
+            "}",
+            /* Geometry shader */
+            "#version 330\n\n"
+            "layout (triangles) in;\n"
+            "layout (line_strip, max_vertices = 6) out;\n"
+            "uniform mat4 MV;\n"
+            "uniform mat4 P;\n"
+            "in VS_OUT {\n"
+            "    mat3 normal_mat;\n"
+            "} gs_in[];\n"
+            "void createline(int index) {\n"
+            "   gl_Position = P * MV * gl_in[index].gl_Position;\n"
+            "   EmitVertex();\n"
+            "   gl_Position = P * MV * gl_in[index+1].gl_Position;\n"
+            "   EmitVertex();\n"
+            "   EndPrimitive();\n"
+            "}\n"
+            "void main() {\n"
+            "   createline(0);\n"
+            "}"
+        );
     }
 
     ~Viewer() {
@@ -479,11 +521,27 @@ public:
             mShaderNormals.drawIndexed(GL_TRIANGLES, 0, n_faces);
         }
 
-        rShader.bind();
+        //rShader.bind();
         unsigned int numFaces;
 
-        //Draw the rods if necessary
+        MatrixXf lIndices;
+        lIndices.resize(3, m_updated_rods_pos.cols());
+        for (size_t i = 0; i < m_updated_rods_pos.cols(); i++) {
+            lIndices.coeffRef(0, i) = i;
+        }
+
+        rShaderLines.bind();
         if (m_reupload_vertices) {
+            rShaderLines.uploadIndices(lIndices);
+            rShaderLines.uploadAttrib("position", m_updated_rods_pos);
+        }
+        rShaderLines.setUniform("MV", mv);
+        rShaderLines.setUniform("P", p);
+        //rShaderLines.uploadAttrib("normal", normals_attrib);
+        rShaderLines.drawIndexed(GL_LINES, 0, m_updated_rods_pos.cols() - 1);
+
+        //Draw the rods if necessary
+        if (false && m_reupload_vertices) {
 
             size_t ndivs = 3;
             size_t ncurves = m_updated_rods_pos.cols() - 1;
@@ -609,11 +667,11 @@ public:
         }
 
 
-        rShader.setUniform("MV", mv);
-        rShader.setUniform("P", p);
-        Vector3f color(0.5, 0.1, 0.88);
-        rShader.setUniform("intensity", color);
-        rShader.drawIndexed(GL_TRIANGLES, 0, numFaces);
+//        rShader.setUniform("MV", mv);
+//        rShader.setUniform("P", p);
+//        Vector3f color(0.5, 0.1, 0.88);
+//        rShader.setUniform("intensity", color);
+//        rShader.drawIndexed(GL_TRIANGLES, 0, numFaces);
     }
 
     Vector3f evalCurve(const Vector3f *p0, const Vector3f *p1, const float &t)
@@ -987,6 +1045,7 @@ private:
     nanogui::GLShader mShader;
     nanogui::GLShader rShader;
     nanogui::GLShader mShaderNormals;
+    nanogui::GLShader rShaderLines;
     nanogui::Window *window;
     nanogui::Arcball arcball;
 
