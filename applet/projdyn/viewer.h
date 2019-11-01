@@ -108,6 +108,87 @@ public:
 		}
 	}
 
+	void rodMesh() {
+
+        size_t nPoints = 4;
+
+        MatrixXf points, vertices;
+        points.resize(3, nPoints);
+        for (size_t i = 0; i < nPoints; i++) {
+            points.col(i) << 0,i,0;
+        }
+
+        cout << "Creating rod mesh" << endl;
+        n_vertices = 2*(nPoints - 1) + 1;
+        cout << "# of vertices : " << n_vertices << endl;
+        n_faces = 2*(nPoints - 2) + 1;
+        cout << "# of faces : " << n_faces << endl;
+        n_edges = 4*(nPoints-2) + 3;
+        cout << "# of edges : " << n_edges << endl;
+
+        mesh.clear();
+
+        vertices.resize(3, n_vertices);
+        size_t j = 0;
+        for (size_t i = 0; i < nPoints - 1; i++) {
+            Vector3f tangent = (points.col(i) - points.col(i + 1)).normalized();
+            Vector3f rand, normal;
+            do {
+                rand = Vector3f(0.0, 0.0, -1.0);
+                normal = rand.cross(tangent).normalized();
+            } while(normal.norm() == 0);
+
+            const float dist = 0.3;
+            vertices.col(j) = points.col(i) + dist * normal;
+            j++;
+            vertices.col(j) = points.col(i) - dist * normal;
+            j++;
+        }
+        vertices.col(j) = points.col(nPoints - 1);
+
+        Surface_mesh::Vertex u, v, w;
+        u = mesh.add_vertex(Point(vertices.coeff(0,0), vertices.coeff(1, 0), vertices.coeff(2, 0)));
+        v = mesh.add_vertex(Point(vertices.coeff(0,1), vertices.coeff(1, 1), vertices.coeff(2, 1)));
+        for (size_t i = 0; i < n_faces-1; i++) {
+            Point p0(vertices.coeff(0,i+2), vertices.coeff(1, i+2), vertices.coeff(2, i+2));
+
+            w = mesh.add_vertex(p0);
+            auto out = mesh.add_triangle(u, v, w);
+            cout << out << endl;
+
+            u = v;
+            v = w;
+
+            if (i == n_faces - 2) {
+                cout << "tip" << endl;
+                Point tip(vertices.coeff(0, n_vertices-1),vertices.coeff(1, n_vertices-1), vertices.coeff(2, n_vertices-1));
+                Surface_mesh::Vertex tip_v = mesh.add_vertex(tip);
+                mesh.add_triangle(u, v, tip_v);
+            }
+        }
+
+        mesh_center = computeCenter(&mesh);
+        float dist_max = 0.0f;
+        for (auto v: mesh.vertices()) {
+            if ( distance(mesh_center, mesh.position(v))> dist_max) {
+                dist_max = distance(mesh_center, mesh.position(v));
+            }
+        }
+
+        mCamera.arcball = Arcball(2.);
+        mCamera.arcball.setSize(mSize);
+        mCamera.modelZoom = 2/dist_max;
+        mCamera.modelTranslation = -Vector3f(mesh_center.x, mesh_center.y, mesh_center.z);
+
+        meshProcess();
+
+        if (m_mesh_load_callback) {
+            if (!m_mesh_load_callback(this)) {
+                std::cout << "Error on callback after loading mesh!" << std::endl;
+            }
+        }
+    }
+
 	void updateShaderVertices(const MatrixXf& vPos) {
         m_updated_shader_verts = vPos;
         m_reupload_vertices = true;
@@ -145,6 +226,9 @@ public:
         // format
         MatrixXf normals_attrib(3, n_vertices);
 
+        cout << "vertices = " << mesh.n_vertices() << endl;
+        cout << "faces = " << mesh.n_faces() << endl;
+        cout << "edges = " << mesh.n_edges() << endl;
         j = 0;
         for (auto v: mesh.vertices()) {
             mesh_points.col(j) << mesh.position(v).x,
@@ -188,6 +272,13 @@ public:
         b = new Button(popup, "Small Sphere");
         b->setCallback([this,popupBtn]() {
             loadMesh("../data/small_sphere.obj");
+            meshProcess();
+            popupBtn->setPushed(false);
+        });
+
+        b = new Button(popup, "Rod");
+        b->setCallback([this,popupBtn]() {
+            rodMesh();
             meshProcess();
             popupBtn->setPushed(false);
         });
@@ -376,48 +467,6 @@ public:
             "   createline(2);\n"
             "}"
         );
-
-        rShaderLines.init(
-            "normal_shader",
-            /* Vertex shader */
-            "#version 330\n\n"
-            "in vec3 position;\n"
-            "uniform mat4 MV;\n"
-            "uniform mat4 P;\n"
-
-			"out VS_OUT {\n"
-            "    mat3 normal_mat;\n"
-            "} vs_out;\n"
-            "void main() {\n"
-            "    gl_Position = vec4(position, 1.0);\n"
-            "    vs_out.normal_mat = mat3(transpose(inverse(MV)));\n"
-            "}",
-            /* Fragment shader */
-            "#version 330\n\n"
-            "out vec4 frag_color;\n"
-            "void main() {\n"
-            "   frag_color = vec4(0.0, 0.0, 1.0, 1.0);\n"
-            "}",
-            /* Geometry shader */
-            "#version 330\n\n"
-            "layout (triangles) in;\n"
-            "layout (line_strip, max_vertices = 6) out;\n"
-            "uniform mat4 MV;\n"
-            "uniform mat4 P;\n"
-            "in VS_OUT {\n"
-            "    mat3 normal_mat;\n"
-            "} gs_in[];\n"
-            "void createline(int index) {\n"
-            "   gl_Position = P * MV * gl_in[index].gl_Position;\n"
-            "   EmitVertex();\n"
-            "   gl_Position = P * MV * gl_in[index+1].gl_Position;\n"
-            "   EmitVertex();\n"
-            "   EndPrimitive();\n"
-            "}\n"
-            "void main() {\n"
-            "   createline(0);\n"
-            "}"
-        );
     }
 
     ~Viewer() {
@@ -477,7 +526,7 @@ public:
 
 		if (m_reupload_vertices) {
 			mShader.uploadAttrib("position", m_updated_shader_verts);
-			//m_reupload_vertices = false;
+			m_reupload_vertices = false;
 		}
 
         Eigen::Matrix4f model, view, proj;
@@ -521,157 +570,6 @@ public:
             mShaderNormals.drawIndexed(GL_TRIANGLES, 0, n_faces);
         }
 
-        //rShader.bind();
-        unsigned int numFaces;
-
-        MatrixXf lIndices;
-        lIndices.resize(3, m_updated_rods_pos.cols());
-        for (size_t i = 0; i < m_updated_rods_pos.cols(); i++) {
-            lIndices.coeffRef(0, i) = i;
-        }
-
-        rShaderLines.bind();
-        if (m_reupload_vertices) {
-            rShaderLines.uploadIndices(lIndices);
-            rShaderLines.uploadAttrib("position", m_updated_rods_pos);
-        }
-        rShaderLines.setUniform("MV", mv);
-        rShaderLines.setUniform("P", p);
-        //rShaderLines.uploadAttrib("normal", normals_attrib);
-        rShaderLines.drawIndexed(GL_LINES, 0, m_updated_rods_pos.cols() - 1);
-
-        //Draw the rods if necessary
-        if (false && m_reupload_vertices) {
-
-            size_t ndivs = 3;
-            size_t ncurves = m_updated_rods_pos.cols() - 1;
-            size_t curveNumPts = m_updated_rods_pos.size();
-
-            //std::vector<Vector3f []> P(new Vector3f[(ndivs + 1) * ndivs * ncurves + 1]);
-            MatrixXf P_, N_, st_;
-            P_.resize(3, ndivs * ndivs * ncurves + ndivs);
-            //std::vector<Vector3f []> N(new Vector3f[(ndivs + 1) * ndivs * ncurves + 1]);
-            N_.resize(3, ndivs * ndivs * ncurves + ndivs);
-            //std::vector<Vector2f []> st(new Vector2f[(ndivs + 1) * ndivs * ncurves + 1]);
-            st_.resize(2, ndivs * ndivs * ncurves + ndivs);
-
-            size_t count = 0;
-            for (size_t i = 0; i < ncurves; ++i) {
-                for (size_t j = 0; j < ndivs; ++j) {
-                    Vector3f p0, p1;
-                    p0 = m_updated_rods_pos.col(i);
-                    p1 = m_updated_rods_pos.col(i + 1);
-                    float s = j / (float) ndivs;
-                    Vector3f pt = evalCurve(&p0, &p1, s);
-                    Vector3f tangent = m_updated_rods_tangents.col(i).normalized();
-
-                    uint8_t maxAxis;
-                    if (std::abs(tangent.x()) > std::abs(tangent.y()))
-                        if (std::abs(tangent.x()) > std::abs(tangent.z()))
-                            maxAxis = 0;
-                        else
-                            maxAxis = 2;
-                    else if (std::abs(tangent.y()) > std::abs(tangent.z()))
-                        maxAxis = 1;
-                    else
-                        maxAxis = 2;
-
-                    Vector3f up, forward, right;
-
-                    switch (maxAxis) {
-                        case 0:
-                        case 1:
-                            up = tangent;
-                            forward = Vector3f(0, 0, 1);
-                            right = up.cross(forward);
-                            forward = right.cross(up);
-                            break;
-                        case 2:
-                            up = tangent;
-                            right = Vector3f(0, 0, 1);
-                            forward = right.cross(up);
-                            right = up.cross(forward);
-                            break;
-                        default:
-                            break;
-                    };
-
-                    float sNormalized = (i * ndivs + j) / float(ndivs * ncurves);
-                    float rad = 2 * (1 - sNormalized);
-                    for (size_t k = 0; k <= ndivs; ++k) {
-                        count++;
-                        float t = k / (float) ndivs;
-                        float theta = t * 2 * M_PI;
-                        Vector3f pc(cos(theta) * rad, 0, sin(theta) * rad);
-                        float x = pc.x() * right.x() + pc.y() * up.x() + pc.z() * forward.x();
-                        float y = pc.x() * right.y() + pc.y() * up.y() + pc.z() * forward.y();
-                        float z = pc.x() * right.z() + pc.y() * up.z() + pc.z() * forward.z();
-                        //P[i * (ndivs + 1) * ndivs + j * (ndivs + 1) + k] = Vector3f(pt.x() + x, pt.y() + y, pt.z() + z);
-                        size_t index = i * ndivs * ndivs + j * ndivs + k;
-                        P_.col(index) = Vector3f(pt.x() + x, pt.y() + y,pt.z() + z);
-                        P_.col(index) = Vector3f(10, 10, 10);
-                        //N[i * (ndivs + 1) * ndivs + j * (ndivs + 1) + k] = Vector3f(x, y, z).normalize();
-                        N_.col(i * ndivs * ndivs + j * ndivs + k) = Vector3f(x, y, z).normalized();
-                        //st[i * (ndivs + 1) * ndivs + j * (ndivs + 1) + k] = Vector2f(sNormalized , t);
-                        st_.col(i * ndivs * ndivs + j * ndivs + k) = Vector2f(sNormalized, t);
-                    }
-                }
-            }
-            std::cout << "count: " << count << std::endl;
-            P_.col(ndivs * ndivs * ncurves + ndivs - 1) = m_updated_rods_pos.col(ncurves);
-            N_.col(ndivs * ndivs * ncurves + ndivs - 1) = (m_updated_rods_pos.col(ncurves - 1) -
-                                                     m_updated_rods_pos.col(ncurves)).normalized();
-            st_.col(ndivs * ndivs * ncurves + ndivs - 1) = Vector2f(1, 0.5);
-            numFaces = ndivs * ndivs * ncurves;
-            MatrixXf verts;
-            verts.resize(3, numFaces);
-            for (size_t i = 0; i < numFaces; ++i)
-                verts.coeffRef(i) = (i < (numFaces - ndivs)) ? 4 : 3;
-            MatrixXf vertIndices;
-            vertIndices.resize(3, 2 * ndivs * ndivs * ncurves);
-            unsigned int nf = 0, ix = 0;
-            for (size_t k = 0; k < ncurves; ++k) {
-                for (size_t j = 0; j < ndivs; ++j) {
-                    //if (k == (ncurves - 1) && j == (ndivs - 1)) { break; }
-                    for (size_t i = 0; i < ndivs; ++i) {
-                        //vertIndices[ix] = nf;
-                        //vertIndices[ix + 1] = nf + (ndivs + 1);
-                        //vertIndices[ix + 2] = nf + (ndivs + 1) + 1;
-                        //vertIndices[ix + 3] = nf + 1;
-                        vertIndices.col(ix) << nf, nf + ndivs, nf + ndivs + 1;
-                        ix += 1;
-                        vertIndices.col(ix) << nf, nf + (ndivs + 1) + 1, nf + 1;
-                        ix += 1;
-                        ++nf;
-                    }
-                    nf++;
-                }
-            }
-
-//            MatrixXu indices(3, 2); /* Draw 2 triangles */
-//            indices.col(0) << 0, 1, 2;
-//            indices.col(1) << 2, 3, 0;
-//
-//            MatrixXf positions(3, 4);
-//            positions.col(0) << -1, -1, 0;
-//            positions.col(1) << 1, -1, 0;
-//            positions.col(2) << 1, 1, 0;
-//            positions.col(3) << -1, 1, 0;
-
-            rShader.uploadIndices(vertIndices);
-            rShader.uploadAttrib("position", P_);
-
-            m_reupload_vertices = false;
-            std::cout << "Face index: \n" << vertIndices << std::endl;
-            std::cout << "Positions: \n" << P_ << std::endl;
-        }
-
-
-//        rShader.setUniform("MV", mv);
-//        rShader.setUniform("P", p);
-//        Vector3f color(0.5, 0.1, 0.88);
-//        rShader.setUniform("intensity", color);
-//        rShader.drawIndexed(GL_TRIANGLES, 0, numFaces);
     }
 
     Vector3f evalCurve(const Vector3f *p0, const Vector3f *p1, const float &t)

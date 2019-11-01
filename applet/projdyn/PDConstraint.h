@@ -98,7 +98,7 @@ class GroundConstraint : public PDConstraint {
 public:
 
     GroundConstraint(const Scalar m, const Scalar vertexIndex, const float weight,
-            float groundHeight = -1.0f, unsigned int floorCoord = 2)
+            float groundHeight = -1.0f, unsigned int floorCoord = 1)
     : PDConstraint(m, weight){
         m_groundHeight = groundHeight;
         m_constrainedVertex = vertexIndex;

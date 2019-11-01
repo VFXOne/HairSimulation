@@ -93,7 +93,7 @@ namespace ProjDyn {
             m_f_ext.setZero(m, 3);
             //Set gravity on z axis m times
             for (size_t i = 0; i < m; i++) {
-                m_f_ext.row(i) << 0, 0, gravity;
+                m_f_ext.row(i) << 0, -gravity, 0;
             }
 
             //addEdgeSpringConstraints();
@@ -120,8 +120,8 @@ namespace ProjDyn {
                 //Set gravity on z axis m times
                 for (size_t i = 0; i < cr_num_positions/3; i++) {
                     cr_f_ext[i*3] = 0;
+                    cr_f_ext[i*3] = -gravity;
                     cr_f_ext[i*3] = 0;
-                    cr_f_ext[i*3] = gravity;
                 }
 
                 cr_orientations = quatFromPos(cr_positions);
