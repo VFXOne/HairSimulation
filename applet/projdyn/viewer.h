@@ -153,14 +153,12 @@ public:
             Point p0(vertices.coeff(0,i+2), vertices.coeff(1, i+2), vertices.coeff(2, i+2));
 
             w = mesh.add_vertex(p0);
-            auto out = mesh.add_triangle(u, v, w);
-            cout << out << endl;
+            mesh.add_triangle(u, v, w);
 
             u = v;
             v = w;
 
             if (i == n_faces - 2) {
-                cout << "tip" << endl;
                 Point tip(vertices.coeff(0, n_vertices-1),vertices.coeff(1, n_vertices-1), vertices.coeff(2, n_vertices-1));
                 Surface_mesh::Vertex tip_v = mesh.add_vertex(tip);
                 mesh.add_triangle(u, v, tip_v);
