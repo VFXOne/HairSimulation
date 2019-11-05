@@ -153,7 +153,13 @@ public:
             Point p0(vertices.coeff(0,i+2), vertices.coeff(1, i+2), vertices.coeff(2, i+2));
 
             w = mesh.add_vertex(p0);
-            mesh.add_triangle(u, v, w);
+
+            if (i % 2 == 0) {
+                mesh.add_triangle(u, v, w);
+            }
+            else {
+                mesh.add_triangle(w, v, u);
+            }
 
             u = v;
             v = w;
@@ -224,9 +230,6 @@ public:
         // format
         MatrixXf normals_attrib(3, n_vertices);
 
-        cout << "vertices = " << mesh.n_vertices() << endl;
-        cout << "faces = " << mesh.n_faces() << endl;
-        cout << "edges = " << mesh.n_edges() << endl;
         j = 0;
         for (auto v: mesh.vertices()) {
             mesh_points.col(j) << mesh.position(v).x,
