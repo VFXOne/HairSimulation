@@ -137,9 +137,10 @@ protected:
 class CRConstraint: public PDConstraint {
 public:
 
-    CRConstraint(Scalar m, Scalar weight)
-    : PDConstraint(m, weight) {
-
+    CRConstraint(Scalar numVertices, Scalar weight)
+    : PDConstraint(numVertices, weight) {
+        m_weight = weight;
+        m = numVertices;
     }
 
     Positions projectOnConstraintSet(Positions& q) override {
@@ -149,9 +150,21 @@ public:
 
     virtual Vector projectOnConstraintSet(Vector& fp) = 0;
 
-    virtual ProjDyn::SparseMatrix getAiMatrix() = 0;
+    ProjDyn::SparseMatrix getAiMatrix() {
+        return A_i;
+    }
 
-    virtual ProjDyn::SparseMatrix getBiMatrix() = 0;
+    ProjDyn::SparseMatrix getBiMatrix() {
+        return B_i;
+    }
+
+    ProjDyn::SparseMatrix getSelectionMatrix() override {
+        return m_selectionMatrix;
+    }
+
+    ProjDyn::SparseMatrix getSelectionMatrixWeighted() override {
+        return m_weight * m_selectionMatrix;
+    }
 
 protected:
     ProjDyn::SparseMatrix A_i;
@@ -227,40 +240,71 @@ public:
         return p_i;
     }
 
-    ProjDyn::SparseMatrix getAiMatrix() override {
-        return A_i;
-    }
-
-    ProjDyn::SparseMatrix getBiMatrix() override {
-        return B_i;
-    }
-
-    ProjDyn::SparseMatrix getSelectionMatrix() override {
-        return m_selectionMatrix;
-    }
-
-    ProjDyn::SparseMatrix getSelectionMatrixWeighted() override {
-        return m_weight * m_selectionMatrix;
-    }
-
 protected:
     Scalar seg_length;
     size_t q_index;
     size_t p_index;
 };
 
-class BendingTwistingConstraint: public CRConstraint {
+class BendTwistConstraint: public CRConstraint {
 public:
 
-    BendingTwistingConstraint(size_t num_coord, float weight)
+    BendTwistConstraint(size_t num_coord, float weight, size_t quat_index)
     : CRConstraint(num_coord, weight) {
+        q_index = quat_index;
+
+        A_i.resize(8, 8);
+        A_i.setIdentity();
+
+        B_i.resize(8, 8);
+        B_i.setIdentity();
+
+        initSM(8, num_coord);
+        m_selectionMatrix.coeffRef(0, q_index) = 1;
+        m_selectionMatrix.coeffRef(1, q_index+1) = 1;
+        m_selectionMatrix.coeffRef(2, q_index+2) = 1;
+        m_selectionMatrix.coeffRef(3, q_index+3) = 1; // Get u_n
+
+        m_selectionMatrix.coeffRef(4, q_index+4) = 1;
+        m_selectionMatrix.coeffRef(5, q_index+5) = 1;
+        m_selectionMatrix.coeffRef(6, q_index+6) = 1;
+        m_selectionMatrix.coeffRef(7, q_index+7) = 1; //Get u_(n+1)
 
     }
 
     Vector projectOnConstraintSet(Vector& q) override {
-        return q;
+        ProjDyn::Quaternion u_n(q.coeff(q_index), q.coeff(q_index+1),q.coeff(q_index+2), q.coeff(q_index+3));
+        ProjDyn::Quaternion u_n_1(q.coeff(q_index+4), q.coeff(q_index+5),q.coeff(q_index+6), q.coeff(q_index+7));
+        u_n.normalize();
+        u_n_1.normalize();
+        ProjDyn::Quaternion r_curvature = u_n.conjugate() * u_n_1;
+        r_curvature.w() = 0; //Take only the imaginary part.
+
+        ProjDyn::Quaternion r_curvature_c(r_curvature.conjugate());
+        r_curvature.normalize();
+        r_curvature_c.normalize();
+
+        r_curvature.x() /= 2;
+        r_curvature.y() /= 2;
+        r_curvature.z() /= 2;
+
+        r_curvature_c.x() /= 2;
+        r_curvature_c.y() /= 2;
+        r_curvature_c.z() /= 2;
+
+        ProjDyn::Quaternion u_n_star = u_n * r_curvature;
+        ProjDyn::Quaternion u_n_1_star = u_n_1 * r_curvature_c;
+
+        Vector sol;
+        sol.resize(8);
+        sol << u_n_star.w(), u_n_star.x(), u_n_star.y(), u_n_star.z(),
+                u_n_1_star.w(), u_n_1_star.x(), u_n_1_star.y(), u_n_1_star.z();
+
+        return sol;
     }
 
+private:
+    size_t q_index;
 };
 
 class FixedPointConstraint: public CRConstraint {
@@ -287,22 +331,6 @@ public:
         p_i.resize(3);
         p_i << f_pos.x(), f_pos.y(), f_pos.z();
         return p_i;
-    }
-
-    ProjDyn::SparseMatrix getAiMatrix() override {
-        return A_i;
-    }
-
-    ProjDyn::SparseMatrix getBiMatrix() override {
-        return B_i;
-    }
-
-    ProjDyn::SparseMatrix getSelectionMatrix() override {
-        return m_selectionMatrix;
-    }
-
-    ProjDyn::SparseMatrix getSelectionMatrixWeighted() override {
-        return m_weight * m_selectionMatrix;
     }
 
 protected:

@@ -97,9 +97,10 @@ namespace ProjDyn {
             }
 
             //addEdgeSpringConstraints();
-            addGroundConstraints();
-            //addSSConstraints();
-            //addFixedPosConstraint();
+            //addGroundConstraints();
+            addSSConstraints();
+            addFixedPosConstraint();
+            addBTConstraints();
 
             lhs = m_masses / (h * h);
             for (auto c: m_constraints) {
@@ -497,6 +498,13 @@ namespace ProjDyn {
 		    p << cr_positions.coeff(0, 0), cr_positions.coeff(0, 1), cr_positions.coeff(0, 1);
 		    auto fpc = new FixedPointConstraint(cr_size, 100.0,0, p);
 		    cr_constraints.push_back(fpc);
+		}
+
+		void addBTConstraints() {
+		    for (size_t i = 0; i < cr_num_positions - 1; i++) {
+		        auto new_c = new BendTwistConstraint(cr_size, 1.0, i*3);
+		        cr_constraints.push_back(new_c);
+		    }
 		}
 
 		//Create imaginary parts of quaternions from vectors. Real part is 0
