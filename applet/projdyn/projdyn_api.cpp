@@ -7,7 +7,7 @@
 // Global variables used by the callback functions
 int projdyn_num_iterations = PROJDYN_NUM_ITS_INITIAL;
 ProjDyn::Simulator sim;
-Eigen::MatrixXf upload_pos, upload_rods, upload_rods_tan;
+Eigen::MatrixXf upload_pos, upload_rods, upload_rods_tan, upload_rods_norm;
 std::thread projdyn_thread;
 bool projdyn_active = false;
 
@@ -44,7 +44,20 @@ bool projdyn_setmesh(Viewer* viewer, bool add_tets) {
         ++j;
     }
 
-    sim.setMesh(vertices, faces);
+    if (viewer->is_using_rods()) {
+        MatrixXf* pos = viewer->getRodsPos();
+        Positions rodPos;
+        rodPos.resize(pos->cols(), 3);
+
+        for (size_t i = 0; i < pos->cols(); i++) {
+            Vector3f p = pos->col(i);
+            rodPos.row(i) << p.x(), p.y(), p.z();
+        }
+
+        sim.setRods(rodPos);
+    } else {
+        sim.setMesh(vertices, faces);
+    }
 
 	return true;
 }
@@ -98,6 +111,7 @@ void init_projdyn_gui(Viewer* viewer) {
 		projdyn_num_iterations = num_its;
 	});
 
+    /* For now we don't use this method
     //Cosserat rods variables
     Window* cr_win = new Window(viewer, "Cosserat Rods Controls");
     cr_win->setPosition(Vector2i(15, 480));
@@ -107,6 +121,7 @@ void init_projdyn_gui(Viewer* viewer) {
     set_cr->setCallback([viewer]() {
         setRods();
     });
+    */
 
 	viewer->performLayout();
 }
@@ -195,12 +210,24 @@ bool projdyn_upload_positions(Viewer* viewer) {
             upload_rods_tan(1, i) = rods_tan->coeff(i, 1);
             upload_rods_tan(2, i) = rods_tan->coeff(i,2);
         }
+
+        upload_rods_norm.resize(3, num_rods);
+        Positions* rods_normals = sim.getRodsNormals();
+
+        for (size_t i = 0; i < num_rods; i++) {
+            upload_rods_norm(0, i) = rods_normals->coeff(i, 0);
+            upload_rods_norm(1, i) = rods_normals->coeff(i, 1);
+            upload_rods_norm(2, i) = rods_normals->coeff(i,2);
+        }
     }
 
 
 	// The matrix is sent to the viewer with this function
-	viewer->updateShaderVertices(upload_pos);
-    viewer->updateShaderRods(upload_rods, upload_rods_tan);
+	if (viewer->is_using_rods()) {
+        viewer->updateShaderRods(upload_rods, upload_rods_tan, upload_rods_norm);
+    } else {
+        viewer->updateShaderVertices(upload_pos);
+    }
 
 	return true;
 }

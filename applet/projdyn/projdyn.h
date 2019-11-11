@@ -93,7 +93,7 @@ namespace ProjDyn {
             m_f_ext.setZero(m, 3);
             //Set gravity on z axis m times
             for (size_t i = 0; i < m; i++) {
-                m_f_ext.row(i) << 0, -gravity, 0;
+                m_f_ext.row(i) << 0, gravity, 0;
             }
 
             //addEdgeSpringConstraints();
@@ -103,7 +103,6 @@ namespace ProjDyn {
 
             lhs = m_masses / (h * h);
             for (auto c: m_constraints) {
-                //lhs += m_constraints.at(i)->computeLHS();
                 lhs += c->getSelectionMatrixWeighted().transpose() * c->getSelectionMatrix();
             }
             m_solver.compute(lhs);
@@ -118,10 +117,10 @@ namespace ProjDyn {
 
                 cr_f_ext.setZero(cr_num_coord);
                 //Set gravity on z axis m times
-                for (size_t i = 0; i < cr_num_positions/3; i++) {
-                    cr_f_ext[i*3] = 0;
-                    cr_f_ext[i*3] = -gravity;
-                    cr_f_ext[i*3] = 0;
+                for (size_t i = 0; i < cr_num_coord; i++) {
+                    cr_f_ext.coeffRef(i) = 0;
+                    cr_f_ext.coeffRef(++i) = gravity;
+                    cr_f_ext.coeffRef(++i) = 0;
                 }
 
                 cr_orientations = quatFromPos(cr_positions);
@@ -233,7 +232,7 @@ namespace ProjDyn {
                     m_velocities = (positions_updated - m_positions) / h;
                     m_positions = Positions(positions_updated);
                 } else {
-                    std::cout << "Unable to solve constraints" << std::endl;
+                    std::cout << "Unable to solve PD constraints" << std::endl;
                     return false;
                 }
             }
@@ -252,13 +251,11 @@ namespace ProjDyn {
 		    const size_t num_constraints = cr_constraints.size(); //TODO: global variable
 		    std::vector<Vector> projections(num_constraints);
 
-		    Vector s_x = cr_positions + h*cr_velocities + h * h * cr_masses_inv * cr_f_ext;
+		    Vector s_x = cr_positions + h*cr_velocities + h*h * cr_masses_inv * cr_f_ext;
             Vector cross = vectorCross(cr_angular_velocities, cr_J_vec * cr_angular_velocities);
 
 		    Vector s_w = cr_angular_velocities + h*cr_J_vec_inv * (cr_torques - cross);
             Orientations s_w_u = pos2quat(s_w);
-            Vector temp1;
-            temp1 = quat2pos(cr_orientations);
 		    Orientations s_u = pos2quat(quat2pos(cr_orientations) + h/2 * quat2pos(cr_orientations * s_w_u));
 
 		    Vector s_t = posQuatConcat(s_x, s_u);
@@ -298,25 +295,32 @@ namespace ProjDyn {
 		                    * projections.at(i);
 		        }
 
-		    }
+		        std::cout << "left hand side: " << cr_lhs << std::endl;
+		        std::cout << "cr_f_ext: " << cr_f_ext << std::endl;
+		        std::cout << "cr_masses_inv: " << cr_masses_inv << std::endl;
+		        std::cout << "right hand side: " << cr_rhs << std::endl;
 
-            cr_solver.compute(cr_lhs);
-            cr_q_t = cr_solver.solve(cr_rhs);
+                cr_solver.compute(cr_lhs);
+                cr_q_t = cr_solver.solve(cr_rhs);
+
+                if (cr_solver.info() == Eigen::Success) {
+                    //Update velocities and angular velocities
+                    Orientations new_quat;
+                    Vector new_pos;
+                    separatePosQuat(&cr_q_t, new_pos, new_quat, cr_num_positions * 3);
+                    cr_velocities = (new_pos - cr_positions) / h;
+                    cr_positions = Vector(new_pos);
+                    cr_angular_velocities = 2/h * quat2pos(conjugateQuat(cr_orientations) * new_quat);
+                    cr_orientations = new_quat;
+                } else {
+                    std::cout << "Unable to solve rods constraints" << std::endl;
+                    return false;
+                }
+            }
+
 
             is_simulating = false;
 
-            if (cr_solver.info() == Eigen::Success) {
-                //Update velocities and angular velocities
-                Orientations new_quat;
-                Vector new_pos;
-                separatePosQuat(&cr_q_t, new_pos, new_quat, cr_num_positions * 3);
-                cr_velocities = (new_pos - cr_positions) / h;
-                cr_positions = Vector(new_pos);
-                cr_angular_velocities = 2/h * quat2pos(conjugateQuat(cr_orientations) * new_quat);
-            } else {
-                std::cout << "Unable to solve constraints" << std::endl;
-                return false;
-            }
 		}
 
 		void setGrab(const std::vector<unsigned long>& grabVerts, const std::vector<Eigen::Vector3f> grabPos) {
@@ -346,14 +350,28 @@ namespace ProjDyn {
 
 		Positions* getRodsTangents() {
 		    upload_tan = vec2pos(cr_positions);
-		    const size_t n = upload_tan.rows();
-		    for (size_t i = 0; i < n - 1; i++) {
-		        upload_tan.row(i) = (upload_tan.row(i+1) - upload_tan.row(i)) / cr_segment_length;
+		    upload_tan.resize(cr_num_positions, 3);
+		    Vector3 t(0,1,0);
+		    for (size_t i = 0; i < cr_num_quaternions; i++) {
+		        Quaternion q = cr_orientations[i];
+		        upload_tan.row(i) = q.normalized().toRotationMatrix() * t;
 		    }
 
-		    upload_tan.row(n - 1) = upload_tan.row(n - 2); //The last segment has the same tangent as the previous one
+		    upload_tan.row(upload_tan.rows()-1) = upload_tan.row(upload_tan.rows()-2);
 
 		    return &upload_tan;
+		}
+
+		Positions* getRodsNormals() {
+		    upload_normals.resize(cr_num_positions, 3);
+		    Vector3 n(-1, 0, 0);
+		    for (size_t i = 0; i < cr_num_quaternions; i++) {
+		        Quaternion q = cr_orientations[i];
+		        upload_normals.row(i) = q.normalized().toRotationMatrix() * n;
+		    }
+		    upload_normals.row(upload_normals.rows()-1) = upload_normals.row(upload_normals.rows()-2);
+
+		    return &upload_normals;
 		}
 
 	protected:
@@ -365,7 +383,7 @@ namespace ProjDyn {
         std::vector<Eigen::Vector3f> m_grabPos;
         std::vector<Edge> edges;
 		const double h = 0.05; //Simulation step size
-		const float gravity = -1.0;
+		const float gravity = -100.0;
         /******************
          * Mesh variables *
          ******************/
@@ -430,8 +448,7 @@ namespace ProjDyn {
 		bool is_ready;
 		bool is_simulating;
 		bool use_cosserat_rods;
-		Positions upload_pos;
-		Positions upload_tan;
+		Positions upload_pos, upload_tan, upload_normals;
 
 		void createEdges(Triangles& triangles) {
 		    for (size_t i = 0; i < triangles.rows(); i++) { //iterate over all triangles
@@ -454,7 +471,7 @@ namespace ProjDyn {
 		void addGroundConstraints() {
             //Iterate over all vertices to add the ground constraint
             for (size_t i = 0; i < m_positions.rows(); i++) {
-                auto new_ground_c = new GroundConstraint(m, i, 1.0);
+                auto new_ground_c = new GroundConstraint(m, i, 1000.0);
                 m_constraints.push_back(new_ground_c);
             }
 		}
@@ -478,12 +495,12 @@ namespace ProjDyn {
 		void addFixedPosConstraint() {
 		    Vector3 p;
 		    p << cr_positions.coeff(0, 0), cr_positions.coeff(0, 1), cr_positions.coeff(0, 1);
-		    auto fpc = new FixedPointConstraint(cr_size, 1.0,0, p);
+		    auto fpc = new FixedPointConstraint(cr_size, 100.0,0, p);
 		    cr_constraints.push_back(fpc);
 		}
 
 		//Create imaginary parts of quaternions from vectors. Real part is 0
-		static Orientations pos2quat(Vector p) {
+		static Orientations pos2quat(const Vector p) {
 		    //The size of the vector must a multiple of 3
 		    assert(p.size() % 3 == 0);
 		    size_t q_size = p.size() / 3;
@@ -501,7 +518,7 @@ namespace ProjDyn {
 		    pos.setZero(quat.size() * 3);
 		    for (size_t i = 0; i < quat.size(); i++) {
 		        auto q = quat[i].normalized();
-		        //The real part must be null
+		        //The real part should be null
 		        //assert(q.w() == 0.0);
 		        pos[i*3] = q.x();
 		        pos[i*3 + 1] = q.y();
@@ -510,7 +527,7 @@ namespace ProjDyn {
 		    return pos;
 		}
 
-		static Positions vec2pos(Vector p) {
+		static Positions vec2pos(const Vector p) {
 		    assert(p.size() % 3 == 0);
 		    size_t q_size = p.size() / 3;
 		    Positions q;
@@ -525,7 +542,7 @@ namespace ProjDyn {
 		    return q;
 		}
 
-		static Vector pos2flatVec(Positions pos) {
+		static Vector pos2flatVec(const Positions pos) {
 		    Vector v;
 		    v.setZero(pos.rows() * 3);
 
@@ -538,7 +555,7 @@ namespace ProjDyn {
 		    return v;
 		}
 
-		static Orientations quatFromPos(Vector pos) {
+		static Orientations quatFromPos(const Vector pos) {
 		    assert(pos.size() % 3 == 0);
 		    size_t num_pos = pos.size() / 3;
 		    Orientations quat;
@@ -551,31 +568,31 @@ namespace ProjDyn {
                 Vector3 v_i, v_next, v_previous;
                 v_i << pos[index], pos[index + 1], pos[index + 2];
                 v_next << pos[next_index], pos[next_index + 1], pos[next_index + 2];
-                if (i <= 0) { //The first position always points forward
+                Quaternion q;
+                if (i == 0) { //The first position always points forward
                     v_previous = Vector3(v_next);
+                    q = Quaternion::FromTwoVectors(v_next - v_i, v_next - v_i);
                 } else {
                     v_previous << pos[previous_index], pos[previous_index + 1], pos[previous_index + 2];
+                    q = Quaternion::FromTwoVectors(v_i - v_previous, v_next - v_i);
                 }
-                Quaternion q;
-                q = Quaternion::FromTwoVectors(v_i - v_previous, v_next - v_i);
                 quat[i] = q;
             }
 
 		    return quat;
 		}
 
-		//Can we normalize in place ?
-		static Orientations conjugateQuat(Orientations quat) {
+		static Orientations conjugateQuat(const Orientations quat) {
 		    Orientations new_quat;
 		    new_quat.resize(quat.size());
 		    for (size_t i = 0; i < quat.size(); i++) {
-		        new_quat[i] = quat[i].normalized();
+		        new_quat[i] = quat[i].conjugate();
 		    }
 		    return new_quat;
 		}
 
 		//Perform cross product column-wise of two vectors
-		static Vector vectorCross(Vector a, Vector b) {
+		static Vector vectorCross(const Vector a, const Vector b) {
 		    Vector cross;
 		    assert(a.size() == b.size() && a.size() % 3 == 0);
 		    cross.setZero(a.rows());
@@ -592,7 +609,7 @@ namespace ProjDyn {
 		    return cross;
 		}
 
-		static Vector posQuatConcat(Vector pos, Orientations u) {
+		static Vector posQuatConcat(const Vector pos, const Orientations u) {
 		    size_t m = pos.size();
 		    size_t dim = m + 4*u.rows();
 		    Vector fp(dim);
@@ -612,7 +629,7 @@ namespace ProjDyn {
 		    return fp;
 		}
 
-		static void separatePosQuat(Vector* concat, Vector& pos, Orientations& quat, size_t separation) {
+		static void separatePosQuat(const Vector* concat, Vector& pos, Orientations& quat, size_t separation) {
 		    size_t size = concat->size();
 		    assert((size - separation) % 4 == 0);
 		    size_t num_quat = (size-separation) / 4;

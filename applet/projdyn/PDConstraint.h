@@ -277,9 +277,9 @@ public:
         B_i.setIdentity();
 
         initSM(3, num_coord);
-        m_selectionMatrix.coeffRef(0, p_index);
-        m_selectionMatrix.coeffRef(1, p_index+1);
-        m_selectionMatrix.coeffRef(2, p_index+2);
+        m_selectionMatrix.coeffRef(0, p_index) = 1;
+        m_selectionMatrix.coeffRef(1, p_index+1) = 1;
+        m_selectionMatrix.coeffRef(2, p_index+2) = 1;
     }
 
     Vector projectOnConstraintSet(Vector& q) override {
