@@ -33,7 +33,7 @@
 *> SLADIV performs complex division in  real arithmetic
 *>
 *>                       a + i*b
-*>            p + i*positions = ---------
+*>            p + i*q = ---------
 *>                       c + i*d
 *>
 *> The algorithm is due to Robert L. Smith and can be found
@@ -72,7 +72,7 @@
 *> \param[out] Q
 *> \verbatim
 *>          Q is REAL
-*>          The scalars p and positions in the above expression.
+*>          The scalars p and q in the above expression.
 *> \endverbatim
 *
 *  Authors:

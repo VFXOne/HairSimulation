@@ -81,7 +81,7 @@ This is a must-read for people using GCC on Windows (like MinGW or TDM-GCC). If 
 \code
 void foo()
 {
-  Eigen::Quaternionf positions;
+  Eigen::Quaternionf q;
   //...
 }
 \endcode

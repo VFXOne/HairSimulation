@@ -8,7 +8,7 @@
 
 #include "projdyn_types.h"
 
-typedef unsigned int Index;
+using namespace ProjDyn;
 
 class Edge {
 public:

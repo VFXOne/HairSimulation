@@ -232,7 +232,7 @@ bool projdyn_upload_positions(Viewer* viewer) {
 	return true;
 }
 
-void projdyn_grab(const std::vector<size_t>& grabbedVerts, const std::vector<Vector3f>& grabPos) {
+void projdyn_grab(const std::vector<ProjDyn::Index>& grabbedVerts, const std::vector<Vector3f>& grabPos) {
 	if (!sim.isInitialized() || !projdyn_active) return;
 
 	sim.setGrab(grabbedVerts, grabPos);

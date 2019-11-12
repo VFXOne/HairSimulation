@@ -1,3 +1,5 @@
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 #include "projdyn_types.h"
 #include "Edge.h"
@@ -324,7 +326,7 @@ namespace ProjDyn {
 
 		}
 
-		void setGrab(const std::vector<unsigned long>& grabVerts, const std::vector<Eigen::Vector3f> grabPos) {
+		void setGrab(const std::vector<Index>& grabVerts, const std::vector<Eigen::Vector3f> grabPos) {
 			// This method will be called from the viewer if an alt-click has been performed and
 			// vertices were grabbed.
 			// You can use the list of grabbed vertices and the new positions to force vertices to move
@@ -380,7 +382,7 @@ namespace ProjDyn {
         // If m_hasGrab is true, vertices with the indices in m_grabVerts will be forced
 		// to the positions set in m_grabPos
 		bool m_hasGrab = false;
-        std::vector<unsigned long> m_grabVerts;
+        std::vector<Index> m_grabVerts;
         std::vector<Eigen::Vector3f> m_grabPos;
         std::vector<Edge> edges;
 		const double h = 0.05; //Simulation step size
