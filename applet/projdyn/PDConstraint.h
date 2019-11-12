@@ -6,17 +6,14 @@
 #define APPLET_PDCONSTRAINT_H
 
 #include "projdyn_types.h"
-
 #include "Edge.h"
-typedef ProjDyn::Positions Positions;
-typedef ProjDyn::Orientations Orientations;
-typedef ProjDyn::Vector Vector;
 
-typedef unsigned int Scalar;
+using namespace ProjDyn;
+
 class PDConstraint {
 public:
 
-    PDConstraint(Scalar numVertices, float weight) {
+    PDConstraint(Index numVertices, Scalar weight) {
         m_weight = weight;
         m = numVertices;
     }
@@ -35,9 +32,9 @@ protected:
 
     ProjDyn::SparseMatrix m_selectionMatrix;
     float m_weight;
-    Scalar m;
+    Index m;
 
-    void initSM(Scalar rows, Scalar cols) {
+    void initSM(Index rows, Index cols) {
         m_selectionMatrix = ProjDyn::SparseMatrix(rows, cols);
         m_selectionMatrix.setZero();
     }
@@ -56,7 +53,7 @@ protected:
 class EdgeSpringConstraint : public PDConstraint {
 public:
 
-    EdgeSpringConstraint(const Scalar m, Edge edge, const float weight,
+    EdgeSpringConstraint(const Index m, Edge edge, const Scalar weight,
             const float rangeMin, const float rangeMax)
     : PDConstraint(m, weight) {
         m_rangeMax = rangeMax;
@@ -71,12 +68,12 @@ public:
     }
 
     Positions projectOnConstraintSet(Positions& q_n) override {
-        int i1 = m_edge.getFirstPos();
-        int i2 = m_edge.getSecondPos();
+        Index i1 = m_edge.getFirstPos();
+        Index i2 = m_edge.getSecondPos();
         Positions edge_coord = q_n.row(m_edge.getFirstPos()) - q_n.row(m_edge.getSecondPos());
-        double edge_length = edge_coord.norm();
+        Scalar edge_length = edge_coord.norm();
         edge_coord /= edge_length; //Normalize
-        double target_length = clamp(edge_length, m_rangeMin, m_rangeMax);
+        Scalar target_length = clamp(edge_length, m_rangeMin, m_rangeMax);
         return edge_coord *= target_length;
     }
 
@@ -89,16 +86,16 @@ public:
     }
 
 protected:
-    float m_rangeMin;
-    float m_rangeMax;
+    Scalar m_rangeMin;
+    Scalar m_rangeMax;
     Edge m_edge = Edge(0, 1);
 };
 
 class GroundConstraint : public PDConstraint {
 public:
 
-    GroundConstraint(const Scalar m, const Scalar vertexIndex, const float weight,
-            float groundHeight = -1.0f, unsigned int floorCoord = 1)
+    GroundConstraint(const Index m, const Index vertexIndex, const Scalar weight,
+            Scalar groundHeight = -1.0f, Index floorCoord = 1)
     : PDConstraint(m, weight){
         m_groundHeight = groundHeight;
         m_constrainedVertex = vertexIndex;
@@ -109,7 +106,7 @@ public:
     }
 
     Positions projectOnConstraintSet(Positions& q) override {
-        float coord = q(m_constrainedVertex, m_groundCoord);
+        Scalar coord = q(m_constrainedVertex, m_groundCoord);
         Positions targetPos = q.row(m_constrainedVertex);
 
         if (coord < m_groundHeight) {
@@ -128,9 +125,9 @@ public:
     }
 
 protected:
-    float m_groundHeight;
-    unsigned int m_groundCoord;
-    Scalar m_constrainedVertex;
+    Scalar m_groundHeight;
+    Index m_groundCoord;
+    Index m_constrainedVertex;
 
 };
 
@@ -249,15 +246,15 @@ public:
     }
 
 protected:
-    float seg_length;
-    size_t q_index;
-    size_t p_index;
+    Scalar seg_length;
+    Index q_index;
+    Index p_index;
 };
 
 class BendTwistConstraint: public CRConstraint {
 public:
 
-    BendTwistConstraint(size_t num_coord, float weight, size_t quat_index, float segment_length)
+    BendTwistConstraint(Index num_coord, Scalar weight, Index quat_index, float segment_length)
     : CRConstraint(num_coord, weight) {
         q_index = quat_index;
 
@@ -314,12 +311,12 @@ public:
     }
 
 private:
-    size_t q_index;
+    Index q_index;
 };
 
 class FixedPointConstraint: public CRConstraint {
 public:
-    FixedPointConstraint(size_t num_coord, float weight, size_t pos_index, ProjDyn::Vector3 fixed_pos)
+    FixedPointConstraint(Index num_coord, Scalar weight, Index pos_index, ProjDyn::Vector3 fixed_pos)
     : CRConstraint(num_coord, weight) {
         p_index = pos_index;
         f_pos = fixed_pos;
@@ -344,7 +341,7 @@ public:
     }
 
 protected:
-    size_t p_index;
+    Index p_index;
     ProjDyn::Vector3 f_pos;
 };
 

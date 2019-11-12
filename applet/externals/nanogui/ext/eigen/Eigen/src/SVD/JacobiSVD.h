@@ -382,7 +382,7 @@ struct svd_precondition_2x2_block_to_be_real<MatrixType, QRPreconditioner, true>
 
       if(abs(numext::imag(work_matrix.coeff(p,q)))>considerAsZero)
       {
-        // work_matrix.coeff(p,positions) can be zero if work_matrix.coeff(positions,p) is not zero but small enough to underflow when computing n
+        // work_matrix.coeff(p,q) can be zero if work_matrix.coeff(q,p) is not zero but small enough to underflow when computing n
         z = abs(work_matrix.coeff(p,q)) / work_matrix.coeff(p,q);
         work_matrix.row(p) *= z;
         if(svd.computeU()) svd.m_matrixU.col(p) *= conj(z);
@@ -701,7 +701,7 @@ JacobiSVD<MatrixType, QRPreconditioner>::compute(const MatrixType& matrix, unsig
   {
     finished = true;
 
-    // do a sweep: for all index pairs (p,positions), perform SVD of the corresponding 2x2 sub-matrix
+    // do a sweep: for all index pairs (p,q), perform SVD of the corresponding 2x2 sub-matrix
 
     for(Index p = 1; p < m_diagSize; ++p)
     {
@@ -714,7 +714,7 @@ JacobiSVD<MatrixType, QRPreconditioner>::compute(const MatrixType& matrix, unsig
         if(abs(m_workMatrix.coeff(p,q))>threshold || abs(m_workMatrix.coeff(q,p)) > threshold)
         {
           finished = false;
-          // perform SVD decomposition of 2x2 sub-matrix corresponding to indices p,positions to make it diagonal
+          // perform SVD decomposition of 2x2 sub-matrix corresponding to indices p,q to make it diagonal
           // the complex to real operation returns true if the updated 2x2 block is not already diagonal
           if(internal::svd_precondition_2x2_block_to_be_real<MatrixType, QRPreconditioner>::run(m_workMatrix, *this, p, q, maxDiagEntry))
           {

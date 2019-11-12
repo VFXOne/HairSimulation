@@ -13,6 +13,9 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 #include <nanogui/opengl.h>
 #include <nanogui/glutil.h>
 #include <nanogui/screen.h>
@@ -55,7 +58,9 @@ using std::max;
 using namespace surface_mesh;
 using namespace nanogui;
 
-typedef unsigned long size_t;
+#ifndef WIN32
+    typedef unsigned long size_t;
+#endif
 
 constexpr float INITIAL_GRAB_RADIUS = 20;
 

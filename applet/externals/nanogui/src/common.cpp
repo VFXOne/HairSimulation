@@ -313,12 +313,12 @@ std::vector<std::string> file_dialog(const std::vector<std::pair<std::string, st
     for (auto pair : filetypes)
         cmd += "\"*." + pair.first + "\" ";
     cmd += "\"";
-    FILE *output = fopen(cmd.c_str(), "r");
+    FILE *output = popen(cmd.c_str(), "r");
     if (output == nullptr)
         throw std::runtime_error("popen() failed -- could not launch zenity!");
     while (fgets(buffer, FILE_DIALOG_MAX_BUFFER, output) != NULL)
         ;
-    fclose(output);
+    pclose(output);
     std::string paths(buffer);
     paths.erase(std::remove(paths.begin(), paths.end(), '\n'), paths.end());
 

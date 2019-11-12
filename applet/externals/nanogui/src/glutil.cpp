@@ -20,7 +20,6 @@
 #include <iostream>
 #include <fstream>
 #include <Eigen/Geometry>
-#include <alloca.h>
 
 NAMESPACE_BEGIN(nanogui)
 

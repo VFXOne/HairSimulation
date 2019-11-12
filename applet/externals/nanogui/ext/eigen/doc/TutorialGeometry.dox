@@ -41,7 +41,7 @@ AngleAxis<float> aa(angle_in_radian, Vector3f(ax,ay,az));\endcode
 <span class="note">The axis vector must be normalized.</span></td></tr>
 <tr><td>
 3D rotation as a \ref Quaternion "quaternion"</td><td>\code
-Quaternion<float> positions;  positions = AngleAxis<float>(angle_in_radian, axis);\endcode</td></tr>
+Quaternion<float> q;  q = AngleAxis<float>(angle_in_radian, axis);\endcode</td></tr>
 <tr class="alt"><td>
 N-D Scaling</td><td>\code
 Scaling(sx, sy)
