@@ -99,7 +99,7 @@ namespace ProjDyn {
             //addEdgeSpringConstraints();
             //addGroundConstraints();
             addSSConstraints();
-            addFixedPosConstraint();
+            //addFixedPosConstraint();
             addBTConstraints();
 
             lhs = m_masses / (h * h);
@@ -120,7 +120,7 @@ namespace ProjDyn {
                 //Set gravity on z axis m times
                 for (size_t i = 0; i < cr_num_coord; i++) {
                     cr_f_ext.coeffRef(i) = 0;
-                    cr_f_ext.coeffRef(++i) = gravity;
+                    cr_f_ext.coeffRef(++i) = 0; //gravity;
                     cr_f_ext.coeffRef(++i) = 0;
                 }
 
@@ -259,6 +259,10 @@ namespace ProjDyn {
             Orientations s_w_u = pos2quat(s_w);
 		    Orientations s_u = pos2quat(quat2pos(cr_orientations) + h/2 * quat2pos(cr_orientations * s_w_u));
 
+		    std::cout << "cr_positions" << cr_positions << std::endl;
+		    std::cout << "s_u" << quat2pos(s_u) << std::endl;
+		    std::cout << "s_x" << s_x << std::endl;
+
 		    Vector s_t = posQuatConcat(s_x, s_u);
             cr_q_t = Vector(s_t);
 
@@ -269,6 +273,8 @@ namespace ProjDyn {
                  ** Local step **
                  ****************/
 		        for (size_t i = 0; i < num_constraints; i++) {
+		            auto proj = cr_constraints.at(i)->projectOnConstraintSet(cr_q_t);
+		            std::cout << "Proj: " << proj << std::endl;
 		            projections[i] = cr_constraints.at(i)->projectOnConstraintSet(cr_q_t);
 		        }
 
@@ -297,8 +303,6 @@ namespace ProjDyn {
 		        }
 
 		        std::cout << "left hand side: " << cr_lhs << std::endl;
-		        std::cout << "cr_f_ext: " << cr_f_ext << std::endl;
-		        std::cout << "cr_masses_inv: " << cr_masses_inv << std::endl;
 		        std::cout << "right hand side: " << cr_rhs << std::endl;
 
                 cr_solver.compute(cr_lhs);
@@ -384,7 +388,7 @@ namespace ProjDyn {
         std::vector<Eigen::Vector3f> m_grabPos;
         std::vector<Edge> edges;
 		const double h = 0.05; //Simulation step size
-		const float gravity = -100.0;
+		const float gravity = -9.861f;
         /******************
          * Mesh variables *
          ******************/
@@ -409,7 +413,7 @@ namespace ProjDyn {
          ***************************/
         const float cr_unit_weight = 0.01;
         const float cr_radius = 0.1;
-        const float cr_density = 0.01;
+        const float cr_density = CRConstraint::radius;
         float cr_segment_length;
 
 
@@ -495,14 +499,14 @@ namespace ProjDyn {
 
 		void addFixedPosConstraint() {
 		    Vector3 p;
-		    p << cr_positions.coeff(0, 0), cr_positions.coeff(0, 1), cr_positions.coeff(0, 1);
-		    auto fpc = new FixedPointConstraint(cr_size, 100.0,0, p);
+		    p << cr_positions.coeff(0, 0), cr_positions.coeff(0, 1), cr_positions.coeff(0, 2);
+		    auto fpc = new FixedPointConstraint(cr_size, 1.0,0, p);
 		    cr_constraints.push_back(fpc);
 		}
 
 		void addBTConstraints() {
 		    for (size_t i = 0; i < cr_num_positions - 1; i++) {
-		        auto new_c = new BendTwistConstraint(cr_size, 1.0, i*3);
+		        auto new_c = new BendTwistConstraint(cr_size, 1.0, i*3, cr_segment_length);
 		        cr_constraints.push_back(new_c);
 		    }
 		}

@@ -4,7 +4,7 @@
 #include "projdyn_types.h"
 
 constexpr int PROJDYN_FPS = 60;
-constexpr int PROJDYN_NUM_ITS_INITIAL = 10;
+constexpr int PROJDYN_NUM_ITS_INITIAL = 10; //Default is 10
 
 class Viewer;
 

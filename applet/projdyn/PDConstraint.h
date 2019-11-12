@@ -137,7 +137,7 @@ protected:
 class CRConstraint: public PDConstraint {
 public:
 
-    CRConstraint(Scalar numVertices, Scalar weight)
+    CRConstraint(Scalar numVertices, float weight)
     : PDConstraint(numVertices, weight) {
         m_weight = weight;
         m = numVertices;
@@ -166,6 +166,11 @@ public:
         return m_weight * m_selectionMatrix;
     }
 
+    //Constants:
+    constexpr static float E = 1; //Young's modulus
+    constexpr static float radius = 3;
+    constexpr static float poisson = 0.377f;
+
 protected:
     ProjDyn::SparseMatrix A_i;
     ProjDyn::SparseMatrix B_i;
@@ -174,16 +179,18 @@ protected:
 class StretchShearConstraint: public CRConstraint {
 public:
 
-    StretchShearConstraint(size_t num_coord, float weight, size_t pos_index, size_t quat_index, Scalar segment_length)
+    StretchShearConstraint(size_t num_coord, float weight, size_t pos_index, size_t quat_index, float segment_length)
             : CRConstraint(num_coord,weight) {
 
         seg_length = segment_length;
         p_index = pos_index;
         q_index = quat_index;
 
+        m_weight = E * M_PI * radius * radius * seg_length;
+
         A_i.resize(7, 10);
         A_i.setZero();
-        Scalar x = 1/seg_length;
+        const float x = 1/seg_length;
         A_i.coeffRef(0,0) = x;
         A_i.coeffRef(1,1) = x;
         A_i.coeffRef(2,2) = x;
@@ -200,6 +207,7 @@ public:
         B_i.coeffRef(0,0) = 1;
         B_i.coeffRef(1,1) = 1;
         B_i.coeffRef(2,2) = 1;
+        B_i.coeffRef(3, 3) = 1;
         B_i.coeffRef(4, 4) = 1;
         B_i.coeffRef(5, 5) = 1;
         B_i.coeffRef(6, 6) = 1;
@@ -229,7 +237,7 @@ public:
         x_f = (x_n_1 - x_n) / seg_length;
 
         u_n = ProjDyn::Quaternion(q.coeff(q_index), q.coeff(q_index+1), q.coeff(q_index+2), q.coeff(q_index+3));
-        d_3 = u_n.toRotationMatrix() * ProjDyn::Vector3(0,0,1);
+        d_3 = u_n.toRotationMatrix() * ProjDyn::Vector3(0,1,0);
         diff_u_n = ProjDyn::Quaternion::FromTwoVectors(d_3, x_f);
 
         u_n_star = u_n * diff_u_n;
@@ -241,7 +249,7 @@ public:
     }
 
 protected:
-    Scalar seg_length;
+    float seg_length;
     size_t q_index;
     size_t p_index;
 };
@@ -249,9 +257,11 @@ protected:
 class BendTwistConstraint: public CRConstraint {
 public:
 
-    BendTwistConstraint(size_t num_coord, float weight, size_t quat_index)
+    BendTwistConstraint(size_t num_coord, float weight, size_t quat_index, float segment_length)
     : CRConstraint(num_coord, weight) {
         q_index = quat_index;
+
+        m_weight = E * M_PI * radius * radius * radius * radius / ((1+poisson) * segment_length);
 
         A_i.resize(8, 8);
         A_i.setIdentity();
