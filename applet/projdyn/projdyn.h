@@ -310,6 +310,8 @@ namespace ProjDyn {
                 cr_solver.compute(cr_lhs);
                 cr_q_t = cr_solver.solve(cr_rhs);
 
+                std::cout << "sol: " << cr_q_t << std::endl;
+
                 if (cr_solver.info() == Eigen::Success) {
                     //Update velocities and angular velocities
                     Orientations new_quat;

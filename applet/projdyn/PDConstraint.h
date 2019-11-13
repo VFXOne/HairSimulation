@@ -20,22 +20,22 @@ public:
 
     virtual Positions projectOnConstraintSet(Positions& q) = 0;
 
-    virtual ProjDyn::SparseMatrix getSelectionMatrix() = 0;
+    virtual SparseMatrix getSelectionMatrix() = 0;
 
-    virtual ProjDyn::SparseMatrix getSelectionMatrixWeighted() = 0;
+    virtual SparseMatrix getSelectionMatrixWeighted() = 0;
 
-    ProjDyn::SparseMatrix computeLHS() {
+    SparseMatrix computeLHS() {
         return m_weight*m_selectionMatrix.transpose() * m_selectionMatrix;
     }
 
 protected:
 
-    ProjDyn::SparseMatrix m_selectionMatrix;
+    SparseMatrix m_selectionMatrix;
     float m_weight;
     Index m;
 
     void initSM(Index rows, Index cols) {
-        m_selectionMatrix = ProjDyn::SparseMatrix(rows, cols);
+        m_selectionMatrix = SparseMatrix(rows, cols);
         m_selectionMatrix.setZero();
     }
 
@@ -77,11 +77,11 @@ public:
         return edge_coord *= target_length;
     }
 
-    ProjDyn::SparseMatrix getSelectionMatrix() override {
+    SparseMatrix getSelectionMatrix() override {
         return m_selectionMatrix;
     }
 
-    ProjDyn::SparseMatrix getSelectionMatrixWeighted() override {
+    SparseMatrix getSelectionMatrixWeighted() override {
         return m_weight * m_selectionMatrix;
     }
 
@@ -116,11 +116,11 @@ public:
         return targetPos;
     }
 
-    ProjDyn::SparseMatrix getSelectionMatrix() override {
+    SparseMatrix getSelectionMatrix() override {
         return m_selectionMatrix;
     }
 
-    ProjDyn::SparseMatrix getSelectionMatrixWeighted() override {
+    SparseMatrix getSelectionMatrixWeighted() override {
         return m_weight * m_selectionMatrix;
     }
 
@@ -142,24 +142,24 @@ public:
 
     Positions projectOnConstraintSet(Positions& q) override {
         throw std::logic_error("Function not implemented for Cosserat Rods. "
-                               "Please use projectOnConstraintSet(ProjDyn::FlatPos& fp)");
+                               "Please use projectOnConstraintSet(FlatPos& fp)");
     }
 
     virtual Vector projectOnConstraintSet(Vector& fp) = 0;
 
-    ProjDyn::SparseMatrix getAiMatrix() {
+    SparseMatrix getAiMatrix() {
         return A_i;
     }
 
-    ProjDyn::SparseMatrix getBiMatrix() {
+    SparseMatrix getBiMatrix() {
         return B_i;
     }
 
-    ProjDyn::SparseMatrix getSelectionMatrix() override {
+    SparseMatrix getSelectionMatrix() override {
         return m_selectionMatrix;
     }
 
-    ProjDyn::SparseMatrix getSelectionMatrixWeighted() override {
+    SparseMatrix getSelectionMatrixWeighted() override {
         return m_weight * m_selectionMatrix;
     }
 
@@ -169,8 +169,8 @@ public:
     constexpr static float poisson = 0.377f;
 
 protected:
-    ProjDyn::SparseMatrix A_i;
-    ProjDyn::SparseMatrix B_i;
+    SparseMatrix A_i;
+    SparseMatrix B_i;
 };
 
 class StretchShearConstraint: public CRConstraint {
@@ -223,8 +223,8 @@ public:
     }
 
     Vector projectOnConstraintSet(Vector& q) override {
-        ProjDyn::Vector3 x_n, x_n_1, x_f, d_3;
-        ProjDyn::Quaternion u_n, diff_u_n, u_n_star;
+        Vector3 x_n, x_n_1, x_f, d_3;
+        Quaternion u_n, diff_u_n, u_n_star;
 
         Vector p_i;
         p_i.resize(7);
@@ -233,11 +233,15 @@ public:
         x_n_1 << q.coeff(p_index + 3), q.coeff(p_index + 4), q.coeff(p_index + 5);
         x_f = (x_n_1 - x_n) / seg_length;
 
-        u_n = ProjDyn::Quaternion(q.coeff(q_index), q.coeff(q_index+1), q.coeff(q_index+2), q.coeff(q_index+3));
-        d_3 = u_n.toRotationMatrix() * ProjDyn::Vector3(0,1,0);
-        diff_u_n = ProjDyn::Quaternion::FromTwoVectors(d_3, x_f);
+        u_n = Quaternion(q.coeff(q_index), q.coeff(q_index+1), q.coeff(q_index+2), q.coeff(q_index+3));
+        u_n.normalize();
 
+        diff_u_n = Quaternion::FromTwoVectors(d_3,  x_f.normalized());
         u_n_star = u_n * diff_u_n;
+
+        d_3 = u_n_star.toRotationMatrix() * Vector3(0,0,1);
+        //d_3 = u_n_star.toRotationMatrix() * x_f;
+        d_3.normalize();
 
         p_i << d_3.coeff(0), d_3.coeff(1), d_3.coeff(2),
                 u_n_star.w(), u_n_star.x(),u_n_star.y(), u_n_star.z();
@@ -280,14 +284,14 @@ public:
     }
 
     Vector projectOnConstraintSet(Vector& q) override {
-        ProjDyn::Quaternion u_n(q.coeff(q_index), q.coeff(q_index+1),q.coeff(q_index+2), q.coeff(q_index+3));
-        ProjDyn::Quaternion u_n_1(q.coeff(q_index+4), q.coeff(q_index+5),q.coeff(q_index+6), q.coeff(q_index+7));
+        Quaternion u_n(q.coeff(q_index), q.coeff(q_index+1),q.coeff(q_index+2), q.coeff(q_index+3));
+        Quaternion u_n_1(q.coeff(q_index+4), q.coeff(q_index+5),q.coeff(q_index+6), q.coeff(q_index+7));
         u_n.normalize();
         u_n_1.normalize();
-        ProjDyn::Quaternion r_curvature = u_n.conjugate() * u_n_1;
+        Quaternion r_curvature = u_n.conjugate() * u_n_1;
         r_curvature.w() = 0; //Take only the imaginary part.
 
-        ProjDyn::Quaternion r_curvature_c(r_curvature.conjugate());
+        Quaternion r_curvature_c(r_curvature.conjugate());
         r_curvature.normalize();
         r_curvature_c.normalize();
 
@@ -299,8 +303,8 @@ public:
         r_curvature_c.y() /= 2;
         r_curvature_c.z() /= 2;
 
-        ProjDyn::Quaternion u_n_star = u_n * r_curvature;
-        ProjDyn::Quaternion u_n_1_star = u_n_1 * r_curvature_c;
+        Quaternion u_n_star = u_n * r_curvature;
+        Quaternion u_n_1_star = u_n_1 * r_curvature_c;
 
         Vector sol;
         sol.resize(8);
@@ -316,7 +320,7 @@ private:
 
 class FixedPointConstraint: public CRConstraint {
 public:
-    FixedPointConstraint(Index num_coord, Scalar weight, Index pos_index, ProjDyn::Vector3 fixed_pos)
+    FixedPointConstraint(Index num_coord, Scalar weight, Index pos_index, Vector3 fixed_pos)
     : CRConstraint(num_coord, weight) {
         p_index = pos_index;
         f_pos = fixed_pos;
@@ -342,7 +346,7 @@ public:
 
 protected:
     Index p_index;
-    ProjDyn::Vector3 f_pos;
+    Vector3 f_pos;
 };
 
 #endif //APPLET_PDCONSTRAINT_H
