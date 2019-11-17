@@ -266,7 +266,9 @@ namespace ProjDyn {
 		    std::cout << "s_x" << s_x << std::endl;
 
 		    Vector s_t = posQuatConcat(s_x, s_u);
-            cr_q_t = Vector(s_t);
+            cr_q_t = s_t;
+
+            std::cout << "cr_q_t before: " << cr_q_t << std::endl;
 
 		    size_t step = 0;
 		    while (step < num_iterations) {
@@ -277,7 +279,7 @@ namespace ProjDyn {
 		        for (size_t i = 0; i < num_constraints; i++) {
 		            auto proj = cr_constraints.at(i)->projectOnConstraintSet(cr_q_t);
 		            std::cout << "Proj: " << proj << std::endl;
-		            projections[i] = cr_constraints.at(i)->projectOnConstraintSet(cr_q_t);
+		            projections[i] = proj;
 		        }
 
                 /*****************
@@ -293,6 +295,9 @@ namespace ProjDyn {
 		            auto Ai = c->getAiMatrix();
                     cr_lhs += c->getSelectionMatrixWeighted().transpose()
                             * Ai.transpose() * Ai * c->getSelectionMatrix();
+
+                    //Check:
+                    std::cout << "Projection check for constraint " << i << " (should be 0): " << Ai * c->getSelectionMatrix() * cr_q_t - c->getBiMatrix() * projections.at(i) << std::endl;
 		        }
 
 		        //Compute right-hand side
@@ -310,7 +315,7 @@ namespace ProjDyn {
                 cr_solver.compute(cr_lhs);
                 cr_q_t = cr_solver.solve(cr_rhs);
 
-                std::cout << "sol: " << cr_q_t << std::endl;
+                std::cout << "cr_qt_solved: " << cr_q_t << std::endl;
 
                 if (cr_solver.info() == Eigen::Success) {
                     //Update velocities and angular velocities
@@ -509,8 +514,8 @@ namespace ProjDyn {
 		}
 
 		void addBTConstraints() {
-		    for (size_t i = 0; i < cr_num_positions - 1; i++) {
-		        auto new_c = new BendTwistConstraint(cr_size, 1.0, i*3, cr_segment_length);
+		    for (size_t i = 0; i < cr_num_positions - 2; i++) {
+		        auto new_c = new BendTwistConstraint(cr_size, 1.0, cr_num_positions*3 + i*4, cr_segment_length);
 		        cr_constraints.push_back(new_c);
 		    }
 		}

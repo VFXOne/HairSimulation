@@ -5,6 +5,7 @@
 #ifndef APPLET_PDCONSTRAINT_H
 #define APPLET_PDCONSTRAINT_H
 
+#include <iostream>
 #include "projdyn_types.h"
 #include "Edge.h"
 
@@ -213,10 +214,10 @@ public:
         m_selectionMatrix.coeffRef(0,p_index + 3) = 1; //To get x_n_1
         m_selectionMatrix.coeffRef(1,p_index + 4) = 1;
         m_selectionMatrix.coeffRef(2,p_index + 5) = 1;
-        m_selectionMatrix.coeffRef(3,p_index) = 1;
+        m_selectionMatrix.coeffRef(3,p_index) = 1; //To get x_n
         m_selectionMatrix.coeffRef(4,p_index + 1) = 1;
         m_selectionMatrix.coeffRef(5,p_index + 2) = 1;
-        m_selectionMatrix.coeffRef(6,q_index) = 1;
+        m_selectionMatrix.coeffRef(6,q_index) = 1; //To get u_n
         m_selectionMatrix.coeffRef(7,q_index + 1) = 1;
         m_selectionMatrix.coeffRef(8,q_index + 2) = 1;
         m_selectionMatrix.coeffRef(9,q_index + 3) = 1;
@@ -236,12 +237,12 @@ public:
         u_n = Quaternion(q.coeff(q_index), q.coeff(q_index+1), q.coeff(q_index+2), q.coeff(q_index+3));
         u_n.normalize();
 
-        diff_u_n = Quaternion::FromTwoVectors(d_3,  x_f.normalized());
-        u_n_star = u_n * diff_u_n;
-
-        d_3 = u_n_star.toRotationMatrix() * Vector3(0,0,1);
+        d_3 = u_n.toRotationMatrix() * Vector3(0,1,0);
         //d_3 = u_n_star.toRotationMatrix() * x_f;
         d_3.normalize();
+
+        diff_u_n = Quaternion::FromTwoVectors(d_3, x_f.normalized());
+        u_n_star = u_n * diff_u_n.normalized();
 
         p_i << d_3.coeff(0), d_3.coeff(1), d_3.coeff(2),
                 u_n_star.w(), u_n_star.x(),u_n_star.y(), u_n_star.z();
@@ -271,15 +272,15 @@ public:
         B_i.setIdentity();
 
         initSM(8, num_coord);
-        m_selectionMatrix.coeffRef(0, q_index) = 1;
+        m_selectionMatrix.coeffRef(0, q_index) = 1; // Get u_n
         m_selectionMatrix.coeffRef(1, q_index+1) = 1;
         m_selectionMatrix.coeffRef(2, q_index+2) = 1;
-        m_selectionMatrix.coeffRef(3, q_index+3) = 1; // Get u_n
+        m_selectionMatrix.coeffRef(3, q_index+3) = 1;
 
-        m_selectionMatrix.coeffRef(4, q_index+4) = 1;
+        m_selectionMatrix.coeffRef(4, q_index+4) = 1; //Get u_(n+1)
         m_selectionMatrix.coeffRef(5, q_index+5) = 1;
         m_selectionMatrix.coeffRef(6, q_index+6) = 1;
-        m_selectionMatrix.coeffRef(7, q_index+7) = 1; //Get u_(n+1)
+        m_selectionMatrix.coeffRef(7, q_index+7) = 1;
 
     }
 
@@ -289,19 +290,29 @@ public:
         u_n.normalize();
         u_n_1.normalize();
         Quaternion r_curvature = u_n.conjugate() * u_n_1;
+        r_curvature.normalize();
         r_curvature.w() = 0; //Take only the imaginary part.
 
         Quaternion r_curvature_c(r_curvature.conjugate());
-        r_curvature.normalize();
         r_curvature_c.normalize();
 
+        auto rotMatrix = r_curvature.toRotationMatrix();
+        r_curvature = Quaternion(0.5 * rotMatrix);
+
+        rotMatrix = r_curvature_c.toRotationMatrix();
+        r_curvature_c = Quaternion(0.5 * rotMatrix);
+
+        /*
+        r_curvature.w() /= 2;
         r_curvature.x() /= 2;
         r_curvature.y() /= 2;
         r_curvature.z() /= 2;
 
+        r_curvature_c.w() /= 2;
         r_curvature_c.x() /= 2;
         r_curvature_c.y() /= 2;
         r_curvature_c.z() /= 2;
+        */
 
         Quaternion u_n_star = u_n * r_curvature;
         Quaternion u_n_1_star = u_n_1 * r_curvature_c;
