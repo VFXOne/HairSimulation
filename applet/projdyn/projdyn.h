@@ -129,7 +129,7 @@ namespace ProjDyn {
                 cr_orientations = quatFromPos(cr_positions);
                 cr_torques.setZero(cr_num_flat_pos);
 
-                Vector masses_flat = Vector::Ones(cr_num_coord) * cr_unit_weight;
+                Vector masses_flat = Vector::Ones(cr_num_coord) * cr_density;
                 cr_masses = masses_flat.asDiagonal();
                 cr_masses_inv = cr_masses.cwiseInverse();
 
@@ -297,10 +297,11 @@ namespace ProjDyn {
                             * Ai.transpose() * Ai * c->getSelectionMatrix();
 
                     //Check:
-                    std::cout << "Projection check for constraint " << i << " (should be 0): " << Ai * c->getSelectionMatrix() * cr_q_t - c->getBiMatrix() * projections.at(i) << std::endl;
+                    //std::cout << "Projection check for constraint " << i << " (should be 0): " << Ai * c->getSelectionMatrix() * cr_q_t - c->getBiMatrix() * projections.at(i) << std::endl;
 		        }
 
 		        //Compute right-hand side
+		        cr_rhs.setZero();
 		        cr_rhs = cr_M_star * s_t / (h*h);
 		        for (size_t i = 0; i < num_constraints; i++) {
 		            auto c = cr_constraints.at(i);
@@ -309,8 +310,8 @@ namespace ProjDyn {
 		                    * projections.at(i);
 		        }
 
-		        std::cout << "left hand side: " << cr_lhs << std::endl;
-		        std::cout << "right hand side: " << cr_rhs << std::endl;
+		        //std::cout << "left hand side: " << cr_lhs << std::endl;
+		        //std::cout << "right hand side: " << cr_rhs << std::endl;
 
                 cr_solver.compute(cr_lhs);
                 cr_q_t = cr_solver.solve(cr_rhs);
@@ -323,7 +324,7 @@ namespace ProjDyn {
                     Vector new_pos;
                     separatePosQuat(&cr_q_t, new_pos, new_quat, cr_num_positions * 3);
                     cr_velocities = (new_pos - cr_positions) / h;
-                    cr_positions = Vector(new_pos);
+                    cr_positions = new_pos;
                     cr_angular_velocities = 2/h * quat2pos(conjugateQuat(cr_orientations) * new_quat);
                     cr_orientations = new_quat;
                 } else {
@@ -420,9 +421,9 @@ namespace ProjDyn {
         /***************************
          * Cosserat Rods variables *
          ***************************/
-        const float cr_unit_weight = 0.01;
-        const float cr_radius = 0.1;
-        const float cr_density = CRConstraint::radius;
+        const float cr_unit_weight = 0.01f;
+        const float cr_radius = CRConstraint::radius;
+        const float cr_density = 1.3f;
         float cr_segment_length;
 
 
@@ -660,7 +661,7 @@ namespace ProjDyn {
 		    quat.resize(num_quat);
 
 		    for (size_t i = 0; i < separation; i++) {
-		        pos[i] = concat->coeff(i);
+		        pos.coeffRef(i) = concat->coeff(i);
 		    }
 
 		    for (size_t i = 0; i < num_quat; i++) {
