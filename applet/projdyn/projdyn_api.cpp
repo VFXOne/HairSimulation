@@ -47,6 +47,7 @@ bool projdyn_setmesh(Viewer* viewer, bool add_tets) {
     if (viewer->is_using_rods()) {
         MatrixXf* pos = viewer->getRodsPos();
         Positions rodPos;
+        std::vector<Positions> rods;
         rodPos.resize(pos->cols(), 3);
 
         for (size_t i = 0; i < pos->cols(); i++) {
@@ -60,20 +61,6 @@ bool projdyn_setmesh(Viewer* viewer, bool add_tets) {
     }
 
 	return true;
-}
-
-//Initialize the rods
-bool setRods() {
-
-    ProjDyn::Positions pos;
-    pos.resize(3, 3);
-    pos <<  0.0, 1.0, 0.0,
-            1.0, 1.0, 0.0,
-            2.0, 1.0, 0.0;
-
-    sim.setRods(pos);
-
-    return true;
 }
 
 void init_projdyn_gui(Viewer* viewer) {
@@ -219,12 +206,14 @@ bool projdyn_upload_positions(Viewer* viewer) {
             upload_rods_norm(1, i) = rods_normals->coeff(i, 1);
             upload_rods_norm(2, i) = rods_normals->coeff(i,2);
         }
+
+        std::vector<ProjDyn::Index> rod_indices = sim.getRodIndices();
     }
 
 
 	// The matrix is sent to the viewer with this function
 	if (viewer->is_using_rods()) {
-        viewer->updateShaderRods(upload_rods, upload_rods_tan, upload_rods_norm);
+        viewer->updateShaderRods(upload_rods, upload_rods_tan, upload_rods_norm, rod_indices);
     } else {
         viewer->updateShaderVertices(upload_pos);
     }

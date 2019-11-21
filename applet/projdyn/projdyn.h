@@ -38,20 +38,32 @@ namespace ProjDyn {
 			//TODO: Reset the correct variables (dimensions) to fit new mesh
 		}
 
-		//For now only one rod allowed
-		void setRods(Positions& pos) {
-		    assert(pos.rows() >= 2 && "There must be at least one segment (two positions)");
-		    use_cosserat_rods = true;
-            cr_num_positions = pos.rows();
-            cr_segment_length = (pos.row(1) - pos.row(0)).norm();
-            cr_num_flat_pos = 3 * (cr_num_positions - 1);
-            cr_num_coord = 3 * cr_num_positions;
-		    cr_num_quaternions = cr_num_positions - 1;
-		    cr_size = 3 * cr_num_positions + 4 * cr_num_quaternions;
-		    cr_positions_init = pos2flatVec(pos);
-		    cr_positions = Vector(cr_positions_init);
+		void setRods(const std::vector<Positions> rods) {
+		    assert(rods.size() >= 1); //At least one rod
+            use_cosserat_rods = true;
 
-		    cr_velocities.setZero(3*cr_num_positions);
+            size_t rod_index = 0;
+            for (size_t i = 0; i < rods.size(); i++) {
+                rod_indices.push_back(rod_index);
+                Positions pos = rods.at(i);
+                assert(pos.rows() >= 2); //At least one segment in a rod
+
+                cr_segments_length.push_back((pos.row(1) - pos.row(0)).norm()); //Assuming all segments have same length
+                rod_index += pos.rows();
+                cr_num_positions += pos.rows();
+
+                Positions new_pos = pos2flatVec(pos);
+                cr_positions_init.resize(cr_positions_init.rows() + new_pos.rows(), 3);
+                cr_positions_init << cr_positions_init, new_pos;
+            }
+
+            cr_num_flat_pos = 3 * (cr_num_positions - rod_indices.size());
+            cr_num_coord = 3 * cr_num_positions;
+            cr_num_quaternions = cr_num_positions - rod_indices.size();
+            cr_size = 3 * cr_num_positions + 4 * cr_num_quaternions;
+            cr_positions = Vector(cr_positions_init);
+
+		    cr_velocities.setZero(cr_num_coord);
 		    cr_angular_velocities.setZero(cr_num_flat_pos);
 		}
 
@@ -61,7 +73,7 @@ namespace ProjDyn {
 			m_velocities.setZero();
 
 			if (use_cosserat_rods) {
-                cr_positions = Vector(cr_positions_init);
+                cr_positions = cr_positions_init;
                 cr_velocities.setZero(3 * cr_num_positions);
                 cr_angular_velocities.setZero(cr_num_flat_pos);
                 //TODO: Recompute correct orientations
@@ -100,9 +112,6 @@ namespace ProjDyn {
 
             //addEdgeSpringConstraints();
             //addGroundConstraints();
-            //addSSConstraints();
-            //addFixedPosConstraint();
-            addBTConstraints();
 
             lhs = m_masses / (h * h);
             for (auto c: m_constraints) {
@@ -118,11 +127,15 @@ namespace ProjDyn {
                  * CR Variables *
                  ****************/
 
+                //addFixedPosConstraint();
+                addSSConstraints();
+                addBTConstraints();
+
                 cr_f_ext.setZero(cr_num_coord);
                 //Set gravity on z axis m times
                 for (size_t i = 0; i < cr_num_coord; i++) {
                     cr_f_ext.coeffRef(i) = 0;
-                    cr_f_ext.coeffRef(++i) = 0; //gravity;
+                    cr_f_ext.coeffRef(++i) = gravity;
                     cr_f_ext.coeffRef(++i) = 0;
                 }
 
@@ -137,24 +150,37 @@ namespace ProjDyn {
                 Vector J_flat_vec;
                 J_flat_vec.setZero(3);
                 J_flat_vec << j_val, j_val, j_val*2;
-                J_flat_vec *= cr_segment_length * cr_density;
+                J_flat_vec *= cr_density;
                 cr_J_vec = stackDiagonal(J_flat_vec, cr_num_positions - 1);
                 Vector J_flat_vec_inv;
                 J_flat_vec_inv.setZero(3);
                 J_flat_vec_inv << 1/j_val, 1/j_val, 1/(j_val*2);
-                J_flat_vec_inv /= cr_segment_length * cr_density;
+                J_flat_vec_inv /= cr_density;
                 cr_J_vec_inv = stackDiagonal(J_flat_vec_inv, cr_num_positions - 1);
 
                 Vector J_flat_quat;
                 J_flat_quat.setZero(4);
                 J_flat_quat << 0, j_val, j_val, j_val*2;
-                J_flat_quat *= cr_segment_length * cr_density;
+                J_flat_quat *= cr_density;
                 cr_J_quat = stackDiagonal(J_flat_quat, cr_num_quaternions);
                 Vector J_flat_quat_inv;
                 J_flat_quat_inv.setZero(4);
                 J_flat_quat_inv << 0, 1/j_val, 1/j_val, 1/(j_val*2);
-                J_flat_quat_inv /= cr_segment_length * cr_density;
+                J_flat_quat_inv /= cr_density;
                 cr_J_quat_inv = stackDiagonal(J_flat_quat_inv, cr_num_quaternions);
+
+                //Scale by corresponding segment length
+                for (size_t i = 0; i < rod_indices.size(); i++) {
+                    Index rod_index = rod_indices.at(i);
+                    Index next_index = i == rod_indices.size()-1 ? cr_num_positions-1 : rod_indices.at(i+1);
+                    for (size_t j = rod_index; j < next_index; j++) {
+                        float seg_len = cr_segments_length.at(j);
+                        cr_J_vec.row(j) *= seg_len;
+                        cr_J_vec_inv.row(j) /= seg_len;
+                        cr_J_quat.row(j) *= seg_len;
+                        cr_J_quat_inv.row(j) /= seg_len;
+                    }
+                }
 
                 cr_M_star.resize(cr_size, cr_size);
                 cr_M_star.setZero();
@@ -358,9 +384,12 @@ namespace ProjDyn {
 		}
 
 		Positions* getRodsPositions() {
-		    //TODO: maybe set the positions to a global variable because we take the pointer of it...
 		    upload_pos = vec2pos(cr_positions);
 		    return &upload_pos;
+		}
+
+		std::vector<Index> getRodIndices() {
+		    return rod_indices;
 		}
 
 		Positions* getRodsTangents() {
@@ -398,7 +427,7 @@ namespace ProjDyn {
         std::vector<Eigen::Vector3f> m_grabPos;
         std::vector<Edge> edges;
 		const double h = 0.05; //Simulation step size
-		const float gravity = -9.861f;
+		const float gravity = -1;
         /******************
          * Mesh variables *
          ******************/
@@ -424,17 +453,17 @@ namespace ProjDyn {
         const float cr_unit_weight = 0.01f;
         const float cr_radius = CRConstraint::radius;
         const float cr_density = 1.3f;
-        float cr_segment_length;
+        std::vector<float> cr_segments_length;
+        std::vector<Index> rod_indices;
 
-
+        //Position variables (dim: cr_num_coord)
         size_t cr_size; //Full size of the flat variables
         Vector cr_positions_init;
         Vector cr_positions;
-        Vector cr_q_t; //The flat vector that holds every variables (positions and quaternions)
 
-        //Position variables (dim: cr_num_coord)
+        Vector cr_q_t; //The flat vector that holds every variables (positions and quaternions)
         size_t cr_num_coord;
-        size_t cr_num_positions; //Number of positions
+        size_t cr_num_positions = 0; //Number of positions
         Vector cr_velocities;
         Vector cr_f_ext;
         SparseMatrix cr_masses;
@@ -500,23 +529,30 @@ namespace ProjDyn {
 		}
 
 		void addSSConstraints() {
-		    for (size_t i = 0; i < cr_num_positions - 1; i++) {
-		        auto new_c = new StretchShearConstraint(cr_size, 1.0, i*3,
-		                cr_num_positions*3 + i*4, cr_segment_length);
-		        cr_constraints.push_back(new_c);
-		    }
+		    for (size_t j = 0; j < rod_indices.size(); j++) {
+		        Index rod_index = rod_indices.at(j);
+		        Index next_index = j == rod_indices.size()-1 ? cr_num_positions : rod_indices.at(j+1);
+
+                for (size_t i = rod_index; i < next_index - 1; i++) {
+                    auto new_c = new StretchShearConstraint(cr_size, 1.0, i*3,
+                                                            cr_num_positions*3 + i*4, cr_segments_length.at(i));
+                    cr_constraints.push_back(new_c);
+                }
+            }
 		}
 
 		void addFixedPosConstraint() {
-		    Vector3 p;
-		    p << cr_positions.coeff(0, 0), cr_positions.coeff(0, 1), cr_positions.coeff(0, 2);
-		    auto fpc = new FixedPointConstraint(cr_size, 1.0,0, p);
-		    cr_constraints.push_back(fpc);
+		    for (auto i: rod_indices) {
+                Vector3 p;
+                p << cr_positions.coeff(i, 0), cr_positions.coeff(i, 1), cr_positions.coeff(i, 2);
+                auto fpc = new FixedPointConstraint(cr_size, 1.0,i, p);
+                cr_constraints.push_back(fpc);
+            }
 		}
 
 		void addBTConstraints() {
 		    for (size_t i = 0; i < cr_num_positions - 2; i++) {
-		        auto new_c = new BendTwistConstraint(cr_size, 1.0, cr_num_positions*3 + i*4, cr_segment_length);
+		        auto new_c = new BendTwistConstraint(cr_size, 1.0, cr_num_positions*3 + i*4, cr_segments_length.at(i));
 		        cr_constraints.push_back(new_c);
 		    }
 		}
@@ -593,10 +629,11 @@ namespace ProjDyn {
                 Quaternion q;
                 if (i == 0) { //The first position always points forward
                     v_previous = Vector3(v_next);
-                    q = Quaternion::FromTwoVectors(v_next - v_i, v_next - v_i);
+                    q = Quaternion::FromTwoVectors(v_next - v_i, Vector3::UnitY());
                 } else {
                     v_previous << pos[previous_index], pos[previous_index + 1], pos[previous_index + 2];
-                    q = Quaternion::FromTwoVectors(v_i - v_previous, v_next - v_i);
+                    //q = Quaternion::FromTwoVectors(v_i - v_previous, v_next - v_i);
+                    q = Quaternion::FromTwoVectors(v_i - v_previous, Vector3::UnitY());
                 }
                 quat[i] = q;
             }
