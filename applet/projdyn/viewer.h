@@ -113,7 +113,7 @@ public:
 		}
 	}
 
-	void rodMesh(const size_t nPoints = 3) {
+	void rodMesh(const size_t nPoints = 5) {
 
         MatrixXf vertices;
         m_updated_rods_pos.resize(3, nPoints);
@@ -126,40 +126,39 @@ public:
         }
 
         cout << "Creating rod mesh" << endl;
-        r_vertices = 2*(nPoints - 1) + 1;
+        r_vertices = ndivs*(nPoints - 1) + 1;
         cout << "# of vertices : " << r_vertices << endl;
-        r_faces = 2*(nPoints - 2) + 1;
+        r_faces = ndivs == 2 ? 2*(nPoints - 2) + 1 : 2*ndivs*(nPoints-2) + ndivs;
         cout << "# of faces : " << r_faces << endl;
-        r_edges = 4*(nPoints-2) + 3;
+        r_edges = 4*(nPoints-2) + 3 + 4*ndivs;
         cout << "# of edges : " << r_edges << endl;
 
         rod_mesh.clear();
 
         vertices = createRodMesh();
 
-        Surface_mesh::Vertex u, v, w;
-        u = rod_mesh.add_vertex(Point(vertices.coeff(0,0), vertices.coeff(1, 0), vertices.coeff(2, 0)));
-        v = rod_mesh.add_vertex(Point(vertices.coeff(0,1), vertices.coeff(1, 1), vertices.coeff(2, 1)));
-        for (size_t i = 0; i < r_faces-1; i++) {
-            Point p0(vertices.coeff(0,i+2), vertices.coeff(1, i+2), vertices.coeff(2, i+2));
+        //First add every vertex to the mesh and store them in an array.
+        //Then use this array to add the faces so we don't need to add them in order
+        std::vector<Surface_mesh::Vertex> v_m;
+        for (size_t i = 0; i < r_vertices; i++) {
+            Surface_mesh::Vertex v = rod_mesh.add_vertex(Point(vertices.coeff(0,i), vertices.coeff(1, i), vertices.coeff(2, i)));
+            v_m.push_back(v);
+        }
 
-            w = rod_mesh.add_vertex(p0);
-
-            if (i % 2 == 0) {
-                rod_mesh.add_triangle(u, v, w);
-            }
-            else {
-                rod_mesh.add_triangle(w, v, u);
-            }
-
-            u = v;
-            v = w;
-
-            if (i == r_faces - 2) {
-                Point tip(vertices.coeff(0, r_vertices-1),vertices.coeff(1, r_vertices-1), vertices.coeff(2, r_vertices-1));
-                Surface_mesh::Vertex tip_v = rod_mesh.add_vertex(tip);
-                rod_mesh.add_triangle(u, v, tip_v);
-            }
+        Surface_mesh::Vertex u, v, w, x;
+        for (size_t i = 0; i < (r_faces - ndivs)/2; i++) {
+            u = v_m.at(i);
+            v = i % (ndivs-1) != 0 || i == 0 ? v_m.at(i+1) : v_m.at(i-(ndivs-1));
+            w = v_m.at(i+ndivs);
+            x = i % (ndivs-1) != 0 || i == 0 ? v_m.at(i+ndivs+1) : v_m.at(i+ndivs-(ndivs-1));
+            rod_mesh.add_triangle(u,v,w);
+            rod_mesh.add_triangle(x, w, v);
+        }
+        for (size_t i = 0; i < ndivs; i++) {
+            u = v_m.at(r_vertices-1);
+            v = v_m.at(r_vertices-ndivs+i-1);
+            w = v_m.at(r_vertices-ndivs+i);
+            rod_mesh.add_triangle(v, w, u);
         }
 
         mesh_center = computeCenter(&rod_mesh);
@@ -776,17 +775,21 @@ private:
         size_t nPoints = m_updated_rods_pos.cols();
         vertices.resize(3, r_vertices);
         size_t j = 0;
-        const float thickness = 0.1;
         for (size_t i = 0; i < nPoints - 1; i++) {
+            float thickness = 0.1 * (nPoints-i)/nPoints;
             Vector3f tangent = m_updated_rods_tangents.col(i).normalized();
             Vector3f normal = m_updated_rods_normals.col(i).normalized();
 
-            vertices.col(j) = m_updated_rods_pos.col(i) + thickness * normal;
-            j++;
-            vertices.col(j) = m_updated_rods_pos.col(i) - thickness * normal;
-            j++;
+            for (size_t k = 0; k < ndivs; k++) {
+                float theta = k / (float)ndivs * 2 * M_PI;
+
+                Eigen::AngleAxisf rotMat = Eigen::AngleAxisf(theta, tangent);
+
+                vertices.col(j++) = m_updated_rods_pos.col(i) + thickness * rotMat._transformVector(normal);
+            }
         }
         vertices.col(j) = m_updated_rods_pos.col(nPoints - 1);
+        std::cout << vertices << std::endl;
         return vertices;
     }
 
@@ -946,9 +949,10 @@ private:
     int n_edges = 0;
 
     // Rod informations
-    int r_vertices = 0;
-    int r_faces = 0;
-    int r_edges = 0;
+    const size_t ndivs = 8;
+    size_t r_vertices = 0;
+    size_t r_faces = 0;
+    size_t r_edges = 0;
 
 	// Temporary storage for updated vertex positions that have to be uploaded to the shader
 	// in the next drawContents() call.

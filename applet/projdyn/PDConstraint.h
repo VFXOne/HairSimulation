@@ -201,14 +201,7 @@ public:
         A_i.coeffRef(6,9) = 1;
 
         B_i.resize(7, 7);
-        B_i.setZero();
-        B_i.coeffRef(0,0) = 1;
-        B_i.coeffRef(1,1) = 1;
-        B_i.coeffRef(2,2) = 1;
-        B_i.coeffRef(3, 3) = 1;
-        B_i.coeffRef(4, 4) = 1;
-        B_i.coeffRef(5, 5) = 1;
-        B_i.coeffRef(6, 6) = 1;
+        B_i.setIdentity();
 
         initSM(10, num_coord);
         m_selectionMatrix.coeffRef(0,p_index + 3) = 1; //To get x_n_1

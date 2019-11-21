@@ -100,7 +100,7 @@ namespace ProjDyn {
 
             //addEdgeSpringConstraints();
             //addGroundConstraints();
-            addSSConstraints();
+            //addSSConstraints();
             //addFixedPosConstraint();
             addBTConstraints();
 
