@@ -150,6 +150,11 @@ public:
         }
 
         Surface_mesh::Vertex u, v, w, x;
+        //TODO: Create new array with computed vertices indices to use them to compute the faces.
+        for (size_t ind = 0; ind < m_rod_indices.size(); ind++) {
+            size_t rod_index = m_rod_indices.at(ind);
+            size_t next_index = ind == m_rod_indices.size() - 1 ? m_updated_rods_pos.cols() : m_rod_indices.at(ind + 1);
+        }
         for (size_t i = 0; i < (r_faces - ndivs)/2; i++) {
             u = v_m.at(i);
             v = i % (ndivs-1) != 0 || i == 0 ? v_m.at(i+1) : v_m.at(i-(ndivs-1));
@@ -786,7 +791,7 @@ private:
             size_t next_index = ind == m_rod_indices.size()-1 ? m_updated_rods_pos.cols() : m_rod_indices.at(ind+1);
 
             size_t nPoints = next_index - rod_index;
-            for (size_t i = rod_index; i < nPoints - 1; i++) {
+            for (size_t i = rod_index; i < next_index - 1; i++) {
                 float thickness = 0.1 * (nPoints-(i-rod_index))/nPoints;
                 Vector3f tangent = m_updated_rods_tangents.col(i).normalized();
                 Vector3f normal = m_updated_rods_normals.col(i).normalized();
