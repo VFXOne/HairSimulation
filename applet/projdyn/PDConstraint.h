@@ -180,6 +180,8 @@ public:
     StretchShearConstraint(size_t num_coord, float weight, size_t pos_index, size_t quat_index, float segment_length)
             : CRConstraint(num_coord,weight) {
 
+        std::cout << "Stretch constraint: " << "\n     pos_index: " << pos_index << "\n     quat_index: " << quat_index << std::endl;
+
         seg_length = segment_length;
         p_index = pos_index;
         q_index = quat_index;
@@ -204,13 +206,13 @@ public:
         B_i.setIdentity();
 
         initSM(10, num_coord);
-        m_selectionMatrix.coeffRef(0,p_index + 3) = 1; //To get x_n_1
+        m_selectionMatrix.coeffRef(0,p_index + 3) = 1; //Select x_n_1
         m_selectionMatrix.coeffRef(1,p_index + 4) = 1;
         m_selectionMatrix.coeffRef(2,p_index + 5) = 1;
-        m_selectionMatrix.coeffRef(3,p_index) = 1; //To get x_n
+        m_selectionMatrix.coeffRef(3,p_index) = 1; //Select x_n
         m_selectionMatrix.coeffRef(4,p_index + 1) = 1;
         m_selectionMatrix.coeffRef(5,p_index + 2) = 1;
-        m_selectionMatrix.coeffRef(6,q_index) = 1; //To get u_n
+        m_selectionMatrix.coeffRef(6,q_index) = 1; //Select u_n
         m_selectionMatrix.coeffRef(7,q_index + 1) = 1;
         m_selectionMatrix.coeffRef(8,q_index + 2) = 1;
         m_selectionMatrix.coeffRef(9,q_index + 3) = 1;
@@ -256,6 +258,8 @@ public:
     : CRConstraint(num_coord, weight) {
         q_index = quat_index;
 
+        std::cout << "Bending constraint: " << "\n    quat_index: " << quat_index << std::endl;
+
         m_weight = E * M_PI * radius * radius * radius * radius / ((1+poisson) * segment_length);
 
         A_i.resize(8, 8);
@@ -265,12 +269,12 @@ public:
         B_i.setIdentity();
 
         initSM(8, num_coord);
-        m_selectionMatrix.coeffRef(0, q_index) = 1; // Get u_n
+        m_selectionMatrix.coeffRef(0, q_index) = 1; // Select u_n
         m_selectionMatrix.coeffRef(1, q_index+1) = 1;
         m_selectionMatrix.coeffRef(2, q_index+2) = 1;
         m_selectionMatrix.coeffRef(3, q_index+3) = 1;
 
-        m_selectionMatrix.coeffRef(4, q_index+4) = 1; //Get u_(n+1)
+        m_selectionMatrix.coeffRef(4, q_index+4) = 1; //Select u_(n+1)
         m_selectionMatrix.coeffRef(5, q_index+5) = 1;
         m_selectionMatrix.coeffRef(6, q_index+6) = 1;
         m_selectionMatrix.coeffRef(7, q_index+7) = 1;

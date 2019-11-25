@@ -113,14 +113,14 @@ public:
 		}
 	}
 
-	void rodMesh(const size_t res = 4, const size_t num_rods = 2) {
+	void rodMesh(const size_t res = 3, const size_t num_rods = 2) {
 
         MatrixXf vertices;
         size_t nPoints = res*num_rods;
         m_updated_rods_pos.resize(3, nPoints);
         m_updated_rods_tangents.resize(3, nPoints);
         m_updated_rods_normals.resize(3, nPoints);
-        const float distance_between_rods = 0.5;
+        const float distance_between_rods = 0.3;
         for (size_t j = 0; j < num_rods; j++) {
             for (size_t i = 0; i < res; i++) {
                 m_updated_rods_pos.col(i+j*res) << distance_between_rods*j,i,0;
@@ -203,7 +203,6 @@ public:
     }
 
 	void updateShaderRods(const MatrixXf& rPos, const MatrixXf& rTan, const MatrixXf& rNorm, const std::vector<size_t> rod_indices) {
-        std::cout << "Update stats:\n rPos: " << rPos.cols() <<"\nrTan: " << rTan.cols() << "\nrNorm: " << rNorm.cols() << "\nrod_indices: " << rod_indices.size() << std::endl;
         m_updated_rods_pos = rPos;
         m_updated_rods_tangents = rTan;
         m_updated_rods_normals = rNorm;

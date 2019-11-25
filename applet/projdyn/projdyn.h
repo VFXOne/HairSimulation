@@ -136,7 +136,7 @@ namespace ProjDyn {
                 for (size_t i = 0; i < cr_num_coord; i++) {
                     cr_f_ext.coeffRef(i) = 0;
                     cr_f_ext.coeffRef(++i) = 0; //gravity;
-                    cr_f_ext.coeffRef(++i) = 0;
+                    cr_f_ext.coeffRef(++i) = 10;
                 }
 
                 cr_orientations = quatFromPos(cr_positions);
@@ -287,15 +287,15 @@ namespace ProjDyn {
             Orientations s_w_u = pos2quat(s_w);
 		    Orientations s_u = pos2quat(quat2pos(cr_orientations) + h/2 * quat2pos(cr_orientations * s_w_u));
 
-		    std::cout << "cr_positions: " << cr_positions << std::endl;
-		    std::cout << "cr_orientations: " << quat2pos(cr_orientations) << std::endl;
-		    std::cout << "s_u: " << quat2pos(s_u) << std::endl;
-		    std::cout << "s_x: " << s_x << std::endl;
+//		    std::cout << "cr_positions: " << cr_positions << std::endl;
+//		    std::cout << "cr_orientations: " << quat2pos(cr_orientations) << std::endl;
+//		    std::cout << "s_u: " << quat2pos(s_u) << std::endl;
+//		    std::cout << "s_x: " << s_x << std::endl;
 
 		    Vector s_t = posQuatConcat(s_x, s_u);
             cr_q_t = s_t;
 
-            std::cout << "cr_q_t before: " << cr_q_t << std::endl;
+            //std::cout << "cr_q_t before: " << cr_q_t << std::endl;
 
 		    size_t step = 0;
 		    while (step < num_iterations) {
@@ -305,7 +305,7 @@ namespace ProjDyn {
                  ****************/
 		        for (size_t i = 0; i < num_constraints; i++) {
 		            auto proj = cr_constraints.at(i)->projectOnConstraintSet(cr_q_t);
-		            std::cout << "Proj: " << proj << std::endl;
+		            //std::cout << "Proj: " << proj << std::endl;
 		            projections[i] = proj;
 		        }
 
@@ -343,7 +343,7 @@ namespace ProjDyn {
                 cr_solver.compute(cr_lhs);
                 cr_q_t = cr_solver.solve(cr_rhs);
 
-                std::cout << "cr_qt_solved: " << cr_q_t << std::endl;
+                //std::cout << "cr_qt_solved: " << cr_q_t << std::endl;
 
                 if (cr_solver.info() == Eigen::Success) {
                     //Update velocities and angular velocities
@@ -397,11 +397,14 @@ namespace ProjDyn {
 		    upload_tan = vec2pos(cr_positions);
 		    upload_tan.resize(cr_num_positions, 3);
 		    Vector3 t(0,1,0);
+		    size_t j = 0;
 		    for (size_t i = 0; i < cr_num_quaternions; i++) {
 		        Quaternion q = cr_orientations[i];
-		        upload_tan.row(i) = q.normalized().toRotationMatrix() * t;
+		        upload_tan.row(j++) = q.normalized().toRotationMatrix() * t;
+                if (i != 0 and std::find(rod_indices.begin(), rod_indices.end(), i) != rod_indices.end()) {
+                    upload_tan.row(j++) = q.normalized().toRotationMatrix() * t;
+                }
 		    }
-
 		    upload_tan.row(upload_tan.rows()-1) = upload_tan.row(upload_tan.rows()-2);
 
 		    return &upload_tan;
@@ -410,10 +413,14 @@ namespace ProjDyn {
 		Positions* getRodsNormals() {
 		    upload_normals.resize(cr_num_positions, 3);
 		    Vector3 n(-1, 0, 0);
+		    size_t j = 0;
 		    for (size_t i = 0; i < cr_num_quaternions; i++) {
 		        Quaternion q = cr_orientations[i];
-		        upload_normals.row(i) = q.normalized().toRotationMatrix() * n;
-		    }
+                upload_normals.row(j++) = q.normalized().toRotationMatrix() * n;
+                if (i != 0 and std::find(rod_indices.begin(), rod_indices.end(), i) != rod_indices.end()) {
+                    upload_normals.row(j++) = q.normalized().toRotationMatrix() * n;
+                }
+            }
 		    upload_normals.row(upload_normals.rows()-1) = upload_normals.row(upload_normals.rows()-2);
 
 		    return &upload_normals;
@@ -546,7 +553,7 @@ namespace ProjDyn {
 		    for (auto i: rod_indices) {
                 Vector3 p;
                 p << cr_positions.coeff(i, 0), cr_positions.coeff(i, 1), cr_positions.coeff(i, 2);
-                auto fpc = new FixedPointConstraint(cr_size, 1.0,i, p);
+                auto fpc = new FixedPointConstraint(cr_size, 100.0,i, p);
                 cr_constraints.push_back(fpc);
             }
 		}
@@ -554,8 +561,8 @@ namespace ProjDyn {
 		void addBTConstraints() {
 		    for (Index ind = 0; ind < rod_indices.size(); ind++) {
 		        Index rod_index = rod_indices.at(ind);
-		        Index next_index = ind == rod_indices.size() - 1 ? cr_num_positions - 1 : rod_indices.at(ind + 1);
-                for (size_t i = rod_index; i < next_index - 1; i++) {
+		        Index next_index = ind == rod_indices.size() - 1 ? cr_num_positions : rod_indices.at(ind + 1);
+                for (size_t i = rod_index; i < next_index - 2; i++) {
                     auto new_c = new BendTwistConstraint(cr_size, 1.0, cr_num_positions*3 + (i-ind)*4, cr_segments_length.at(ind));
                     cr_constraints.push_back(new_c);
                 }
