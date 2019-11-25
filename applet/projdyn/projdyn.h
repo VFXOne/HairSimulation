@@ -52,9 +52,10 @@ namespace ProjDyn {
                 rod_index += pos.rows();
                 cr_num_positions += pos.rows();
 
-                Positions new_pos = pos2flatVec(pos);
-                cr_positions_init.resize(cr_positions_init.rows() + new_pos.rows(), 3);
-                cr_positions_init << cr_positions_init, new_pos;
+                Vector new_pos = pos2flatVec(pos);
+                Vector temp_pos(cr_positions_init.size() + new_pos.size());
+                temp_pos << cr_positions_init, new_pos;
+                cr_positions_init = temp_pos;
             }
 
             cr_num_flat_pos = 3 * (cr_num_positions - rod_indices.size());
@@ -95,7 +96,6 @@ namespace ProjDyn {
 			    return false;
 			}
 
-
             /****************
              * PD Variables *
              ****************/
@@ -135,7 +135,7 @@ namespace ProjDyn {
                 //Set gravity on z axis m times
                 for (size_t i = 0; i < cr_num_coord; i++) {
                     cr_f_ext.coeffRef(i) = 0;
-                    cr_f_ext.coeffRef(++i) = gravity;
+                    cr_f_ext.coeffRef(++i) = 0; //gravity;
                     cr_f_ext.coeffRef(++i) = 0;
                 }
 
@@ -151,12 +151,12 @@ namespace ProjDyn {
                 J_flat_vec.setZero(3);
                 J_flat_vec << j_val, j_val, j_val*2;
                 J_flat_vec *= cr_density;
-                cr_J_vec = stackDiagonal(J_flat_vec, cr_num_positions - 1);
+                cr_J_vec = stackDiagonal(J_flat_vec, cr_num_positions - rod_indices.size());
                 Vector J_flat_vec_inv;
                 J_flat_vec_inv.setZero(3);
                 J_flat_vec_inv << 1/j_val, 1/j_val, 1/(j_val*2);
                 J_flat_vec_inv /= cr_density;
-                cr_J_vec_inv = stackDiagonal(J_flat_vec_inv, cr_num_positions - 1);
+                cr_J_vec_inv = stackDiagonal(J_flat_vec_inv, cr_num_positions - rod_indices.size());
 
                 Vector J_flat_quat;
                 J_flat_quat.setZero(4);
@@ -172,9 +172,9 @@ namespace ProjDyn {
                 //Scale by corresponding segment length
                 for (size_t i = 0; i < rod_indices.size(); i++) {
                     Index rod_index = rod_indices.at(i);
-                    Index next_index = i == rod_indices.size()-1 ? cr_num_positions-1 : rod_indices.at(i+1);
+                    Index next_index = i == rod_indices.size()-1 ? cr_num_positions : rod_indices.at(i+1);
                     for (size_t j = rod_index; j < next_index; j++) {
-                        float seg_len = cr_segments_length.at(j);
+                        float seg_len = cr_segments_length.at(i);
                         cr_J_vec.row(j) *= seg_len;
                         cr_J_vec_inv.row(j) /= seg_len;
                         cr_J_quat.row(j) *= seg_len;
@@ -287,9 +287,10 @@ namespace ProjDyn {
             Orientations s_w_u = pos2quat(s_w);
 		    Orientations s_u = pos2quat(quat2pos(cr_orientations) + h/2 * quat2pos(cr_orientations * s_w_u));
 
-		    std::cout << "cr_positions" << cr_positions << std::endl;
-		    std::cout << "s_u" << quat2pos(s_u) << std::endl;
-		    std::cout << "s_x" << s_x << std::endl;
+		    std::cout << "cr_positions: " << cr_positions << std::endl;
+		    std::cout << "cr_orientations: " << quat2pos(cr_orientations) << std::endl;
+		    std::cout << "s_u: " << quat2pos(s_u) << std::endl;
+		    std::cout << "s_x: " << s_x << std::endl;
 
 		    Vector s_t = posQuatConcat(s_x, s_u);
             cr_q_t = s_t;
@@ -529,13 +530,13 @@ namespace ProjDyn {
 		}
 
 		void addSSConstraints() {
-		    for (size_t j = 0; j < rod_indices.size(); j++) {
-		        Index rod_index = rod_indices.at(j);
-		        Index next_index = j == rod_indices.size()-1 ? cr_num_positions : rod_indices.at(j+1);
+		    for (size_t ind = 0; ind < rod_indices.size(); ind++) {
+		        Index rod_index = rod_indices.at(ind);
+		        Index next_index = ind == rod_indices.size() - 1 ? cr_num_positions : rod_indices.at(ind + 1);
 
                 for (size_t i = rod_index; i < next_index - 1; i++) {
                     auto new_c = new StretchShearConstraint(cr_size, 1.0, i*3,
-                                                            cr_num_positions*3 + i*4, cr_segments_length.at(i));
+                                                            cr_num_positions*3 + (i - ind) * 4, cr_segments_length.at(ind));
                     cr_constraints.push_back(new_c);
                 }
             }
@@ -551,10 +552,14 @@ namespace ProjDyn {
 		}
 
 		void addBTConstraints() {
-		    for (size_t i = 0; i < cr_num_positions - 2; i++) {
-		        auto new_c = new BendTwistConstraint(cr_size, 1.0, cr_num_positions*3 + i*4, cr_segments_length.at(i));
-		        cr_constraints.push_back(new_c);
-		    }
+		    for (Index ind = 0; ind < rod_indices.size(); ind++) {
+		        Index rod_index = rod_indices.at(ind);
+		        Index next_index = ind == rod_indices.size() - 1 ? cr_num_positions - 1 : rod_indices.at(ind + 1);
+                for (size_t i = rod_index; i < next_index - 1; i++) {
+                    auto new_c = new BendTwistConstraint(cr_size, 1.0, cr_num_positions*3 + (i-ind)*4, cr_segments_length.at(ind));
+                    cr_constraints.push_back(new_c);
+                }
+            }
 		}
 
 		//Create imaginary parts of quaternions from vectors. Real part is 0
@@ -613,13 +618,14 @@ namespace ProjDyn {
 		    return v;
 		}
 
-		static Orientations quatFromPos(const Vector pos) {
+		Orientations quatFromPos(const Vector pos) {
 		    assert(pos.size() % 3 == 0);
 		    size_t num_pos = pos.size() / 3;
 		    Orientations quat;
-		    quat.resize(num_pos - 1);
+		    quat.resize(num_pos - rod_indices.size());
 
-		    for (size_t i = 0; i < num_pos - 1; i++) {
+		    size_t j = 0;
+		    for (size_t i = 0; i < num_pos-1; i++) {
 		        size_t index = i*3;
 		        size_t next_index = (i + 1) * 3;
                 size_t previous_index = (i - 1) * 3;
@@ -627,15 +633,16 @@ namespace ProjDyn {
                 v_i << pos[index], pos[index + 1], pos[index + 2];
                 v_next << pos[next_index], pos[next_index + 1], pos[next_index + 2];
                 Quaternion q;
-                if (i == 0) { //The first position always points forward
+                if (std::find(rod_indices.begin(), rod_indices.end(), i) != rod_indices.end()) { //The first position always points forward
                     v_previous = Vector3(v_next);
                     q = Quaternion::FromTwoVectors(v_next - v_i, Vector3::UnitY());
+                    if (i != 0) i++;
                 } else {
                     v_previous << pos[previous_index], pos[previous_index + 1], pos[previous_index + 2];
                     //q = Quaternion::FromTwoVectors(v_i - v_previous, v_next - v_i);
                     q = Quaternion::FromTwoVectors(v_i - v_previous, Vector3::UnitY());
                 }
-                quat[i] = q;
+                quat[j++] = q;
             }
 
 		    return quat;

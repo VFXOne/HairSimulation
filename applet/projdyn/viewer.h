@@ -113,28 +113,29 @@ public:
 		}
 	}
 
-	void rodMesh(const size_t res = 3, const size_t num_rods = 1) {
+	void rodMesh(const size_t res = 4, const size_t num_rods = 2) {
 
         MatrixXf vertices;
         size_t nPoints = res*num_rods;
         m_updated_rods_pos.resize(3, nPoints);
         m_updated_rods_tangents.resize(3, nPoints);
         m_updated_rods_normals.resize(3, nPoints);
+        const float distance_between_rods = 0.5;
         for (size_t j = 0; j < num_rods; j++) {
             for (size_t i = 0; i < res; i++) {
-                m_updated_rods_pos.col(i) << j,i,0;
-                m_updated_rods_tangents.col(i) << 0,1,0;
-                m_updated_rods_normals.col(i) << -1,0,0;
-                m_rod_indices.push_back(j*res);
+                m_updated_rods_pos.col(i+j*res) << distance_between_rods*j,i,0;
+                m_updated_rods_tangents.col(i+j*res) << 0,1,0;
+                m_updated_rods_normals.col(i+j*res) << -1,0,0;
             }
+            m_rod_indices.push_back(j*res);
         }
 
         cout << "Creating rod mesh" << endl;
-        r_vertices = ndivs*(nPoints - 1) + 1;
+        r_vertices = num_rods * (ndivs*(res - 1) + 1);
         cout << "# of vertices : " << r_vertices << endl;
-        r_faces = ndivs == 2 ? 2*(nPoints - 2) + 1 : 2*ndivs*(nPoints-2) + ndivs;
+        r_faces = ndivs == 2 ? num_rods * (2*(res - 2) + 1) : num_rods * (2*ndivs*(res-2) + ndivs);
         cout << "# of faces : " << r_faces << endl;
-        r_edges = 4*(nPoints-2) + 3 + 4*ndivs;
+        r_edges = num_rods * (4*(res-2) + 3 + 4*ndivs);
         cout << "# of edges : " << r_edges << endl;
 
         rod_mesh.clear();
@@ -151,26 +152,28 @@ public:
 
         Surface_mesh::Vertex u, v, w, x;
         //TODO: Create new array with computed vertices indices to use them to compute the faces.
-        for (size_t ind = 0; ind < m_rod_indices.size(); ind++) {
-            size_t rod_index = m_rod_indices.at(ind);
-            size_t next_index = ind == m_rod_indices.size() - 1 ? m_updated_rods_pos.cols() : m_rod_indices.at(ind + 1);
-        }
-        for (size_t i = 0; i < (r_faces - ndivs)/2; i++) {
-            u = v_m.at(i);
-            v = i % (ndivs-1) != 0 || i == 0 ? v_m.at(i+1) : v_m.at(i-(ndivs-1));
-            w = v_m.at(i+ndivs);
-            x = i % (ndivs-1) != 0 || i == 0 ? v_m.at(i+ndivs+1) : v_m.at(i+ndivs-(ndivs-1));
-            rod_mesh.add_triangle(u,v,w);
-            rod_mesh.add_triangle(x, w, v);
-        }
-        for (size_t i = 0; i < ndivs; i++) {
-            u = v_m.at(r_vertices-1);
-            v = v_m.at(r_vertices-ndivs+i-1);
-            w = i == ndivs-1 ? v_m.at(r_vertices-ndivs-1) : v_m.at(r_vertices-ndivs+i);
-            rod_mesh.add_triangle(v, w, u);
+        for (size_t ind = 0; ind < m_rod_face_indices.size()-1; ind++) {
+            size_t rod_index = m_rod_face_indices.at(ind);
+            size_t next_index = m_rod_face_indices.at(ind+1);
+
+            size_t nfaces = next_index - rod_index;
+            for (size_t i = 0; i < (r_faces/num_rods-ndivs)/2; i++) {
+                u = v_m.at(rod_index+i);
+                v = i == 0 or (i+1) % ndivs != 0 ? v_m.at(rod_index+i+1) : v_m.at(rod_index+i-(ndivs-1));
+                w = v_m.at(rod_index+i+ndivs);
+                x = i == 0 or (i+1) % ndivs != 0 ? v_m.at(rod_index+i+ndivs+1) : v_m.at(rod_index+i+1);
+                rod_mesh.add_triangle(u, v, w);
+                rod_mesh.add_triangle(v, x, w);
+            }
+            for (size_t i = 0; i < ndivs; i++) {
+                u = v_m.at(next_index-1);
+                v = v_m.at(next_index-ndivs+i-1);
+                w = i == ndivs-1 ? v_m.at(next_index-ndivs-1) : v_m.at(next_index-ndivs+i);
+                rod_mesh.add_triangle(v, w, u);
+            }
         }
 
-        std::cout << rod_mesh.n_faces() << std::endl;
+        std::cout << "Number of faces added: " << rod_mesh.n_faces() << std::endl;
 
         mesh_center = computeCenter(&rod_mesh);
         float dist_max = 0.0f;
@@ -200,6 +203,7 @@ public:
     }
 
 	void updateShaderRods(const MatrixXf& rPos, const MatrixXf& rTan, const MatrixXf& rNorm, const std::vector<size_t> rod_indices) {
+        std::cout << "Update stats:\n rPos: " << rPos.cols() <<"\nrTan: " << rTan.cols() << "\nrNorm: " << rNorm.cols() << "\nrod_indices: " << rod_indices.size() << std::endl;
         m_updated_rods_pos = rPos;
         m_updated_rods_tangents = rTan;
         m_updated_rods_normals = rNorm;
@@ -780,12 +784,19 @@ public:
     MatrixXf* getRodsPos() {
         return &m_updated_rods_pos;
     }
+
+    std::vector<size_t> getRodIndices() {
+        return m_rod_indices;
+    }
+
 private:
 
     MatrixXf createRodMesh() {
         MatrixXf vertices;
         vertices.resize(3, r_vertices);
         size_t j = 0;
+        m_rod_face_indices.clear();
+        m_rod_face_indices.push_back(0);
         for (size_t ind = 0; ind < m_rod_indices.size(); ind++) {
             size_t rod_index = m_rod_indices.at(ind);
             size_t next_index = ind == m_rod_indices.size()-1 ? m_updated_rods_pos.cols() : m_rod_indices.at(ind+1);
@@ -799,12 +810,13 @@ private:
                 for (size_t k = 0; k < ndivs; k++) {
                     float theta = k / (float)ndivs * 2 * M_PI;
 
-                    Eigen::AngleAxisf rotMat = Eigen::AngleAxisf(theta, tangent);
+                    Eigen::AngleAxisf rotMat(theta, tangent);
 
                     vertices.col(j++) = m_updated_rods_pos.col(i) + thickness * rotMat._transformVector(normal);
                 }
             }
-            vertices.col(j++) = m_updated_rods_pos.col(nPoints - 1);
+            vertices.col(j++) = m_updated_rods_pos.col(next_index - 1);
+            m_rod_face_indices.push_back(j);
         }
         return vertices;
     }
@@ -965,7 +977,7 @@ private:
     int n_edges = 0;
 
     // Rod informations
-    const size_t ndivs = 4;
+    const size_t ndivs = 8;
     size_t r_vertices = 0;
     size_t r_faces = 0;
     size_t r_edges = 0;
@@ -982,6 +994,7 @@ private:
 	MatrixXf m_updated_rods_normals;
 	MatrixXf m_updated_rods_verts;
 	std::vector<size_t> m_rod_indices;
+	std::vector<size_t> m_rod_face_indices;
 
 	// Flag that will be set to true when new vertex positions have been povided via updateShaderVertices
 	// which need to be re-uploaded at the beginning of the next drawContents() call

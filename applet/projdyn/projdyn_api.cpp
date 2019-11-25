@@ -46,21 +46,29 @@ bool projdyn_setmesh(Viewer* viewer, bool add_tets) {
 
     if (viewer->is_using_rods()) {
         MatrixXf* pos = viewer->getRodsPos();
-        Positions rodPos;
         std::vector<Positions> rods;
-        rodPos.resize(pos->cols(), 3);
+        std::vector<size_t> rod_indices = viewer->getRodIndices();
 
-        for (size_t i = 0; i < pos->cols(); i++) {
-            Vector3f p = pos->col(i);
-            rodPos.row(i) << p.x(), p.y(), p.z();
+        for (size_t ind = 0; ind < rod_indices.size(); ind++) {
+            size_t rod_index = rod_indices.at(ind);
+            size_t next_index = ind == rod_indices.size()-1 ? pos->cols() : rod_indices.at(ind+1);
+
+            Positions rodPos;
+            rodPos.resize(next_index - rod_index, 3);
+
+            for (size_t i = rod_index; i < next_index; i++) {
+                Vector3f p = pos->col(i);
+                rodPos.row(i-rod_index) << p.x(), p.y(), p.z();
+            }
+            rods.push_back(rodPos);
         }
 
-        sim.setRods(rodPos);
+        sim.setRods(rods);
     } else {
         sim.setMesh(vertices, faces);
     }
 
-	return true;
+    return true;
 }
 
 void init_projdyn_gui(Viewer* viewer) {
@@ -176,6 +184,7 @@ bool projdyn_upload_positions(Viewer* viewer) {
         upload_pos(2, i) = pos->coeff(i,2);
     }
 
+    std::vector<ProjDyn::Index> rod_indices;
     if (sim.isUsingCR()) {
         Positions* rods_pos = sim.getRodsPositions();
         size_t num_rods = rods_pos->rows();
@@ -207,7 +216,7 @@ bool projdyn_upload_positions(Viewer* viewer) {
             upload_rods_norm(2, i) = rods_normals->coeff(i,2);
         }
 
-        std::vector<ProjDyn::Index> rod_indices = sim.getRodIndices();
+        rod_indices = sim.getRodIndices();
     }
 
 
