@@ -113,7 +113,7 @@ public:
 		}
 	}
 
-	void rodMesh(const size_t res = 5, const size_t num_rods = 2) {
+	void rodMesh(const size_t res = 5, const size_t num_rods = 3) {
 
         MatrixXf vertices;
         size_t nPoints = res*num_rods;
@@ -151,7 +151,6 @@ public:
         }
 
         Surface_mesh::Vertex u, v, w, x;
-        //TODO: Create new array with computed vertices indices to use them to compute the faces.
         for (size_t ind = 0; ind < m_rod_face_indices.size()-1; ind++) {
             size_t rod_index = m_rod_face_indices.at(ind);
             size_t next_index = m_rod_face_indices.at(ind+1);
@@ -802,7 +801,7 @@ private:
 
             size_t nPoints = next_index - rod_index;
             for (size_t i = rod_index; i < next_index - 1; i++) {
-                float thickness = 0.1 * (nPoints-(i-rod_index))/nPoints;
+                const float width = m_thickness * (nPoints - (i - rod_index)) / nPoints;
                 Vector3f tangent = m_updated_rods_tangents.col(i).normalized();
                 Vector3f normal = m_updated_rods_normals.col(i).normalized();
 
@@ -811,7 +810,7 @@ private:
 
                     Eigen::AngleAxisf rotMat(theta, tangent);
 
-                    vertices.col(j++) = m_updated_rods_pos.col(i) + thickness * rotMat._transformVector(normal);
+                    vertices.col(j++) = m_updated_rods_pos.col(i) + width * rotMat._transformVector(normal);
                 }
             }
             vertices.col(j++) = m_updated_rods_pos.col(next_index - 1);
@@ -977,6 +976,7 @@ private:
 
     // Rod informations
     const size_t ndivs = 8;
+    const float m_thickness = 0.1f;
     size_t r_vertices = 0;
     size_t r_faces = 0;
     size_t r_edges = 0;

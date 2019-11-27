@@ -220,9 +220,6 @@ public:
         Vector3 x_n, x_n_1, x_f, d_3;
         Quaternion u_n, diff_u_n, u_n_star;
 
-        Vector p_i;
-        p_i.resize(7);
-
         x_n << q.coeff(p_index), q.coeff(p_index + 1), q.coeff(p_index + 2);
         x_n_1 << q.coeff(p_index + 3), q.coeff(p_index + 4), q.coeff(p_index + 5);
         x_f = (x_n_1 - x_n) / seg_length;
@@ -236,6 +233,9 @@ public:
 
         diff_u_n = Quaternion::FromTwoVectors(d_3, x_f.normalized());
         u_n_star = u_n * diff_u_n.normalized();
+
+        Vector p_i;
+        p_i.resize(7);
 
         p_i << d_3.coeff(0), d_3.coeff(1), d_3.coeff(2),
                 u_n_star.w(), u_n_star.x(),u_n_star.y(), u_n_star.z();

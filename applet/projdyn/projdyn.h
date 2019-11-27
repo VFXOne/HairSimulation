@@ -1,13 +1,16 @@
-#define _USE_MATH_DEFINES
-#include <math.h>
+#pragma once
 
+#define _USE_MATH_DEFINES
+
+#include <math.h>
 #include "projdyn_types.h"
 #include "Edge.h"
+
 #include "PDConstraint.h"
 
 #include<Eigen/Geometry>
-
 #include <memory>
+
 #include <iostream>
 
 namespace ProjDyn {
@@ -77,7 +80,7 @@ namespace ProjDyn {
                 cr_positions = cr_positions_init;
                 cr_velocities.setZero(3 * cr_num_positions);
                 cr_angular_velocities.setZero(cr_num_flat_pos);
-                //TODO: Recompute correct orientations
+                cr_orientations = quatFromPos(cr_positions);
             }
 
         }
@@ -88,6 +91,22 @@ namespace ProjDyn {
 
 		bool isUsingCR() {
 		    return use_cosserat_rods;
+		}
+
+        void initializeLHS() {
+            //Compute left-hand side of system (can be done earlier)
+            cr_lhs.resize(cr_size, cr_size);
+            cr_lhs.setZero();
+            cr_lhs = cr_M_star / (h*h);
+
+            for (size_t i = 0; i < cr_constraints.size(); i++) {
+                auto c = cr_constraints.at(i);
+                auto Ai = c->getAiMatrix();
+                cr_lhs += c->getSelectionMatrixWeighted().transpose()
+                          * Ai.transpose() * Ai * c->getSelectionMatrix();
+            }
+
+            cr_solver.compute(cr_lhs);
 		}
 
         bool initializeSystem() {
@@ -135,12 +154,13 @@ namespace ProjDyn {
                 //Set gravity on z axis m times
                 for (size_t i = 0; i < cr_num_coord; i++) {
                     cr_f_ext.coeffRef(i) = 3;
-                    cr_f_ext.coeffRef(++i) = gravity;
+                    cr_f_ext.coeffRef(++i) = 0; //gravity;
                     cr_f_ext.coeffRef(++i) = 0;
                 }
 
                 cr_orientations = quatFromPos(cr_positions);
                 cr_torques.setZero(cr_num_flat_pos);
+                cr_torques.coeffRef(12) = 10;
 
                 Vector masses_flat = Vector::Ones(cr_num_coord) * cr_density;
                 cr_masses = masses_flat.asDiagonal();
@@ -193,6 +213,9 @@ namespace ProjDyn {
                         cr_M_star.coeffRef(i + cr_num_coord, j + cr_num_coord) = cr_J_quat.coeff(i, j);
                     }
                 }
+
+                //Finally, precompute the left-hand side matrix
+                initializeLHS();
             }
 
 			is_ready = true;
@@ -239,7 +262,6 @@ namespace ProjDyn {
                 }
 
 			    //Factorize right hand side of the system
-			    //TODO: Parallelize this badboi
 			    for (size_t i = 0; i < numConstraints; i++) {
                     SparseMatrix S_i_T = m_constraints.at(i)->getSelectionMatrixWeighted().transpose();
                     for (size_t d = 0; d < 3; d++) {
@@ -251,7 +273,6 @@ namespace ProjDyn {
                     }
                 }
 
-			    //TODO: parallelize
                 for (size_t d = 0; d < 3; d++) {
                     positions_updated.col(d) = m_solver.solve(rhs.col(d));
                 }
@@ -279,7 +300,7 @@ namespace ProjDyn {
 
 		    is_simulating = true;
 
-		    const size_t num_constraints = cr_constraints.size(); //TODO: global variable
+		    const size_t num_constraints = cr_constraints.size();
 		    std::vector<Vector> projections(num_constraints);
 
 		    Vector s_x = cr_positions + h*cr_velocities + h*h * cr_masses_inv * cr_f_ext;
@@ -298,6 +319,7 @@ namespace ProjDyn {
                 /****************
                  ** Local step **
                  ****************/
+#pragma omp parallel for
 		        for (size_t i = 0; i < num_constraints; i++) {
 		            auto proj = cr_constraints.at(i)->projectOnConstraintSet(cr_q_t);
 		            projections[i] = proj;
@@ -306,18 +328,6 @@ namespace ProjDyn {
                 /*****************
                  ** Global step **
                  *****************/
-		        //Compute left-hand side of system (can be done earlier)
-		        cr_lhs.resize(cr_size, cr_size);
-		        cr_lhs.setZero();
-                cr_lhs = cr_M_star / (h*h);
-
-		        for (size_t i = 0; i < num_constraints; i++) {
-		            auto c = cr_constraints.at(i);
-		            auto Ai = c->getAiMatrix();
-                    cr_lhs += c->getSelectionMatrixWeighted().transpose()
-                            * Ai.transpose() * Ai * c->getSelectionMatrix();
-		        }
-
 		        //Compute right-hand side
 		        cr_rhs.setZero();
 		        cr_rhs = cr_M_star * s_t / (h*h);
@@ -328,14 +338,15 @@ namespace ProjDyn {
 		                    * projections.at(i);
 		        }
 
-                cr_solver.compute(cr_lhs);
                 cr_q_t = cr_solver.solve(cr_rhs);
+
+		        std::cout << "Q solved: " << cr_q_t << std::endl;
 
                 if (cr_solver.info() == Eigen::Success) {
                     //Update velocities and angular velocities
                     Orientations new_quat;
                     Vector new_pos;
-                    separatePosQuat(&cr_q_t, new_pos, new_quat, cr_num_positions * 3);
+                    separatePosQuat(&cr_q_t, new_pos, new_quat, cr_num_coord);
                     cr_velocities = (new_pos - cr_positions) / h;
                     cr_positions = new_pos;
                     cr_angular_velocities = 2/h * quat2pos(conjugateQuat(cr_orientations) * new_quat);
@@ -346,9 +357,8 @@ namespace ProjDyn {
                 }
             }
 
-
             is_simulating = false;
-
+		    return true;
 		}
 
 		void setGrab(const std::vector<Index>& grabVerts, const std::vector<Eigen::Vector3f> grabPos) {
@@ -697,16 +707,18 @@ namespace ProjDyn {
 
 		    quat.resize(num_quat);
 
-		    for (size_t i = 0; i < separation; i++) {
-		        pos.coeffRef(i) = concat->coeff(i);
-		    }
+		    //for (size_t i = 0; i < separation; i++) {
+		    //    pos.coeffRef(i) = concat->coeff(i);
+		    //}
+
+		    pos = concat->head(separation);
 
 		    for (size_t i = 0; i < num_quat; i++) {
 		        size_t index = separation + i*4;
-		        quat.coeffRef(i) = Eigen::Quaterniond(concat->coeff(index),
-                                                    concat->coeff(index+1),
-                                                    concat->coeff(index+2),
-                                                    concat->coeff(index+3));
+		        quat.coeffRef(i) = Quaternion(concat->coeff(index),
+                                            concat->coeff(index+1),
+                                            concat->coeff(index+2),
+                                            concat->coeff(index+3));
 		    }
 		}
 
