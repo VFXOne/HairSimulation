@@ -113,7 +113,7 @@ public:
 		}
 	}
 
-	void rodMesh(const size_t res = 3, const size_t num_rods = 2) {
+	void rodMesh(const size_t res = 5, const size_t num_rods = 2) {
 
         MatrixXf vertices;
         size_t nPoints = res*num_rods;
@@ -334,7 +334,7 @@ public:
             popupBtn->setPushed(false);
         });
 
-        b = new Button(popup, "Add Rod");
+        b = new Button(popup, "Rods");
         b->setCallback([this,popupBtn]() {
             using_rods = true;
             rodMesh();

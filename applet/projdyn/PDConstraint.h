@@ -180,8 +180,6 @@ public:
     StretchShearConstraint(size_t num_coord, float weight, size_t pos_index, size_t quat_index, float segment_length)
             : CRConstraint(num_coord,weight) {
 
-        std::cout << "Stretch constraint: " << "\n     pos_index: " << pos_index << "\n     quat_index: " << quat_index << std::endl;
-
         seg_length = segment_length;
         p_index = pos_index;
         q_index = quat_index;
@@ -258,8 +256,6 @@ public:
     : CRConstraint(num_coord, weight) {
         q_index = quat_index;
 
-        std::cout << "Bending constraint: " << "\n    quat_index: " << quat_index << std::endl;
-
         m_weight = E * M_PI * radius * radius * radius * radius / ((1+poisson) * segment_length);
 
         A_i.resize(8, 8);
@@ -328,7 +324,7 @@ private:
 
 class FixedPointConstraint: public CRConstraint {
 public:
-    FixedPointConstraint(Index num_coord, Scalar weight, Index pos_index, Vector3 fixed_pos)
+    FixedPointConstraint(Index num_coord, Scalar weight, Index pos_index, const Vector3 fixed_pos)
     : CRConstraint(num_coord, weight) {
         p_index = pos_index;
         f_pos = fixed_pos;

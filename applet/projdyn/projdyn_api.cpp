@@ -190,8 +190,6 @@ bool projdyn_upload_positions(Viewer* viewer) {
         size_t num_rods = rods_pos->rows();
         upload_rods.resize(3, num_rods);
 
-        std::cout << "Rods pos: \n" << *rods_pos << std::endl;
-
         for (size_t i = 0; i < num_rods; i++) {
             upload_rods(0, i) = rods_pos->coeff(i, 0);
             upload_rods(1, i) = rods_pos->coeff(i, 1);
