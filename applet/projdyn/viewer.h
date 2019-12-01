@@ -742,7 +742,6 @@ public:
             rShaderNormals.setUniform("P", p);
             rShaderNormals.drawIndexed(GL_TRIANGLES, 0, r_faces);
         }
-
     }
 
     bool scrollEvent(const Vector2i &p, const Vector2f &rel) {

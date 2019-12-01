@@ -115,32 +115,6 @@ namespace ProjDyn {
 			    return false;
 			}
 
-            /****************
-             * PD Variables *
-             ****************/
-            const float unit_weight = 0.01;
-            m_masses_flat = Vector::Ones(m) * unit_weight;
-            m_masses = m_masses_flat.asDiagonal();
-            m_masses_inv = m_masses.cwiseInverse();
-
-            m_f_ext.setZero(m, 3);
-            //Set gravity on z axis m times
-            for (size_t i = 0; i < m; i++) {
-                m_f_ext.row(i) << 0, gravity, 0;
-            }
-
-            //addEdgeSpringConstraints();
-            //addGroundConstraints();
-
-            lhs = m_masses / (h * h);
-            for (auto c: m_constraints) {
-                lhs += c->getSelectionMatrixWeighted().transpose() * c->getSelectionMatrix();
-            }
-            m_solver.compute(lhs);
-
-            rhs.resize(m, 3);
-            rhs.setZero();
-
             if (use_cosserat_rods) {
                 /****************
                  * CR Variables *
@@ -221,81 +195,7 @@ namespace ProjDyn {
 			return is_ready;
 		}
 
-		bool step(int num_iterations) {
-			// Perform a simulation step
-            is_simulating = true;
-
-            size_t numConstraints = m_constraints.size();
-
-            Positions s_n = m_positions + h * m_velocities + m_masses_inv * m_f_ext * h * h;
-            Positions positions_updated = Positions(s_n);
-            std::vector<Positions> projections(numConstraints);
-
-            size_t step = 0;
-
-            while (step < num_iterations) {
-                step++;
-                /****************
-                 ** Local step **
-                 ****************/
-                for (size_t c_ind = 0; c_ind < numConstraints; c_ind++) {
-                    PDConstraint* c = m_constraints.at(c_ind);
-                    Positions p_i = c->projectOnConstraintSet(positions_updated);
-                    projections[c_ind] = p_i;
-                }
-
-                /*****************
-                 ** Global step **
-                 *****************/
-			    if (m_solver.info() != Eigen::Success) {
-			        std::cout << "Unable to factorize left hand side" << std::endl;
-			        return false;
-			    }
-
-                //rhs = m_masses_flat * s_n / (h*h);
-                rhs.setZero();
-                for (size_t v = 0; v < m; v++) {
-                    for (int d = 0; d < 3; d++) {
-                        rhs.coeffRef(v, d) += m_masses_flat(v) * s_n(v, d) / (h * h);
-                    }
-                }
-
-			    //Factorize right hand side of the system
-			    for (size_t i = 0; i < numConstraints; i++) {
-                    SparseMatrix S_i_T = m_constraints.at(i)->getSelectionMatrixWeighted().transpose();
-                    for (size_t d = 0; d < 3; d++) {
-                        for (size_t k = 0; k < S_i_T.cols(); ++k) {
-                            for (SparseMatrix::InnerIterator it(S_i_T, k); it; ++it) {
-                                rhs.coeffRef(it.row(), d) += it.value() * projections.at(i)(0, d);
-                            }
-                        }
-                    }
-                }
-
-                for (size_t d = 0; d < 3; d++) {
-                    positions_updated.col(d) = m_solver.solve(rhs.col(d));
-                }
-
-                is_simulating = false;
-
-                if (m_solver.info() == Eigen::Success) {
-                    //Update positions and m_velocities
-                    m_velocities = (positions_updated - m_positions) / h;
-                    m_positions = Positions(positions_updated);
-                } else {
-                    std::cout << "Unable to solve PD constraints" << std::endl;
-                    return false;
-                }
-            }
-
-            if (use_cosserat_rods) {
-                CR_step(num_iterations);
-            }
-
-			return true;
-		}
-
-        bool CR_step(int num_iterations) {
+        bool step(int num_iterations) {
 
 		    is_simulating = true;
 
