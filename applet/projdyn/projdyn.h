@@ -153,14 +153,13 @@ namespace ProjDyn {
                 cr_f_ext.setZero(cr_num_coord);
                 //Set gravity on z axis m times
                 for (size_t i = 0; i < cr_num_coord; i++) {
-                    cr_f_ext.coeffRef(i) = 3;
-                    cr_f_ext.coeffRef(++i) = 0; //gravity;
-                    cr_f_ext.coeffRef(++i) = 0;
+                    cr_f_ext.coeffRef(i) = 10;
+                    cr_f_ext.coeffRef(++i) = gravity;
+                    cr_f_ext.coeffRef(++i) = 10;
                 }
 
                 cr_orientations = quatFromPos(cr_positions);
                 cr_torques.setZero(cr_num_flat_pos);
-                cr_torques.coeffRef(12) = 10;
 
                 Vector masses_flat = Vector::Ones(cr_num_coord) * cr_density;
                 cr_masses = masses_flat.asDiagonal();
@@ -333,7 +332,7 @@ namespace ProjDyn {
 		        cr_rhs = cr_M_star * s_t / (h*h);
 		        for (size_t i = 0; i < num_constraints; i++) {
 		            auto c = cr_constraints.at(i);
-		            cr_rhs += c->getSelectionMatrixWeighted().transpose()
+		            cr_rhs += c->getSelectionMatrixWeighted().transpose() //TODO: new function in constraints that computes this product in advance
 		                    * c->getAiMatrix().transpose() * c->getBiMatrix()
 		                    * projections.at(i);
 		        }
@@ -376,6 +375,10 @@ namespace ProjDyn {
 			m_hasGrab = false;
 		}
 
+		void setTimestep(const float timestep) {
+		    h = timestep;
+		}
+
 		Positions* getPositions() {
 		    return &m_positions;
 		}
@@ -392,7 +395,7 @@ namespace ProjDyn {
 		Positions* getRodsTangents() {
 		    upload_tan = vec2pos(cr_positions);
 		    upload_tan.resize(cr_num_positions, 3);
-		    Vector3 t(0,1,0);
+		    Vector3 t = Vector3::UnitY();
 		    size_t j = 0;
 		    for (size_t i = 0; i < cr_num_quaternions; i++) {
 		        Quaternion q = cr_orientations[i];
@@ -408,7 +411,7 @@ namespace ProjDyn {
 
 		Positions* getRodsNormals() {
 		    upload_normals.resize(cr_num_positions, 3);
-		    Vector3 n(-1, 0, 0);
+		    Vector3 n = Vector3::UnitX();
 		    size_t j = 0;
 		    for (size_t i = 0; i < cr_num_quaternions; i++) {
 		        Quaternion q = cr_orientations[i];
@@ -422,16 +425,16 @@ namespace ProjDyn {
 		    return &upload_normals;
 		}
 
-	protected:
 
+	protected:
         // If m_hasGrab is true, vertices with the indices in m_grabVerts will be forced
 		// to the positions set in m_grabPos
 		bool m_hasGrab = false;
         std::vector<Index> m_grabVerts;
         std::vector<Eigen::Vector3f> m_grabPos;
         std::vector<Edge> edges;
-		const double h = 0.05; //Simulation step size
-		const float gravity = -9.81;
+        double h = 0.05; //Simulation step size
+
         /******************
          * Mesh variables *
          ******************/
@@ -454,9 +457,6 @@ namespace ProjDyn {
         /***************************
          * Cosserat Rods variables *
          ***************************/
-        const float cr_unit_weight = 0.01f;
-        const float cr_radius = CRConstraint::radius;
-        const float cr_density = 1.3f;
         std::vector<float> cr_segments_length;
         std::vector<Index> rod_indices;
 

@@ -175,7 +175,7 @@ bool projdyn_upload_positions(Viewer* viewer) {
 
     // This is done using the 3 x #Verts matrix upload_pos
     size_t num_verts = pos->rows();
-    upload_pos.resize(3, num_verts  );
+    upload_pos.resize(3, num_verts);
 
     //Copy the transpose of the matrix because different storage order
     for (size_t i = 0; i < num_verts; i++) {

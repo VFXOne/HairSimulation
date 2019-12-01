@@ -6,8 +6,8 @@
 #define APPLET_PDCONSTRAINT_H
 
 #include <iostream>
-#include "projdyn_types.h"
 #include "Edge.h"
+#include "projdyn_types.h"
 
 using namespace ProjDyn;
 
@@ -164,10 +164,6 @@ public:
         return m_weight * m_selectionMatrix;
     }
 
-    //Constants:
-    constexpr static float E = 1; //Young's modulus
-    constexpr static float radius = 3;
-    constexpr static float poisson = 0.377f;
 
 protected:
     SparseMatrix A_i;
@@ -177,14 +173,14 @@ protected:
 class StretchShearConstraint: public CRConstraint {
 public:
 
-    StretchShearConstraint(size_t num_coord, float weight, size_t pos_index, size_t quat_index, float segment_length)
-            : CRConstraint(num_coord,weight) {
+    StretchShearConstraint(size_t num_coord, float weight_multiplier, size_t pos_index, size_t quat_index, float segment_length)
+            : CRConstraint(num_coord, weight_multiplier) {
 
         seg_length = segment_length;
         p_index = pos_index;
         q_index = quat_index;
 
-        m_weight = E * M_PI * radius * radius * seg_length;
+        m_weight = E * M_PI * cr_radius * cr_radius * seg_length * weight_multiplier;
 
         A_i.resize(7, 10);
         A_i.setZero();
@@ -227,12 +223,17 @@ public:
         u_n = Quaternion(q.coeff(q_index), q.coeff(q_index+1), q.coeff(q_index+2), q.coeff(q_index+3));
         u_n.normalize();
 
-        d_3 = u_n.toRotationMatrix() * Vector3(0,1,0);
+        d_3 = u_n.toRotationMatrix() * Vector3::UnitY();
         //d_3 = u_n_star.toRotationMatrix() * x_f;
         d_3.normalize();
 
         diff_u_n = Quaternion::FromTwoVectors(d_3, x_f.normalized());
-        u_n_star = u_n * diff_u_n.normalized();
+        u_n_star = u_n * diff_u_n;
+
+        std::cout << "x_f: " << x_f << std::endl;
+        std::cout << "d_3: " << d_3 << std::endl;
+        std::cout << "diff_u_n: " << diff_u_n.toRotationMatrix() << std::endl;
+        std::cout << "u_n_star: " << u_n_star.toRotationMatrix() << std::endl;
 
         Vector p_i;
         p_i.resize(7);
@@ -252,11 +253,11 @@ protected:
 class BendTwistConstraint: public CRConstraint {
 public:
 
-    BendTwistConstraint(Index num_coord, Scalar weight, Index quat_index, float segment_length)
-    : CRConstraint(num_coord, weight) {
+    BendTwistConstraint(Index num_coord, Scalar weight_multiplier, Index quat_index, float segment_length)
+    : CRConstraint(num_coord, weight_multiplier) {
         q_index = quat_index;
 
-        m_weight = E * M_PI * radius * radius * radius * radius / ((1+poisson) * segment_length);
+        m_weight = E * M_PI * cr_radius * cr_radius * cr_radius * cr_radius / ((1+poisson) * segment_length) * weight_multiplier;
 
         A_i.resize(8, 8);
         A_i.setIdentity();
@@ -284,7 +285,7 @@ public:
         u_n_1.normalize();
         Quaternion r_curvature = u_n.conjugate() * u_n_1;
         r_curvature.normalize();
-        r_curvature.w() = 0; //Take only the imaginary part.
+        //r_curvature.w() = 0;
 
         Quaternion r_curvature_c(r_curvature.conjugate());
         r_curvature_c.normalize();
@@ -294,18 +295,6 @@ public:
 
         rotMatrix = r_curvature_c.toRotationMatrix();
         r_curvature_c = Quaternion(0.5 * rotMatrix);
-
-        /*
-        r_curvature.w() /= 2;
-        r_curvature.x() /= 2;
-        r_curvature.y() /= 2;
-        r_curvature.z() /= 2;
-
-        r_curvature_c.w() /= 2;
-        r_curvature_c.x() /= 2;
-        r_curvature_c.y() /= 2;
-        r_curvature_c.z() /= 2;
-        */
 
         Quaternion u_n_star = u_n * r_curvature;
         Quaternion u_n_1_star = u_n_1 * r_curvature_c;

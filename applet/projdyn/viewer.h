@@ -94,7 +94,7 @@ public:
         mesh_center = computeCenter(&mesh);
         float dist_max = 0.0f;
         for (auto v: mesh.vertices()) {
-            if ( distance(mesh_center, mesh.position(v))> dist_max) {
+            if (distance(mesh_center, mesh.position(v))> dist_max) {
                 dist_max = distance(mesh_center, mesh.position(v));
             }
         }
@@ -113,18 +113,19 @@ public:
 		}
 	}
 
-	void rodMesh(const size_t res = 5, const size_t num_rods = 3) {
+	void rodMesh(const size_t res = 5, const size_t num_rods = 1) {
 
         MatrixXf vertices;
         size_t nPoints = res*num_rods;
         m_updated_rods_pos.resize(3, nPoints);
         m_updated_rods_tangents.resize(3, nPoints);
         m_updated_rods_normals.resize(3, nPoints);
+        m_rod_indices.clear();
         const float distance_between_rods = 0.3;
         for (size_t j = 0; j < num_rods; j++) {
-            for (size_t i = 0; i < res; i++) {
-                m_updated_rods_pos.col(i+j*res) << distance_between_rods*j,i,0;
-                m_updated_rods_tangents.col(i+j*res) << 0,1,0;
+            for (int i = 0; i < res; i++) {
+                m_updated_rods_pos.col(i+j*res) << distance_between_rods*j, -i,0;
+                m_updated_rods_tangents.col(i+j*res) << 0,-1,0;
                 m_updated_rods_normals.col(i+j*res) << -1,0,0;
             }
             m_rod_indices.push_back(j*res);
@@ -302,7 +303,7 @@ public:
         rShader.uploadIndices(indices);
         rShader.uploadAttrib("position", mesh_points);
         rShader.uploadAttrib("normal", normals_attrib);
-        rShader.setUniform("intensity", Vector3f(0.98, 0.59, 0.04));
+        rShader.setUniform("intensity", Vector3f(0.0, 0.0, 0.88));
 
         rShaderNormals.bind();
         rShaderNormals.uploadIndices(indices);
@@ -418,7 +419,7 @@ public:
         );
 
         rShader.init(
-            "a_simple_shader_for_rods",
+            "a_simple_rod_shader",
 
             /* Vertex shader */
             "#version 330\n"
@@ -527,7 +528,7 @@ public:
         );
 
         rShaderNormals.init(
-            "normal_shader",
+            "normal_rod_shader",
             /* Vertex shader */
             "#version 330\n\n"
             "in vec3 position;\n"
@@ -633,12 +634,9 @@ public:
 
 		/* Draw the window contents using OpenGL */
 		mShader.bind();
-		rShader.bind();
 
 		if (m_reupload_vertices) {
 			mShader.uploadAttrib("position", m_updated_shader_verts);
-			rShader.uploadAttrib("position", m_updated_rods_verts);
-			m_reupload_vertices = false;
 		}
 
         Eigen::Matrix4f model, view, proj;
@@ -650,8 +648,6 @@ public:
         /* MVP uniforms */
         mShader.setUniform("MV", mv);
         mShader.setUniform("P", p);
-        rShader.setUniform("MV", mv);
-        rShader.setUniform("P", p);
 
         /* Setup OpenGL (making sure the GUI doesn't disable these */
         glEnable(GL_DEPTH_TEST);
@@ -667,9 +663,6 @@ public:
         Vector3f colors(0.98, 0.59, 0.04);
         mShader.setUniform("intensity", colors);
         mShader.drawIndexed(GL_TRIANGLES, 0, n_faces);
-        colors << 0.0, 0.0, 0.88;
-        rShader.setUniform("intensity", colors);
-        rShader.drawIndexed(GL_TRIANGLES, 0, r_faces);
 
         if (wireframe) {
             glDisable(GL_POLYGON_OFFSET_FILL);
@@ -677,8 +670,6 @@ public:
             colors << 0.0, 0.0, 0.0;
             mShader.setUniform("intensity", colors);
             mShader.drawIndexed(GL_TRIANGLES, 0, n_faces);
-            rShader.setUniform("intensity", colors);
-            rShader.drawIndexed(GL_TRIANGLES, 0, r_faces);
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
 
@@ -687,8 +678,66 @@ public:
             mShaderNormals.setUniform("MV", mv);
             mShaderNormals.setUniform("P", p);
             mShaderNormals.drawIndexed(GL_TRIANGLES, 0, n_faces);
+        }
 
+
+		/* Draw the rods */
+		rShader.bind();
+
+        MatrixXf normals_attrib(3, r_vertices);
+
+		if (m_reupload_vertices) {
+            Surface_mesh::Vertex_property<Point> vertex_normal =
+                    rod_mesh.vertex_property<Point>("v:normal");
+            rod_mesh.update_face_normals();
+            rod_mesh.update_vertex_normals();
+
+            size_t j = 0;
+            for (auto v: rod_mesh.vertices()) {
+                normals_attrib.col(j) << vertex_normal[v].x,
+                        vertex_normal[v].y,
+                        vertex_normal[v].z;
+                ++j;
+            }
+
+			rShader.uploadAttrib("position", m_updated_rods_verts);
+            rShader.uploadAttrib("normal", normals_attrib);
+
+			m_reupload_vertices = false;
+		}
+
+        /* MVP uniforms */
+        rShader.setUniform("MV", mv);
+        rShader.setUniform("P", p);
+
+        /* Setup OpenGL (making sure the GUI doesn't disable these */
+        glEnable(GL_DEPTH_TEST);
+        glDisable(GL_CULL_FACE);
+
+        /* Render everything */
+        if (wireframe) {
+            glEnable(GL_POLYGON_OFFSET_FILL);
+            glPolygonOffset(1.0, 1.0);
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        }
+
+        colors << 0.0, 0.0, 0.88;
+        rShader.setUniform("intensity", colors);
+        rShader.drawIndexed(GL_TRIANGLES, 0, r_faces);
+
+        if (wireframe) {
+            glDisable(GL_POLYGON_OFFSET_FILL);
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            colors << 0.0, 0.0, 0.0;
+            rShader.setUniform("intensity", colors);
+            rShader.drawIndexed(GL_TRIANGLES, 0, r_faces);
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        }
+
+        if (normals) {
             rShaderNormals.bind();
+            rShaderNormals.uploadAttrib("position", m_updated_rods_verts);
+            rShaderNormals.uploadAttrib("normal", normals_attrib);
             rShaderNormals.setUniform("MV", mv);
             rShaderNormals.setUniform("P", p);
             rShaderNormals.drawIndexed(GL_TRIANGLES, 0, r_faces);
