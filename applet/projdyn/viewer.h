@@ -177,8 +177,6 @@ public:
             }
         }
 
-        std::cout << "Number of faces added: " << rod_mesh.n_faces() << std::endl;
-
         mesh_center = computeCenter(&rod_mesh);
         float dist_max = 0.0f;
         for (auto v: rod_mesh.vertices()) {
@@ -226,10 +224,6 @@ public:
             }
             m_rod_indices.push_back(j*res);
         }
-
-        cout << "rod positions: " << m_updated_rods_pos << endl;
-        cout << "rod normals: " << m_updated_rods_normals << endl;
-        cout << "rod tangents: " << m_updated_rods_tangents << endl;
 
         rodMesh();
         loadMesh("../data/small_sphere.obj");

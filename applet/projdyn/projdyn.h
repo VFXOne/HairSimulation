@@ -252,8 +252,6 @@ namespace ProjDyn {
 
                 cr_q_t = cr_solver.solve(cr_rhs);
 
-		        std::cout << "Q solved: " << cr_q_t << std::endl;
-
                 if (cr_solver.info() == Eigen::Success) {
                     //Update velocities and angular velocities
                     Orientations new_quat;
@@ -282,6 +280,16 @@ namespace ProjDyn {
 			m_grabVerts = grabVerts;
 			m_grabPos = grabPos;
 			m_hasGrab = true;
+
+			assert(grabVerts.size() >= 1);
+			Vector3 p = m_positions.row(grabVerts.at(0));
+			Eigen::Vector3f d = grabPos.at(0);
+			Vector3 f(d.x(), d.y(), d.z());
+			Vector3 diff = f - p;
+#pragma omp parallel for
+			for (size_t i = 0; i < m_positions.rows(); i++) {
+			    m_positions.row(i) += diff;
+			}
 		}
 
 		void releaseGrab() {
@@ -447,7 +455,7 @@ namespace ProjDyn {
                     }
                 }
 
-                auto mpc = new MovingPointConstraint(cr_size, 100, i, &m_positions, index);
+                auto mpc = new MovingPointConstraint(cr_size, 1000, i, &m_positions, index);
                 cr_constraints.push_back(mpc);
             }
 		}

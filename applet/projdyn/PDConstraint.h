@@ -230,10 +230,12 @@ public:
         diff_u_n = Quaternion::FromTwoVectors(d_3, x_f.normalized());
         u_n_star = u_n * diff_u_n;
 
+        /*
         std::cout << "x_f: " << x_f << std::endl;
         std::cout << "d_3: " << d_3 << std::endl;
         std::cout << "diff_u_n: " << diff_u_n.toRotationMatrix() << std::endl;
         std::cout << "u_n_star: " << u_n_star.toRotationMatrix() << std::endl;
+        */
 
         Vector p_i;
         p_i.resize(7);
@@ -369,7 +371,7 @@ public:
     Vector projectOnConstraintSet(Vector& q) override {
         Vector p_i;
         p_i.resize(3);
-        p_i << m_pos->coeff(m_pos_index, 0), m_pos->coeff(m_pos_index, 1), m_pos->coeff(m_pos_index);
+        p_i << m_pos->coeff(m_pos_index, 0), m_pos->coeff(m_pos_index, 1), m_pos->coeff(m_pos_index, 2);
         return p_i;
     }
 
