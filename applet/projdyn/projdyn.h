@@ -12,6 +12,7 @@
 #include <memory>
 
 #include <iostream>
+#include <limits>
 
 namespace ProjDyn {
 	typedef Eigen::SimplicialLDLT<SparseMatrix> SparseSolver;
@@ -31,19 +32,18 @@ namespace ProjDyn {
             m = 0;
 		}
 
-		void setMesh(Positions& pos, Triangles& tris) {
+		void setMesh(Positions& pos) {
 			// Pass the positions of the geometry
 			m = pos.rows();
             m_positions = Positions(pos);
-            m_positions_init = Positions(pos);
-			m_velocities.setZero(pos.rows(), pos.cols());
-			createEdges(tris);
-			//TODO: Reset the correct variables (dimensions) to fit new mesh
 		}
 
 		void setRods(const std::vector<Positions> rods) {
 		    assert(rods.size() >= 1); //At least one rod
             use_cosserat_rods = true;
+            rod_indices.clear();
+            cr_num_positions = 0;
+            cr_positions_init = Vector();
 
             size_t rod_index = 0;
             for (size_t i = 0; i < rods.size(); i++) {
@@ -65,24 +65,34 @@ namespace ProjDyn {
             cr_num_coord = 3 * cr_num_positions;
             cr_num_quaternions = cr_num_positions - rod_indices.size();
             cr_size = 3 * cr_num_positions + 4 * cr_num_quaternions;
-            cr_positions = Vector(cr_positions_init);
+            cr_positions = cr_positions_init;
 
 		    cr_velocities.setZero(cr_num_coord);
 		    cr_angular_velocities.setZero(cr_num_flat_pos);
 		}
 
+		void addDefaultConstraints() {
+		    cr_constraints.clear();
+            addFixedPosConstraint();
+            addSSConstraints();
+            addBTConstraints();
+		}
+
+		void addMeshConstraints() {
+		    cr_constraints.clear();
+		    addSSConstraints();
+		    addBTConstraints();
+		    addMovingPosConstraints();
+		}
+
 		void resetPositions() {
 			// Reset vertex positions to initial state and set m_velocities to 0
-			m_positions = Positions(m_positions_init);
-			m_velocities.setZero();
-
 			if (use_cosserat_rods) {
                 cr_positions = cr_positions_init;
                 cr_velocities.setZero(3 * cr_num_positions);
                 cr_angular_velocities.setZero(cr_num_flat_pos);
                 cr_orientations = quatFromPos(cr_positions);
             }
-
         }
 
 		bool isInitialized() {
@@ -109,7 +119,7 @@ namespace ProjDyn {
             cr_solver.compute(cr_lhs);
 		}
 
-        bool initializeSystem() {
+        bool initializeSystem(bool default_constraints) {
 			// Setup simulation (collect constraints, set up and factorize global step system)
 			if (is_simulating) {
 			    return false;
@@ -120,16 +130,18 @@ namespace ProjDyn {
                  * CR Variables *
                  ****************/
 
-                addFixedPosConstraint();
-                addSSConstraints();
-                addBTConstraints();
+                if (default_constraints) {
+                    addDefaultConstraints();
+                } else {
+                    addMeshConstraints();
+                }
 
                 cr_f_ext.setZero(cr_num_coord);
                 //Set gravity on z axis m times
                 for (size_t i = 0; i < cr_num_coord; i++) {
-                    cr_f_ext.coeffRef(i) = 10;
+                    cr_f_ext.coeffRef(i) = 0;
                     cr_f_ext.coeffRef(++i) = gravity;
-                    cr_f_ext.coeffRef(++i) = 10;
+                    cr_f_ext.coeffRef(++i) = 0;
                 }
 
                 cr_orientations = quatFromPos(cr_positions);
@@ -196,6 +208,7 @@ namespace ProjDyn {
 		}
 
         bool step(int num_iterations) {
+		    if (!isInitialized()) return
 
 		    is_simulating = true;
 
@@ -339,20 +352,7 @@ namespace ProjDyn {
          * Mesh variables *
          ******************/
         size_t m;
-
-        Positions m_f_ext;
-        Positions m_positions_init;
         Positions m_positions;
-        Positions m_velocities;
-
-        Vector m_masses_flat;
-        SparseMatrix m_masses;
-        SparseMatrix m_masses_inv;
-        SparseMatrix lhs;
-        SparseMatrix rhs;
-
-		std::vector<PDConstraint*> m_constraints;
-		SparseSolver m_solver;
 
         /***************************
          * Cosserat Rods variables *
@@ -367,7 +367,7 @@ namespace ProjDyn {
 
         Vector cr_q_t; //The flat vector that holds every variables (positions and quaternions)
         size_t cr_num_coord;
-        size_t cr_num_positions = 0; //Number of positions
+        size_t cr_num_positions; //Number of positions
         Vector cr_velocities;
         Vector cr_f_ext;
         SparseMatrix cr_masses;
@@ -397,40 +397,6 @@ namespace ProjDyn {
 		bool is_simulating;
 		bool use_cosserat_rods;
 		Positions upload_pos, upload_tan, upload_normals;
-
-		void createEdges(Triangles& triangles) {
-		    for (size_t i = 0; i < triangles.rows(); i++) { //iterate over all triangles
-                size_t length = triangles.row(i).size();
-                for (size_t t = 0; t < length; t++) { //iterate over all coordinates
-                    //Find the two indexes of an edge
-		            Index t0 = triangles(i, t);
-		            Index t1 = triangles(i, (t + 1) % length);
-		            //TODO: Use pointers
-		            Edge edge = Edge(t0, t1);
-
-                    if (std::find(edges.begin(), edges.end(), edge) == edges.end()) { //Check if the edge already exists
-                        edges.push_back(edge);
-                    }
-		        }
-		    }
-
-		}
-
-		void addGroundConstraints() {
-            //Iterate over all vertices to add the ground constraint
-            for (size_t i = 0; i < m_positions.rows(); i++) {
-                auto new_ground_c = new GroundConstraint(m, i, 1000.0);
-                m_constraints.push_back(new_ground_c);
-            }
-		}
-
-		void addEdgeSpringConstraints() {
-		    //Iterate over all edges to add the spring constraint
-            for (auto e : edges) {
-                auto new_edge_c = new EdgeSpringConstraint(m, e, 1.0, 0.001, 1.5);
-                m_constraints.push_back(new_edge_c);
-            }
-		}
 
 		void addSSConstraints() {
 		    for (size_t ind = 0; ind < rod_indices.size(); ind++) {
@@ -462,6 +428,27 @@ namespace ProjDyn {
                     auto new_c = new BendTwistConstraint(cr_size, 1.0, cr_num_coord + (i-ind)*4, cr_segments_length.at(ind));
                     cr_constraints.push_back(new_c);
                 }
+            }
+		}
+
+		void addMovingPosConstraints() {
+		    if (m_positions.size() == 0) return;
+            for (auto i: rod_indices) {
+                //Find closest point to the rod on the mesh
+                size_t index  = 0;
+                float min_distance = std::numeric_limits<float>::max();
+                for (size_t j = 0; j < m_positions.rows(); j++) {
+                    Vector3 p = m_positions.row(j);
+                    Vector3 r(cr_positions.coeff(j), cr_positions.coeff(j+1), cr_positions.coeff(j+2));
+                    float dist = (p-r).norm();
+                    if (dist < min_distance) {
+                        index = j;
+                        min_distance = dist;
+                    }
+                }
+
+                auto mpc = new MovingPointConstraint(cr_size, 100, i, &m_positions, index);
+                cr_constraints.push_back(mpc);
             }
 		}
 

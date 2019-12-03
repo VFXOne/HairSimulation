@@ -113,9 +113,10 @@ public:
 		}
 	}
 
-	void rodMesh(const size_t res = 5, const size_t num_rods = 1) {
-
-        MatrixXf vertices;
+    void default_rods(const size_t res = 5, const size_t num_rods = 1) {
+        using_rods = true;
+        r_res = res;
+        r_num_rods = num_rods;
         size_t nPoints = res*num_rods;
         m_updated_rods_pos.resize(3, nPoints);
         m_updated_rods_tangents.resize(3, nPoints);
@@ -130,17 +131,20 @@ public:
             }
             m_rod_indices.push_back(j*res);
         }
+    }
 
+	void rodMesh() {
         cout << "Creating rod mesh" << endl;
-        r_vertices = num_rods * (ndivs*(res - 1) + 1);
+        r_vertices = r_num_rods * (ndivs*(r_res - 1) + 1);
         cout << "# of vertices : " << r_vertices << endl;
-        r_faces = ndivs == 2 ? num_rods * (2*(res - 2) + 1) : num_rods * (2*ndivs*(res-2) + ndivs);
+        r_faces = ndivs == 2 ? r_num_rods * (2*(r_res - 2) + 1) : r_num_rods * (2*ndivs*(r_res-2) + ndivs);
         cout << "# of faces : " << r_faces << endl;
-        r_edges = num_rods * (4*(res-2) + 3 + 4*ndivs);
+        r_edges = r_num_rods * (4*(r_res-2) + 3 + 4*ndivs);
         cout << "# of edges : " << r_edges << endl;
 
         rod_mesh.clear();
 
+        MatrixXf vertices;
         vertices = createRodMesh();
 
         //First add every vertex to the mesh and store them in an array.
@@ -157,7 +161,7 @@ public:
             size_t next_index = m_rod_face_indices.at(ind+1);
 
             size_t nfaces = next_index - rod_index;
-            for (size_t i = 0; i < (r_faces/num_rods-ndivs)/2; i++) {
+            for (size_t i = 0; i < (r_faces/r_num_rods-ndivs)/2; i++) {
                 u = v_m.at(rod_index+i);
                 v = i == 0 or (i+1) % ndivs != 0 ? v_m.at(rod_index+i+1) : v_m.at(rod_index+i-(ndivs-1));
                 w = v_m.at(rod_index+i+ndivs);
@@ -194,6 +198,44 @@ public:
             if (!m_mesh_load_callback(this)) {
                 std::cout << "Error on callback after loading mesh!" << std::endl;
             }
+        }
+    }
+
+    void add_rods_on_ball(float radius, size_t res = 5, size_t num_rods = 1) {
+        using_rods = true;
+        r_res = res;
+        r_num_rods = num_rods;
+        size_t nPoints = res*num_rods;
+        m_updated_rods_pos.resize(3, nPoints);
+        m_updated_rods_tangents.resize(3, nPoints);
+        m_updated_rods_normals.resize(3, nPoints);
+        m_rod_indices.clear();
+        Vector3f default_tangent = Vector3f::UnitY();
+        Vector3f default_normal = Vector3f::UnitX();
+        const float seg_length = 1;
+        auto randAngle = [](){ return float(rand()) / float(RAND_MAX) * 2*M_PI; };
+        for (size_t j = 0; j < num_rods; j++) {
+            Quaternionf rotQuat(randAngle(), randAngle(), randAngle(), randAngle());
+            rotQuat.FromTwoVectors(default_tangent, default_tangent);
+            rotQuat.normalize();
+            for (int i = 0; i < res; i++) {
+                Vector3f p = rotQuat.toRotationMatrix() * (default_tangent * radius + default_tangent * i * seg_length);
+                m_updated_rods_pos.col(i+j*res) << p;
+                m_updated_rods_tangents.col(i+j*res) << p.normalized();
+                m_updated_rods_normals.col(i+j*res) << rotQuat.toRotationMatrix() * default_normal;
+            }
+            m_rod_indices.push_back(j*res);
+        }
+
+        cout << "rod positions: " << m_updated_rods_pos << endl;
+        cout << "rod normals: " << m_updated_rods_normals << endl;
+        cout << "rod tangents: " << m_updated_rods_tangents << endl;
+
+        rodMesh();
+        loadMesh("../data/small_sphere.obj");
+        Point center = computeCenter(&mesh);
+        for (auto v : mesh.vertices()) {
+            mesh.position(v) = (mesh.position(v) - center) * radius + center;
         }
     }
 
@@ -336,7 +378,7 @@ public:
 
         b = new Button(popup, "Rods");
         b->setCallback([this,popupBtn]() {
-            using_rods = true;
+            default_rods();
             rodMesh();
             rodProcess();
             popupBtn->setPushed(false);
@@ -1023,6 +1065,8 @@ private:
     int n_edges = 0;
 
     // Rod informations
+    size_t r_res = 0;
+    size_t r_num_rods = 0;
     const size_t ndivs = 8;
     const float m_thickness = 0.1f;
     size_t r_vertices = 0;

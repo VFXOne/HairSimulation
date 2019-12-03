@@ -10,6 +10,7 @@ ProjDyn::Simulator sim;
 Eigen::MatrixXf upload_pos, upload_rods, upload_rods_tan, upload_rods_norm;
 std::thread projdyn_thread;
 bool projdyn_active = false;
+bool default_constraints = true;
 
 // Pass updated vertex positions to the viewer
 bool projdyn_setmesh(Viewer* viewer) {
@@ -26,17 +27,7 @@ bool projdyn_setmesh(Viewer* viewer, bool add_tets) {
     // Convert surface mesh to Eigen matrices
     surface_mesh::Surface_mesh* mesh = viewer->getMesh();
     ProjDyn::Positions vertices(mesh->n_vertices(), 3);
-    ProjDyn::Triangles faces(mesh->n_faces(), 3);
     int j = 0;
-    for (auto f : mesh->faces()) {
-        int k = 0;
-        for (auto v : mesh->vertices(f)) {
-            faces(j, k) = (ProjDyn::Index)v.idx();
-            ++k;
-        }
-        ++j;
-    }
-    j = 0;
     for (auto v : mesh->vertices()) {
         vertices.row(j) << (ProjDyn::Scalar)mesh->position(v).x,
                 (ProjDyn::Scalar)mesh->position(v).y,
@@ -64,11 +55,18 @@ bool projdyn_setmesh(Viewer* viewer, bool add_tets) {
         }
 
         sim.setRods(rods);
+        sim.setMesh(vertices);
     } else {
-        sim.setMesh(vertices, faces);
+        sim.setMesh(vertices);
     }
 
     return true;
+}
+
+void setup_demo_scene(Viewer* viewer) {
+    const float radius = 0.3;
+    viewer->add_rods_on_ball(radius);
+    default_constraints = false;
 }
 
 void init_projdyn_gui(Viewer* viewer) {
@@ -76,6 +74,11 @@ void init_projdyn_gui(Viewer* viewer) {
 	Window* pd_win = new Window(viewer, "Simulation Controls");
 	pd_win->setPosition(Vector2i(15, 230));
 	pd_win->setLayout(new GroupLayout());
+
+	Button* sim_setup = new Button(pd_win, "Set up demo scene");
+	sim_setup->setCallback([viewer]() {
+		setup_demo_scene(viewer);
+	});
 
 	Button* runsim_b = new Button(pd_win, "Run Simulation");
 	runsim_b->setCallback([viewer]() {
@@ -106,18 +109,6 @@ void init_projdyn_gui(Viewer* viewer) {
 		projdyn_num_iterations = num_its;
 	});
 
-    /* For now we don't use this method
-    //Cosserat rods variables
-    Window* cr_win = new Window(viewer, "Cosserat Rods Controls");
-    cr_win->setPosition(Vector2i(15, 480));
-    cr_win->setLayout(new GroupLayout());
-
-    Button* set_cr = new Button(cr_win, "Create rods");
-    set_cr->setCallback([viewer]() {
-        setRods();
-    });
-    */
-
 	viewer->performLayout();
 }
 
@@ -125,10 +116,9 @@ bool projdyn_start(Viewer* viewer) {
 	projdyn_stop();
 
 	// Make sure the simulator is properly initialized
-	if (!sim.isInitialized()) {
-		if (!sim.initializeSystem())
-			return false;
-	}
+	if (!sim.isInitialized())
+		if (!sim.initializeSystem(default_constraints))
+            return false;
 
 	// Create a thread that runs the simulation
 	// It calls a function that triggers a time-step every 1000/PROJDYN_FPS milliseconds
@@ -185,45 +175,39 @@ bool projdyn_upload_positions(Viewer* viewer) {
     }
 
     std::vector<ProjDyn::Index> rod_indices;
-    if (sim.isUsingCR()) {
-        Positions* rods_pos = sim.getRodsPositions();
-        size_t num_rods = rods_pos->rows();
-        upload_rods.resize(3, num_rods);
+    Positions* rods_pos = sim.getRodsPositions();
+    size_t num_rods = rods_pos->rows();
+    upload_rods.resize(3, num_rods);
 
-        for (size_t i = 0; i < num_rods; i++) {
-            upload_rods(0, i) = rods_pos->coeff(i, 0);
-            upload_rods(1, i) = rods_pos->coeff(i, 1);
-            upload_rods(2, i) = rods_pos->coeff(i,2);
-        }
-
-        upload_rods_tan.resize(3, num_rods);
-        Positions* rods_tan = sim.getRodsTangents();
-
-        for (size_t i = 0; i < num_rods; i++) {
-            upload_rods_tan(0, i) = rods_tan->coeff(i, 0);
-            upload_rods_tan(1, i) = rods_tan->coeff(i, 1);
-            upload_rods_tan(2, i) = rods_tan->coeff(i,2);
-        }
-
-        upload_rods_norm.resize(3, num_rods);
-        Positions* rods_normals = sim.getRodsNormals();
-
-        for (size_t i = 0; i < num_rods; i++) {
-            upload_rods_norm(0, i) = rods_normals->coeff(i, 0);
-            upload_rods_norm(1, i) = rods_normals->coeff(i, 1);
-            upload_rods_norm(2, i) = rods_normals->coeff(i,2);
-        }
-
-        rod_indices = sim.getRodIndices();
+    for (size_t i = 0; i < num_rods; i++) {
+        upload_rods(0, i) = rods_pos->coeff(i, 0);
+        upload_rods(1, i) = rods_pos->coeff(i, 1);
+        upload_rods(2, i) = rods_pos->coeff(i,2);
     }
 
+    upload_rods_tan.resize(3, num_rods);
+    Positions* rods_tan = sim.getRodsTangents();
+
+    for (size_t i = 0; i < num_rods; i++) {
+        upload_rods_tan(0, i) = rods_tan->coeff(i, 0);
+        upload_rods_tan(1, i) = rods_tan->coeff(i, 1);
+        upload_rods_tan(2, i) = rods_tan->coeff(i,2);
+    }
+
+    upload_rods_norm.resize(3, num_rods);
+    Positions* rods_normals = sim.getRodsNormals();
+
+    for (size_t i = 0; i < num_rods; i++) {
+        upload_rods_norm(0, i) = rods_normals->coeff(i, 0);
+        upload_rods_norm(1, i) = rods_normals->coeff(i, 1);
+        upload_rods_norm(2, i) = rods_normals->coeff(i,2);
+    }
+
+    rod_indices = sim.getRodIndices();
 
 	// The matrix is sent to the viewer with this function
-	if (viewer->is_using_rods()) {
-        viewer->updateShaderRods(upload_rods, upload_rods_tan, upload_rods_norm, rod_indices);
-    } else {
-        viewer->updateShaderVertices(upload_pos);
-    }
+    viewer->updateShaderRods(upload_rods, upload_rods_tan, upload_rods_norm, rod_indices);
+    viewer->updateShaderVertices(upload_pos);
 
 	return true;
 }

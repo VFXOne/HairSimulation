@@ -342,4 +342,41 @@ protected:
     Vector3 f_pos;
 };
 
+/*
+ * Constraint describing a rod point sticking to another point (on a mesh for example)
+ */
+//TODO: Add normal parameter
+class MovingPointConstraint: public CRConstraint {
+public:
+    MovingPointConstraint(Index num_coord, Scalar weight, Index pos_index, Positions* positions, Index moving_pos_index)
+    : CRConstraint(num_coord, weight) {
+        p_index = pos_index;
+        m_pos = positions;
+        m_pos_index = moving_pos_index;
+
+        A_i.resize(3, 3);
+        A_i.setIdentity();
+
+        B_i.resize(3, 3);
+        B_i.setIdentity();
+
+        initSM(3, num_coord);
+        m_selectionMatrix.coeffRef(0, p_index) = 1;
+        m_selectionMatrix.coeffRef(1, p_index+1) = 1;
+        m_selectionMatrix.coeffRef(2, p_index+2) = 1;
+    }
+
+    Vector projectOnConstraintSet(Vector& q) override {
+        Vector p_i;
+        p_i.resize(3);
+        p_i << m_pos->coeff(m_pos_index, 0), m_pos->coeff(m_pos_index, 1), m_pos->coeff(m_pos_index);
+        return p_i;
+    }
+
+protected:
+    Index p_index;
+    Positions* m_pos;
+    Index m_pos_index;
+};
+
 #endif //APPLET_PDCONSTRAINT_H
