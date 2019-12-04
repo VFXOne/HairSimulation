@@ -257,6 +257,10 @@ namespace ProjDyn {
                     Orientations new_quat;
                     Vector new_pos;
                     separatePosQuat(&cr_q_t, new_pos, new_quat, cr_num_coord);
+					for (Index i = 0; i < new_quat.rows(); i++) {
+						double phi = new_quat(i,0).angularDistance(s_u(i,0));
+						if (std::abs(phi) > 1e-10) std::cout << phi << std::endl;
+					}
                     cr_velocities = (new_pos - cr_positions) / h;
                     cr_positions = new_pos;
                     cr_angular_velocities = 2/h * quat2pos(conjugateQuat(cr_orientations) * new_quat);
@@ -406,13 +410,13 @@ namespace ProjDyn {
 		bool use_cosserat_rods;
 		Positions upload_pos, upload_tan, upload_normals;
 
-		void addSSConstraints() {
+		void addSSConstraints(double weight = 1.0) {
 		    for (size_t ind = 0; ind < rod_indices.size(); ind++) {
 		        Index rod_index = rod_indices.at(ind);
 		        Index next_index = ind == rod_indices.size() - 1 ? cr_num_positions : rod_indices.at(ind + 1);
 
                 for (size_t i = rod_index; i < next_index - 1; i++) {
-                    auto new_c = new StretchShearConstraint(cr_size, 1.0, i*3,
+                    auto new_c = new StretchShearConstraint(cr_size, weight, i*3,
                                                             cr_num_coord + (i - ind) * 4, cr_segments_length.at(ind));
                     cr_constraints.push_back(new_c);
                 }
@@ -428,7 +432,7 @@ namespace ProjDyn {
             }
 		}
 
-		void addBTConstraints() {
+		void addBTConstraints(double weight = 1.0) {
 		    for (Index ind = 0; ind < rod_indices.size(); ind++) {
 		        Index rod_index = rod_indices.at(ind);
 		        Index next_index = ind == rod_indices.size() - 1 ? cr_num_positions : rod_indices.at(ind + 1);
