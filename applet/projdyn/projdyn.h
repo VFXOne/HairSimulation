@@ -337,6 +337,7 @@ namespace ProjDyn {
 		    for (size_t i = 0; i < cr_num_quaternions; i++) {
 		        Quaternion q = cr_orientations[i];
                 upload_normals.row(j++) = q.normalized().toRotationMatrix() * n;
+                std::cout << "uploaded normal: " << q.normalized().toRotationMatrix() * n << std::endl;
                 if (i != 0 and std::find(rod_indices.begin(), rod_indices.end(), i) != rod_indices.end()) {
                     upload_normals.row(j++) = q.normalized().toRotationMatrix() * n;
                 }
