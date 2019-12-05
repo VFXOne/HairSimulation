@@ -208,16 +208,17 @@ public:
         m_updated_rods_tangents.resize(3, nPoints);
         m_updated_rods_normals.resize(3, nPoints);
         m_rod_indices.clear();
-        Vector3f default_tangent = Vector3f::UnitY();
-        Vector3f default_normal = Vector3f::UnitX();
+        Vector3f default_tangent = Vector3f::UnitX();
+        Vector3f default_normal = Vector3f::UnitY();
         const float seg_length = 1;
-        auto randAngle = [](){ return float(rand()) / float(RAND_MAX) * 2*M_PI; };
+        auto randVal = [](float max){ return float(rand()) / float(RAND_MAX) * max; };
         for (size_t j = 0; j < num_rods; j++) {
-            Quaternionf rotQuat(randAngle(), randAngle(), randAngle(), randAngle());
-            rotQuat.FromTwoVectors(default_tangent, default_tangent);
+            Quaternionf rotQuat;
+            rotQuat.FromTwoVectors(default_tangent, Vector3f(randVal(1), randVal(1), randVal(1)));
             rotQuat.normalize();
+            Vector3f tangent = rotQuat.toRotationMatrix() * default_tangent;
             for (int i = 0; i < res; i++) {
-                Vector3f p = rotQuat.toRotationMatrix() * (default_tangent * radius + default_tangent * i * seg_length);
+                Vector3f p = tangent * radius + tangent * i * seg_length;
                 m_updated_rods_pos.col(i+j*res) << p;
                 m_updated_rods_tangents.col(i+j*res) << p.normalized();
                 m_updated_rods_normals.col(i+j*res) << rotQuat.toRotationMatrix() * default_normal;

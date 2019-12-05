@@ -1,0 +1,3 @@
+[submodule "applet/externals/nanogui"]
+	path = applet/externals/nanogui
+	url = https://github.com/wjakob/nanogui.git
