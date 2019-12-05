@@ -230,6 +230,11 @@ public:
         diff_u_n = Quaternion::FromTwoVectors(d_3, x_f.normalized());
         u_n_star = u_n * diff_u_n;
 
+        std::cout << "x_f: " << x_f << std::endl;
+        std::cout << "d_3: " << d_3 << std::endl;
+        std::cout << "diff_u_n: " << diff_u_n.toRotationMatrix() << std::endl;
+        std::cout << "u_n_star: " << u_n_star.toRotationMatrix() << std::endl;
+
         Vector p_i;
         p_i.resize(7);
 
