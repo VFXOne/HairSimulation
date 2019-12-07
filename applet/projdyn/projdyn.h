@@ -35,7 +35,8 @@ namespace ProjDyn {
 		void setMesh(Positions& pos) {
 			// Pass the positions of the geometry
 			m = pos.rows();
-            m_positions = Positions(pos);
+            m_positions_init = pos;
+            m_positions = pos;
 		}
 
 		void setRods(const std::vector<Positions> rods) {
@@ -87,11 +88,13 @@ namespace ProjDyn {
 
 		void resetPositions() {
 			// Reset vertex positions to initial state and set m_velocities to 0
+			m_positions = m_positions_init;
 			if (use_cosserat_rods) {
                 cr_positions = cr_positions_init;
                 cr_velocities.setZero(3 * cr_num_positions);
                 cr_angular_velocities.setZero(cr_num_flat_pos);
                 cr_orientations = quatFromPos(cr_positions);
+                initializeSystem(m_default_constraints);
             }
         }
 
@@ -125,12 +128,14 @@ namespace ProjDyn {
 			    return false;
 			}
 
+			m_default_constraints = default_constraints;
+
             if (use_cosserat_rods) {
                 /****************
                  * CR Variables *
                  ****************/
 
-                if (default_constraints) {
+                if (m_default_constraints) {
                     addDefaultConstraints();
                 } else {
                     addMeshConstraints();
@@ -208,7 +213,7 @@ namespace ProjDyn {
 		}
 
         bool step(int num_iterations) {
-		    if (!isInitialized()) return
+		    if (!isInitialized()) return false;
 
 		    is_simulating = true;
 
@@ -234,7 +239,7 @@ namespace ProjDyn {
 #pragma omp parallel for
 		        for (size_t i = 0; i < num_constraints; i++) {
 		            auto proj = cr_constraints.at(i)->projectOnConstraintSet(cr_q_t);
-		            projections[i] = proj;
+		            projections.at(i) = proj;
 		        }
 
                 /*****************
@@ -257,10 +262,6 @@ namespace ProjDyn {
                     Orientations new_quat;
                     Vector new_pos;
                     separatePosQuat(&cr_q_t, new_pos, new_quat, cr_num_coord);
-					for (Index i = 0; i < new_quat.rows(); i++) {
-						double phi = new_quat(i,0).angularDistance(s_u(i,0));
-						if (std::abs(phi) > 1e-10) std::cout << phi << std::endl;
-					}
                     cr_velocities = (new_pos - cr_positions) / h;
                     cr_positions = new_pos;
                     cr_angular_velocities = 2/h * quat2pos(conjugateQuat(cr_orientations) * new_quat);
@@ -336,12 +337,11 @@ namespace ProjDyn {
 
 		Positions* getRodsNormals() {
 		    upload_normals.resize(cr_num_positions, 3);
-		    Vector3 n = Vector3::UnitX();
+		    Vector3 n = -Vector3::UnitX();
 		    size_t j = 0;
 		    for (size_t i = 0; i < cr_num_quaternions; i++) {
 		        Quaternion q = cr_orientations[i];
                 upload_normals.row(j++) = q.normalized().toRotationMatrix() * n;
-                std::cout << "uploaded normal: " << q.normalized().toRotationMatrix() * n << std::endl;
                 if (i != 0 and std::find(rod_indices.begin(), rod_indices.end(), i) != rod_indices.end()) {
                     upload_normals.row(j++) = q.normalized().toRotationMatrix() * n;
                 }
@@ -366,6 +366,7 @@ namespace ProjDyn {
          ******************/
         size_t m;
         Positions m_positions;
+        Positions m_positions_init;
 
         /***************************
          * Cosserat Rods variables *
@@ -409,9 +410,10 @@ namespace ProjDyn {
 		bool is_ready;
 		bool is_simulating;
 		bool use_cosserat_rods;
+		bool m_default_constraints = true;
 		Positions upload_pos, upload_tan, upload_normals;
 
-		void addSSConstraints(double weight = 1.0) {
+		void addSSConstraints(Scalar weight = 10.0) {
 		    for (size_t ind = 0; ind < rod_indices.size(); ind++) {
 		        Index rod_index = rod_indices.at(ind);
 		        Index next_index = ind == rod_indices.size() - 1 ? cr_num_positions : rod_indices.at(ind + 1);
@@ -424,25 +426,25 @@ namespace ProjDyn {
             }
 		}
 
-		void addFixedPosConstraint() {
-		    for (auto i: rod_indices) {
+		void addBTConstraints(Scalar weight = 10.0) {
+		    for (Index ind = 0; ind < rod_indices.size(); ind++) {
+		        Index rod_index = rod_indices.at(ind);
+		        Index next_index = ind == rod_indices.size() - 1 ? cr_num_positions : rod_indices.at(ind + 1);
+                for (size_t i = rod_index; i < next_index - 2; i++) {
+                    auto new_c = new BendTwistConstraint(cr_size, weight, cr_num_coord + (i-ind)*4, cr_segments_length.at(ind));
+                    cr_constraints.push_back(new_c);
+                }
+            }
+		}
+
+        void addFixedPosConstraint() {
+            for (auto i: rod_indices) {
                 Vector3 p;
                 p << cr_positions.coeff(i*3), cr_positions.coeff(i*3+1), cr_positions.coeff(i*3+2);
                 auto fpc = new FixedPointConstraint(cr_size, 10000,i*3, p);
                 cr_constraints.push_back(fpc);
             }
-		}
-
-		void addBTConstraints(double weight = 1.0) {
-		    for (Index ind = 0; ind < rod_indices.size(); ind++) {
-		        Index rod_index = rod_indices.at(ind);
-		        Index next_index = ind == rod_indices.size() - 1 ? cr_num_positions : rod_indices.at(ind + 1);
-                for (size_t i = rod_index; i < next_index - 2; i++) {
-                    auto new_c = new BendTwistConstraint(cr_size, 1.0, cr_num_coord + (i-ind)*4, cr_segments_length.at(ind));
-                    cr_constraints.push_back(new_c);
-                }
-            }
-		}
+        }
 
 		void addMovingPosConstraints() {
 		    if (m_positions.size() == 0) return;
@@ -473,7 +475,7 @@ namespace ProjDyn {
 		    Orientations u(q_size);
 		    for (size_t i = 0; i < q_size; i++) {
                 Quaternion quat(0, p[i*3], p[i*3 + 1], p[i*3 + 2]);
-                u[i] = quat.normalized();
+                u[i] = quat;
 		    }
 		    return u;
 		}
@@ -483,7 +485,7 @@ namespace ProjDyn {
 		    Vector pos;
 		    pos.setZero(quat.size() * 3);
 		    for (size_t i = 0; i < quat.size(); i++) {
-		        auto q = quat[i].normalized();
+		        auto q = quat[i];
 		        //The real part should be null
 		        //assert(q.w() == 0.0);
 		        pos[i*3] = q.x();

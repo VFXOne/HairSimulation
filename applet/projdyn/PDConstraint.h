@@ -221,19 +221,12 @@ public:
         x_f = (x_n_1 - x_n) / seg_length;
 
         u_n = Quaternion(q.coeff(q_index), q.coeff(q_index+1), q.coeff(q_index+2), q.coeff(q_index+3));
-        u_n.normalize();
 
         d_3 = u_n.toRotationMatrix() * Vector3::UnitY();
-        //d_3 = u_n_star.toRotationMatrix() * x_f;
         d_3.normalize();
 
-        diff_u_n = Quaternion::FromTwoVectors(d_3, x_f.normalized());
+        diff_u_n = Quaternion::FromTwoVectors(d_3, x_f);
         u_n_star = u_n * diff_u_n;
-
-        std::cout << "x_f: " << x_f << std::endl;
-        std::cout << "d_3: " << d_3 << std::endl;
-        std::cout << "diff_u_n: " << diff_u_n.toRotationMatrix() << std::endl;
-        std::cout << "u_n_star: " << u_n_star.toRotationMatrix() << std::endl;
 
         Vector p_i;
         p_i.resize(7);
@@ -281,19 +274,16 @@ public:
     Vector projectOnConstraintSet(Vector& q) override {
         Quaternion u_n(q.coeff(q_index), q.coeff(q_index+1),q.coeff(q_index+2), q.coeff(q_index+3));
         Quaternion u_n_1(q.coeff(q_index+4), q.coeff(q_index+5),q.coeff(q_index+6), q.coeff(q_index+7));
-        u_n.normalize();
-        u_n_1.normalize();
         Quaternion r_curvature = u_n.conjugate() * u_n_1;
-        r_curvature.normalize();
-        //r_curvature.w() = 0;
+        r_curvature;
 
         Quaternion r_curvature_c(r_curvature.conjugate());
-        r_curvature_c.normalize();
+        r_curvature_c;
 
-        auto rotMatrix = r_curvature.toRotationMatrix();
+        auto rotMatrix = r_curvature.normalized().toRotationMatrix();
         r_curvature = Quaternion(0.5 * rotMatrix);
 
-        rotMatrix = r_curvature_c.toRotationMatrix();
+        rotMatrix = r_curvature_c.normalized().toRotationMatrix();
         r_curvature_c = Quaternion(0.5 * rotMatrix);
 
         Quaternion u_n_star = u_n * r_curvature;

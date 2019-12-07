@@ -113,7 +113,7 @@ public:
 		}
 	}
 
-    void default_rods(const size_t res = 5, const size_t num_rods = 1) {
+    void default_rods(const size_t res = 5, const size_t num_rods = 3) {
         using_rods = true;
         r_res = res;
         r_num_rods = num_rods;
@@ -199,7 +199,7 @@ public:
         }
     }
 
-    void add_rods_on_ball(float radius, size_t res = 5, size_t num_rods = 1) {
+    void add_rods_on_ball(float radius, size_t res = 5, size_t num_rods = 1, float seg_length = 0.5) {
         using_rods = true;
         r_res = res;
         r_num_rods = num_rods;
@@ -210,14 +210,14 @@ public:
         m_rod_indices.clear();
         Vector3f default_tangent = Vector3f::UnitX();
         Vector3f default_normal = Vector3f::UnitY();
-        const float seg_length = 1;
         auto randVal = [](float max){ return float(rand()) / float(RAND_MAX) * max; };
         for (size_t j = 0; j < num_rods; j++) {
             Quaternionf rotQuat;
             rotQuat.FromTwoVectors(default_tangent, Vector3f(randVal(1), randVal(1), randVal(1)));
             rotQuat.normalize();
             Vector3f tangent = rotQuat.toRotationMatrix() * default_tangent;
-            for (int i = 0; i < res; i++) {
+            tangent = default_tangent;
+            for (size_t i = 0; i < res; i++) {
                 Vector3f p = tangent * radius + tangent * i * seg_length;
                 m_updated_rods_pos.col(i+j*res) << p;
                 m_updated_rods_tangents.col(i+j*res) << p.normalized();
@@ -229,6 +229,7 @@ public:
         rodMesh();
         loadMesh("../data/small_sphere.obj");
         Point center = computeCenter(&mesh);
+        center += Point(1+radius, -2, 0);
         for (auto v : mesh.vertices()) {
             mesh.position(v) = (mesh.position(v) - center) * radius + center;
         }
@@ -371,7 +372,7 @@ public:
             popupBtn->setPushed(false);
         });
 
-        b = new Button(popup, "Rods");
+        b = new Button(popup, "Default rods");
         b->setCallback([this,popupBtn]() {
             default_rods();
             rodMesh();
