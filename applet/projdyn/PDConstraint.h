@@ -275,10 +275,8 @@ public:
         Quaternion u_n(q.coeff(q_index), q.coeff(q_index+1),q.coeff(q_index+2), q.coeff(q_index+3));
         Quaternion u_n_1(q.coeff(q_index+4), q.coeff(q_index+5),q.coeff(q_index+6), q.coeff(q_index+7));
         Quaternion r_curvature = u_n.conjugate() * u_n_1;
-        r_curvature;
 
         Quaternion r_curvature_c(r_curvature.conjugate());
-        r_curvature_c;
 
         auto rotMatrix = r_curvature.normalized().toRotationMatrix();
         r_curvature = Quaternion(0.5 * rotMatrix);

@@ -113,7 +113,7 @@ public:
 		}
 	}
 
-    void default_rods(const size_t res = 5, const size_t num_rods = 3) {
+    void defaultRods(const size_t res = 5, const size_t num_rods = 3) {
         using_rods = true;
         r_res = res;
         r_num_rods = num_rods;
@@ -131,6 +131,44 @@ public:
             }
             m_rod_indices.push_back(j*res);
         }
+    }
+
+    void addRodsOnBall(float radius, size_t res = 5, size_t num_rods = 1, float seg_length = 0.5) {
+        using_rods = true;
+        r_res = res;
+        r_num_rods = num_rods;
+        size_t nPoints = res*num_rods;
+        m_updated_rods_pos.resize(3, nPoints);
+        m_updated_rods_tangents.resize(3, nPoints);
+        m_updated_rods_normals.resize(3, nPoints);
+        m_rod_indices.clear();
+        Vector3f default_tangent = -Vector3f::UnitX();
+        Vector3f default_normal = Vector3f::UnitY();
+        auto randVal = [](float max){ return float(rand()) / float(RAND_MAX) * max; };
+        for (size_t j = 0; j < num_rods; j++) {
+            Quaternionf rotQuat;
+            rotQuat.FromTwoVectors(default_tangent, Vector3f(randVal(1), randVal(1), randVal(1)).normalized());
+            rotQuat.normalize();
+            Vector3f tangent = rotQuat.toRotationMatrix() * default_tangent;
+            tangent = default_tangent;
+            for (size_t i = 0; i < res; i++) {
+                Vector3f p = tangent * radius + tangent * i * seg_length;
+                m_updated_rods_pos.col(i+j*res) << p;
+                m_updated_rods_tangents.col(i+j*res) << p.normalized();
+                m_updated_rods_normals.col(i+j*res) << rotQuat.toRotationMatrix() * default_normal;
+            }
+            m_rod_indices.push_back(j*res);
+        }
+
+        rodMesh();
+        loadMesh("../data/small_sphere.obj");
+        Point center = computeCenter(&mesh);
+        center += Point(0, 0, 0);
+        for (auto v : mesh.vertices()) {
+            mesh.position(v) = (mesh.position(v) - center) * radius + center;
+        }
+        meshProcess();
+        m_mesh_load_callback(this); //Re-upload the positions to the simulator because we changed them
     }
 
 	void rodMesh() {
@@ -196,42 +234,6 @@ public:
             if (!m_mesh_load_callback(this)) {
                 std::cout << "Error on callback after loading mesh!" << std::endl;
             }
-        }
-    }
-
-    void add_rods_on_ball(float radius, size_t res = 5, size_t num_rods = 1, float seg_length = 0.5) {
-        using_rods = true;
-        r_res = res;
-        r_num_rods = num_rods;
-        size_t nPoints = res*num_rods;
-        m_updated_rods_pos.resize(3, nPoints);
-        m_updated_rods_tangents.resize(3, nPoints);
-        m_updated_rods_normals.resize(3, nPoints);
-        m_rod_indices.clear();
-        Vector3f default_tangent = Vector3f::UnitX();
-        Vector3f default_normal = Vector3f::UnitY();
-        auto randVal = [](float max){ return float(rand()) / float(RAND_MAX) * max; };
-        for (size_t j = 0; j < num_rods; j++) {
-            Quaternionf rotQuat;
-            rotQuat.FromTwoVectors(default_tangent, Vector3f(randVal(1), randVal(1), randVal(1)));
-            rotQuat.normalize();
-            Vector3f tangent = rotQuat.toRotationMatrix() * default_tangent;
-            tangent = default_tangent;
-            for (size_t i = 0; i < res; i++) {
-                Vector3f p = tangent * radius + tangent * i * seg_length;
-                m_updated_rods_pos.col(i+j*res) << p;
-                m_updated_rods_tangents.col(i+j*res) << p.normalized();
-                m_updated_rods_normals.col(i+j*res) << rotQuat.toRotationMatrix() * default_normal;
-            }
-            m_rod_indices.push_back(j*res);
-        }
-
-        rodMesh();
-        loadMesh("../data/small_sphere.obj");
-        Point center = computeCenter(&mesh);
-        center += Point(1+radius, -2, 0);
-        for (auto v : mesh.vertices()) {
-            mesh.position(v) = (mesh.position(v) - center) * radius + center;
         }
     }
 
@@ -374,7 +376,7 @@ public:
 
         b = new Button(popup, "Default rods");
         b->setCallback([this,popupBtn]() {
-            default_rods();
+            defaultRods();
             rodMesh();
             rodProcess();
             popupBtn->setPushed(false);

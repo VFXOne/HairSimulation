@@ -321,7 +321,7 @@ namespace ProjDyn {
 		Positions* getRodsTangents() {
 		    upload_tan = vec2pos(cr_positions);
 		    upload_tan.resize(cr_num_positions, 3);
-		    Vector3 t = Vector3::UnitY();
+		    Vector3 t = -Vector3::UnitY();
 		    size_t j = 0;
 		    for (size_t i = 0; i < cr_num_quaternions; i++) {
 		        Quaternion q = cr_orientations[i];
@@ -337,7 +337,7 @@ namespace ProjDyn {
 
 		Positions* getRodsNormals() {
 		    upload_normals.resize(cr_num_positions, 3);
-		    Vector3 n = -Vector3::UnitX();
+		    Vector3 n = Vector3::UnitX();
 		    size_t j = 0;
 		    for (size_t i = 0; i < cr_num_quaternions; i++) {
 		        Quaternion q = cr_orientations[i];
@@ -413,7 +413,7 @@ namespace ProjDyn {
 		bool m_default_constraints = true;
 		Positions upload_pos, upload_tan, upload_normals;
 
-		void addSSConstraints(Scalar weight = 10.0) {
+		void addSSConstraints(Scalar weight = 100.0) {
 		    for (size_t ind = 0; ind < rod_indices.size(); ind++) {
 		        Index rod_index = rod_indices.at(ind);
 		        Index next_index = ind == rod_indices.size() - 1 ? cr_num_positions : rod_indices.at(ind + 1);
@@ -528,6 +528,7 @@ namespace ProjDyn {
 		    size_t num_pos = pos.size() / 3;
 		    Orientations quat;
 		    quat.resize(num_pos - rod_indices.size());
+		    const Vector3 tangent = -Vector3::UnitY();
 
 		    size_t j = 0;
 		    for (size_t i = 0; i < num_pos-1; i++) {
@@ -540,12 +541,12 @@ namespace ProjDyn {
                 Quaternion q;
                 if (std::find(rod_indices.begin(), rod_indices.end(), i) != rod_indices.end()) { //The first position always points forward
                     v_previous = Vector3(v_next);
-                    q = Quaternion::FromTwoVectors(v_next - v_i, Vector3::UnitY());
+                    q = Quaternion::FromTwoVectors(v_next - v_i, tangent);
                     if (i != 0) i++;
                 } else {
                     v_previous << pos[previous_index], pos[previous_index + 1], pos[previous_index + 2];
                     //q = Quaternion::FromTwoVectors(v_i - v_previous, v_next - v_i);
-                    q = Quaternion::FromTwoVectors(v_i - v_previous, Vector3::UnitY());
+                    q = Quaternion::FromTwoVectors(v_i - v_previous, tangent);
                 }
                 quat[j++] = q;
             }
