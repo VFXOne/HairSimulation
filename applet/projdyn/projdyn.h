@@ -1,4 +1,5 @@
 #pragma once
+#pragma once
 
 #define _USE_MATH_DEFINES
 
@@ -142,7 +143,6 @@ namespace ProjDyn {
                 }
 
                 cr_f_ext.setZero(cr_num_coord);
-                //Set gravity on z axis m times
                 for (size_t i = 0; i < cr_num_coord; i++) {
                     cr_f_ext.coeffRef(i) = 0;
                     cr_f_ext.coeffRef(++i) = gravity;
@@ -152,7 +152,7 @@ namespace ProjDyn {
                 cr_orientations = quatFromPos(cr_positions);
                 cr_torques.setZero(cr_num_flat_pos);
 
-                Vector masses_flat = Vector::Ones(cr_num_coord) * cr_density;
+                Vector masses_flat = Vector::Ones(cr_num_coord) * cr_unit_weight;
                 cr_masses = masses_flat.asDiagonal();
                 cr_masses_inv = cr_masses.cwiseInverse();
 
@@ -250,12 +250,12 @@ namespace ProjDyn {
 		        cr_rhs = cr_M_star * s_t / (h*h);
 		        for (size_t i = 0; i < num_constraints; i++) {
 		            auto c = cr_constraints.at(i);
-		            cr_rhs += c->getSelectionMatrixWeighted().transpose() //TODO: new function in constraints that computes this product in advance
-		                    * c->getAiMatrix().transpose() * c->getBiMatrix()
-		                    * projections.at(i);
+		            cr_rhs += c->getLHS() * projections.at(i);
 		        }
 
                 cr_q_t = cr_solver.solve(cr_rhs);
+
+		        std::cout << "solved: " << cr_q_t << std::endl;
 
                 if (cr_solver.info() == Eigen::Success) {
                     //Update velocities and angular velocities
@@ -319,7 +319,6 @@ namespace ProjDyn {
 		}
 
 		Positions* getRodsTangents() {
-		    upload_tan = vec2pos(cr_positions);
 		    upload_tan.resize(cr_num_positions, 3);
 		    Vector3 t = -Vector3::UnitY();
 		    size_t j = 0;
@@ -337,7 +336,7 @@ namespace ProjDyn {
 
 		Positions* getRodsNormals() {
 		    upload_normals.resize(cr_num_positions, 3);
-		    Vector3 n = Vector3::UnitX();
+		    Vector3 n = -Vector3::UnitX();
 		    size_t j = 0;
 		    for (size_t i = 0; i < cr_num_quaternions; i++) {
 		        Quaternion q = cr_orientations[i];
@@ -413,14 +412,14 @@ namespace ProjDyn {
 		bool m_default_constraints = true;
 		Positions upload_pos, upload_tan, upload_normals;
 
-		void addSSConstraints(Scalar weight = 100.0) {
+		void addSSConstraints(Scalar weight = 10.0) {
 		    for (size_t ind = 0; ind < rod_indices.size(); ind++) {
 		        Index rod_index = rod_indices.at(ind);
 		        Index next_index = ind == rod_indices.size() - 1 ? cr_num_positions : rod_indices.at(ind + 1);
 
                 for (size_t i = rod_index; i < next_index - 1; i++) {
                     auto new_c = new StretchShearConstraint(cr_size, weight, i*3,
-                                                            cr_num_coord + (i - ind) * 4, cr_segments_length.at(ind));
+                                                            cr_num_coord + (i-ind)*4, cr_segments_length.at(ind));
                     cr_constraints.push_back(new_c);
                 }
             }
@@ -454,7 +453,7 @@ namespace ProjDyn {
                 float min_distance = std::numeric_limits<float>::max();
                 for (size_t j = 0; j < m_positions.rows(); j++) {
                     Vector3 p = m_positions.row(j);
-                    Vector3 r(cr_positions.coeff(j), cr_positions.coeff(j+1), cr_positions.coeff(j+2));
+                    Vector3 r(cr_positions.coeff(i*3), cr_positions.coeff(i*3+1), cr_positions.coeff(i*3+2));
                     float dist = (p-r).norm();
                     if (dist < min_distance) {
                         index = j;
@@ -486,8 +485,6 @@ namespace ProjDyn {
 		    pos.setZero(quat.size() * 3);
 		    for (size_t i = 0; i < quat.size(); i++) {
 		        auto q = quat[i];
-		        //The real part should be null
-		        //assert(q.w() == 0.0);
 		        pos[i*3] = q.x();
 		        pos[i*3 + 1] = q.y();
 		        pos[i*3 + 2] = q.z();
@@ -532,22 +529,16 @@ namespace ProjDyn {
 
 		    size_t j = 0;
 		    for (size_t i = 0; i < num_pos-1; i++) {
-		        size_t index = i*3;
+		        size_t index = i * 3;
 		        size_t next_index = (i + 1) * 3;
-                size_t previous_index = (i - 1) * 3;
-                Vector3 v_i, v_next, v_previous;
+
+                Vector3 v_i, v_next;
                 v_i << pos[index], pos[index + 1], pos[index + 2];
                 v_next << pos[next_index], pos[next_index + 1], pos[next_index + 2];
-                Quaternion q;
-                if (std::find(rod_indices.begin(), rod_indices.end(), i) != rod_indices.end()) { //The first position always points forward
-                    v_previous = Vector3(v_next);
-                    q = Quaternion::FromTwoVectors(v_next - v_i, tangent);
-                    if (i != 0) i++;
-                } else {
-                    v_previous << pos[previous_index], pos[previous_index + 1], pos[previous_index + 2];
-                    //q = Quaternion::FromTwoVectors(v_i - v_previous, v_next - v_i);
-                    q = Quaternion::FromTwoVectors(v_i - v_previous, tangent);
-                }
+
+                if (std::find(rod_indices.begin(), rod_indices.end(), i) != rod_indices.end() and i != 0) i++;
+
+                Quaternion q = Quaternion::FromTwoVectors(tangent, v_next - v_i);
                 quat[j++] = q;
             }
 

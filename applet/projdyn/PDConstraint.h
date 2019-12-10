@@ -25,10 +25,6 @@ public:
 
     virtual SparseMatrix getSelectionMatrixWeighted() = 0;
 
-    SparseMatrix computeLHS() {
-        return m_weight*m_selectionMatrix.transpose() * m_selectionMatrix;
-    }
-
 protected:
 
     SparseMatrix m_selectionMatrix;
@@ -164,10 +160,20 @@ public:
         return m_weight * m_selectionMatrix;
     }
 
+    SparseMatrix getLHS() {
+        return lhs;
+    }
+
 
 protected:
+
+    void computeLHS()  {
+        lhs = m_weight * m_selectionMatrix.transpose() * A_i.transpose() * B_i;
+    }
+
     SparseMatrix A_i;
     SparseMatrix B_i;
+    SparseMatrix lhs;
 };
 
 class StretchShearConstraint: public CRConstraint {
@@ -210,6 +216,8 @@ public:
         m_selectionMatrix.coeffRef(7,q_index + 1) = 1;
         m_selectionMatrix.coeffRef(8,q_index + 2) = 1;
         m_selectionMatrix.coeffRef(9,q_index + 3) = 1;
+
+        computeLHS();
     }
 
     Vector projectOnConstraintSet(Vector& q) override {
@@ -222,8 +230,9 @@ public:
 
         u_n = Quaternion(q.coeff(q_index), q.coeff(q_index+1), q.coeff(q_index+2), q.coeff(q_index+3));
 
-        d_3 = u_n.toRotationMatrix() * Vector3::UnitY();
-        d_3.normalize();
+        d_3 = u_n.normalized().toRotationMatrix() * -Vector3::UnitY();
+
+        std::cout << "d_3 for quat " << q_index << ": " << d_3 << std::endl;
 
         diff_u_n = Quaternion::FromTwoVectors(d_3, x_f);
         u_n_star = u_n * diff_u_n;
@@ -269,6 +278,7 @@ public:
         m_selectionMatrix.coeffRef(6, q_index+6) = 1;
         m_selectionMatrix.coeffRef(7, q_index+7) = 1;
 
+        computeLHS();
     }
 
     Vector projectOnConstraintSet(Vector& q) override {
@@ -279,17 +289,19 @@ public:
         Quaternion r_curvature_c(r_curvature.conjugate());
 
         auto rotMatrix = r_curvature.normalized().toRotationMatrix();
-        r_curvature = Quaternion(0.5 * rotMatrix);
+        r_curvature = Quaternion(rotMatrix / 2);
+        //r_curvature = Quaternion(r_curvature.w()/2, r_curvature.x()/2, r_curvature.y()/2, r_curvature.z()/2);
 
         rotMatrix = r_curvature_c.normalized().toRotationMatrix();
-        r_curvature_c = Quaternion(0.5 * rotMatrix);
+        r_curvature_c = Quaternion(rotMatrix / 2);
+        //r_curvature_c = Quaternion(r_curvature_c.w()/2, r_curvature_c.x()/2, r_curvature_c.y()/2, r_curvature_c.z()/2);
 
         Quaternion u_n_star = u_n * r_curvature;
         Quaternion u_n_1_star = u_n_1 * r_curvature_c;
 
         Vector sol;
         sol.resize(8);
-        sol << u_n_star.w(), u_n_star.x(), u_n_star.y(), u_n_star.z(),
+        sol <<  u_n_star.w(), u_n_star.x(), u_n_star.y(), u_n_star.z(),
                 u_n_1_star.w(), u_n_1_star.x(), u_n_1_star.y(), u_n_1_star.z();
 
         return sol;
@@ -316,6 +328,8 @@ public:
         m_selectionMatrix.coeffRef(0, p_index) = 1;
         m_selectionMatrix.coeffRef(1, p_index+1) = 1;
         m_selectionMatrix.coeffRef(2, p_index+2) = 1;
+
+        computeLHS();
     }
 
     Vector projectOnConstraintSet(Vector& q) override {
@@ -352,6 +366,8 @@ public:
         m_selectionMatrix.coeffRef(0, p_index) = 1;
         m_selectionMatrix.coeffRef(1, p_index+1) = 1;
         m_selectionMatrix.coeffRef(2, p_index+2) = 1;
+
+        computeLHS();
     }
 
     Vector projectOnConstraintSet(Vector& q) override {

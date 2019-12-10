@@ -163,7 +163,7 @@ public:
         rodMesh();
         loadMesh("../data/small_sphere.obj");
         Point center = computeCenter(&mesh);
-        center += Point(0, 0, 0);
+        center += Point(0, radius, 0);
         for (auto v : mesh.vertices()) {
             mesh.position(v) = (mesh.position(v) - center) * radius + center;
         }
