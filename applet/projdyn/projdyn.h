@@ -538,7 +538,7 @@ namespace ProjDyn {
 
                 if (std::find(rod_indices.begin(), rod_indices.end(), i) != rod_indices.end() and i != 0) i++;
 
-                Quaternion q = Quaternion::FromTwoVectors(tangent, v_next - v_i);
+                Quaternion q = Quaternion::FromTwoVectors(tangent, (v_next - v_i).normalized());
                 quat[j++] = q;
             }
 
