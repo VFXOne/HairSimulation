@@ -142,7 +142,7 @@ public:
                                "Please use projectOnConstraintSet(FlatPos& fp)");
     }
 
-    virtual Vector projectOnConstraintSet(Vector& fp) = 0;
+    virtual Vector projectOnConstraintSet(const Vector& fp) = 0;
 
     SparseMatrix getAiMatrix() {
         return A_i;
@@ -220,7 +220,7 @@ public:
         computeLHS();
     }
 
-    Vector projectOnConstraintSet(Vector& q) override {
+    Vector projectOnConstraintSet(const Vector& q) override {
         Vector3 x_n, x_n_1, x_f, d_3;
         Quaternion u_n, diff_u_n, u_n_star;
 
@@ -231,8 +231,6 @@ public:
         u_n = Quaternion(q.coeff(q_index), q.coeff(q_index+1), q.coeff(q_index+2), q.coeff(q_index+3));
 
         d_3 = u_n.normalized().toRotationMatrix() * -Vector3::UnitY();
-
-        std::cout << "d_3 for quat " << q_index << ": " << d_3 << std::endl;
 
         diff_u_n = Quaternion::FromTwoVectors(d_3, x_f);
         u_n_star = u_n * diff_u_n;
@@ -281,7 +279,7 @@ public:
         computeLHS();
     }
 
-    Vector projectOnConstraintSet(Vector& q) override {
+    Vector projectOnConstraintSet(const Vector& q) override {
         Quaternion u_n(q.coeff(q_index), q.coeff(q_index+1),q.coeff(q_index+2), q.coeff(q_index+3));
         Quaternion u_n_1(q.coeff(q_index+4), q.coeff(q_index+5),q.coeff(q_index+6), q.coeff(q_index+7));
         Quaternion r_curvature = u_n.conjugate() * u_n_1;
@@ -298,6 +296,8 @@ public:
 
         Quaternion u_n_star = u_n * r_curvature;
         Quaternion u_n_1_star = u_n_1 * r_curvature_c;
+
+        std::cout << "u_n_star: " << u_n_star.x() << ", " << u_n_star.y() << ", " << u_n_star.z() << std::endl;
 
         Vector sol;
         sol.resize(8);
@@ -332,7 +332,7 @@ public:
         computeLHS();
     }
 
-    Vector projectOnConstraintSet(Vector& q) override {
+    Vector projectOnConstraintSet(const Vector& q) override {
         Vector p_i;
         p_i.resize(3);
         p_i << f_pos.x(), f_pos.y(), f_pos.z();
@@ -370,7 +370,7 @@ public:
         computeLHS();
     }
 
-    Vector projectOnConstraintSet(Vector& q) override {
+    Vector projectOnConstraintSet(const Vector& q) override {
         Vector p_i;
         p_i.resize(3);
         p_i << m_pos->coeff(m_pos_index, 0), m_pos->coeff(m_pos_index, 1), m_pos->coeff(m_pos_index, 2);
@@ -381,6 +381,81 @@ protected:
     Index p_index;
     Positions* m_pos;
     Index m_pos_index;
+};
+
+class NormalConstraint: public CRConstraint {
+public:
+    NormalConstraint(Index num_coord, Scalar weight, Index pos_index, Vector3 normal)
+    : CRConstraint(num_coord, weight) {
+        p_index = pos_index;
+        m_normal = normal;
+
+        A_i.resize(3, 3);
+        A_i.setIdentity();
+
+        B_i.resize(3, 3);
+        B_i.setIdentity();
+
+        initSM(3, num_coord);
+//        m_selectionMatrix.coeffRef(0, p_index) = 1;
+//        m_selectionMatrix.coeffRef(1, p_index+1) = 1;
+//        m_selectionMatrix.coeffRef(2, p_index+2) = 1;
+        m_selectionMatrix.coeffRef(0, p_index+3) = 1;
+        m_selectionMatrix.coeffRef(1, p_index+4) = 1;
+        m_selectionMatrix.coeffRef(2, p_index+5) = 1;
+
+        computeLHS();
+    }
+
+    Vector projectOnConstraintSet(const Vector& q) override {
+        Vector p_i;
+        p_i.resize(3);
+        Vector3 pos(q.coeff(p_index), q.coeff(p_index+1), q.coeff(p_index+2));
+        Vector3 next(q.coeff(p_index+3), q.coeff(p_index+4), q.coeff(p_index+5));
+        double dist = (pos - next).norm();
+        Vector3 proj = pos + m_normal*dist;
+        std::cout << "normal constraint: pos = " << pos << ". next: " << next << ". proj: " << proj << std::endl;
+        p_i << next.x(), next.y(), next.z();
+        return p_i;
+    }
+
+protected:
+    Index p_index;
+    Vector3 m_normal;
+};
+
+class NormalConstraintQuat: public CRConstraint {
+public:
+    NormalConstraintQuat(Index num_coord, Scalar weight, Index quat_index, Quaternion normal)
+    : CRConstraint(num_coord, weight) {
+        q_index = quat_index;
+        m_normal = normal;
+
+        A_i.resize(4, 4);
+        A_i.setIdentity();
+
+        B_i.resize(4, 4);
+        B_i.setIdentity();
+
+        initSM(4, num_coord);
+        m_selectionMatrix.coeffRef(0, q_index) = 1;
+        m_selectionMatrix.coeffRef(1, q_index+1) = 1;
+        m_selectionMatrix.coeffRef(2, q_index+2) = 1;
+        m_selectionMatrix.coeffRef(3, q_index+3) = 1;
+
+        computeLHS();
+    }
+
+    Vector projectOnConstraintSet(const Vector& q) override {
+        Vector p_i;
+        p_i.resize(4);
+        p_i << m_normal.w(), m_normal.x(), m_normal.y(), m_normal.z();
+        return p_i;
+    }
+
+protected:
+    Index q_index;
+    Quaternion m_normal;
 };
 
 #endif //APPLET_PDCONSTRAINT_H

@@ -136,12 +136,6 @@ namespace ProjDyn {
                  * CR Variables *
                  ****************/
 
-                if (m_default_constraints) {
-                    addDefaultConstraints();
-                } else {
-                    addMeshConstraints();
-                }
-
                 cr_f_ext.setZero(cr_num_coord);
                 for (size_t i = 0; i < cr_num_coord; i++) {
                     cr_f_ext.coeffRef(i) = 0;
@@ -204,6 +198,12 @@ namespace ProjDyn {
                     }
                 }
 
+                if (m_default_constraints) {
+                    addDefaultConstraints();
+                } else {
+                    addMeshConstraints();
+                }
+
                 //Finally, precompute the left-hand side matrix
                 initializeLHS();
             }
@@ -254,8 +254,6 @@ namespace ProjDyn {
 		        }
 
                 cr_q_t = cr_solver.solve(cr_rhs);
-
-		        std::cout << "solved: " << cr_q_t << std::endl;
 
                 if (cr_solver.info() == Eigen::Success) {
                     //Update velocities and angular velocities
@@ -320,7 +318,7 @@ namespace ProjDyn {
 
 		Positions* getRodsTangents() {
 		    upload_tan.resize(cr_num_positions, 3);
-		    Vector3 t = -Vector3::UnitY();
+		    Vector3 t = Vector3::UnitY();
 		    size_t j = 0;
 		    for (size_t i = 0; i < cr_num_quaternions; i++) {
 		        Quaternion q = cr_orientations[i];
@@ -447,10 +445,15 @@ namespace ProjDyn {
 
 		void addMovingPosConstraints() {
 		    if (m_positions.size() == 0) return;
+
+            Vector3 center = computeCenter(m_positions);
+
+            size_t ind = 0;
             for (auto i: rod_indices) {
                 //Find closest point to the rod on the mesh
                 size_t index  = 0;
                 float min_distance = std::numeric_limits<float>::max();
+                Vector3 closest_point;
                 for (size_t j = 0; j < m_positions.rows(); j++) {
                     Vector3 p = m_positions.row(j);
                     Vector3 r(cr_positions.coeff(i*3), cr_positions.coeff(i*3+1), cr_positions.coeff(i*3+2));
@@ -458,11 +461,22 @@ namespace ProjDyn {
                     if (dist < min_distance) {
                         index = j;
                         min_distance = dist;
+                        closest_point = r;
                     }
                 }
 
-                auto mpc = new MovingPointConstraint(cr_size, 1000, i, &m_positions, index);
+                auto mpc = new MovingPointConstraint(cr_size, 1000, i*3, &m_positions, index);
                 cr_constraints.push_back(mpc);
+
+                Vector3 normal = (closest_point - center).normalized();
+                auto nc = new NormalConstraint(cr_size, 1000, i*3, normal);
+                //cr_constraints.push_back(nc);
+
+                Quaternion q_normal = cr_orientations.coeff(i);
+                auto ncq = new NormalConstraintQuat(cr_size, 1000, cr_num_coord + (i-ind)*4, q_normal);
+                cr_constraints.push_back(ncq);
+
+                ind++;
             }
 		}
 
@@ -628,6 +642,16 @@ namespace ProjDyn {
 		    }
 		    return concat;
 		}
+
+        Vector3 computeCenter(const Positions& positions) {
+            Vector3 center = Vector3(0, 0, 0);
+
+            for (size_t i = 0; i < positions.rows(); i++) {
+                center += positions.row(i);
+            }
+
+            return center/positions.rows();
+        }
 
 	};
 

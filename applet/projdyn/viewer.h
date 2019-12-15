@@ -133,7 +133,7 @@ public:
         }
     }
 
-    void addRodsOnBall(float radius, size_t res = 5, size_t num_rods = 1, float seg_length = 0.5) {
+    void addRodsOnBall(float radius, size_t res = 5, size_t num_rods = 5, float seg_length = 0.5) {
         using_rods = true;
         r_res = res;
         r_num_rods = num_rods;
@@ -143,19 +143,20 @@ public:
         m_updated_rods_normals.resize(3, nPoints);
         m_rod_indices.clear();
         Vector3f default_tangent = -Vector3f::UnitX();
-        Vector3f default_normal = Vector3f::UnitY();
-        auto randVal = [](float max){ return float(rand()) / float(RAND_MAX) * max; };
+        Vector3f default_normal = -Vector3f::UnitY();
+        auto randVal = [](float max){ return float( (rand() * max) / float(RAND_MAX)); };
         for (size_t j = 0; j < num_rods; j++) {
             Quaternionf rotQuat;
-            rotQuat.FromTwoVectors(default_tangent, Vector3f(randVal(1), randVal(1), randVal(1)).normalized());
-            rotQuat.normalize();
-            Vector3f tangent = rotQuat.toRotationMatrix() * default_tangent;
-            tangent = default_tangent;
+            Vector3f tangent = Vector3f(randVal(2), randVal(2), randVal(2)).normalized();
+            rotQuat.FromTwoVectors(tangent, default_tangent);
+            std::cout << "random tangent: " << tangent << std::endl;
+            std::cout << "random normal: " << rotQuat.toRotationMatrix()  * default_normal;
+            std::cout << "dot product: " << tangent.dot(rotQuat.toRotationMatrix()  * default_normal);
             for (size_t i = 0; i < res; i++) {
                 Vector3f p = tangent * radius + tangent * i * seg_length;
                 m_updated_rods_pos.col(i+j*res) << p;
                 m_updated_rods_tangents.col(i+j*res) << p.normalized();
-                m_updated_rods_normals.col(i+j*res) << rotQuat.toRotationMatrix() * default_normal;
+                m_updated_rods_normals.col(i+j*res) << rotQuat.toRotationMatrix()  * default_normal;
             }
             m_rod_indices.push_back(j*res);
         }
@@ -163,7 +164,7 @@ public:
         rodMesh();
         loadMesh("../data/small_sphere.obj");
         Point center = computeCenter(&mesh);
-        center += Point(0, radius, 0);
+        center += Point(0, 0, 0);
         for (auto v : mesh.vertices()) {
             mesh.position(v) = (mesh.position(v) - center) * radius + center;
         }

@@ -44,7 +44,7 @@ namespace ProjDyn {
     typedef ArrayQ<Eigen::Dynamic, 1> Orientations;
 
     //Constants
-    constexpr static float gravity = 0;
+    constexpr static float gravity = -9.81;
     constexpr static float E = 1; //Young's modulus
     constexpr static float cr_radius = 3;
     constexpr static float poisson = 0.377f;
