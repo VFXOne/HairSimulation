@@ -65,7 +65,7 @@ bool projdyn_setmesh(Viewer* viewer, bool add_tets) {
 
 void setup_demo_scene(Viewer* viewer) {
     const float radius = 0.8;
-    viewer->addRodsOnBall(radius, 5, 2, 0.5);
+    viewer->addRodsOnBall(radius, 10, 10, 0.2);
     default_constraints = false;
 }
 
@@ -155,7 +155,7 @@ bool projdyn_update(Viewer* viewer) {
 	return projdyn_upload_positions(viewer);
 }
 
-// Extract positions, convert them to column-wise tripples of floats and
+// Extract positions, convert them to column-wise triples of floats and
 // upload them to the OpenGL buffer
 bool projdyn_upload_positions(Viewer* viewer) {
 	// In this function you need to extract the vertex positions of the simulation
@@ -176,28 +176,28 @@ bool projdyn_upload_positions(Viewer* viewer) {
 
     std::vector<ProjDyn::Index> rod_indices;
     Positions* rods_pos = sim.getRodsPositions();
-    size_t num_rods = rods_pos->rows();
-    upload_rods.resize(3, num_rods);
+    size_t num_pos = rods_pos->rows();
+    upload_rods.resize(3, num_pos);
 
-    for (size_t i = 0; i < num_rods; i++) {
+    for (size_t i = 0; i < num_pos; i++) {
         upload_rods(0, i) = rods_pos->coeff(i, 0);
         upload_rods(1, i) = rods_pos->coeff(i, 1);
         upload_rods(2, i) = rods_pos->coeff(i,2);
     }
 
-    upload_rods_tan.resize(3, num_rods);
+    upload_rods_tan.resize(3, num_pos);
     Positions* rods_tan = sim.getRodsTangents();
 
-    for (size_t i = 0; i < num_rods; i++) {
+    for (size_t i = 0; i < num_pos; i++) {
         upload_rods_tan(0, i) = rods_tan->coeff(i, 0);
         upload_rods_tan(1, i) = rods_tan->coeff(i, 1);
         upload_rods_tan(2, i) = rods_tan->coeff(i,2);
     }
 
-    upload_rods_norm.resize(3, num_rods);
+    upload_rods_norm.resize(3, num_pos);
     Positions* rods_normals = sim.getRodsNormals();
 
-    for (size_t i = 0; i < num_rods; i++) {
+    for (size_t i = 0; i < num_pos; i++) {
         upload_rods_norm(0, i) = rods_normals->coeff(i, 0);
         upload_rods_norm(1, i) = rods_normals->coeff(i, 1);
         upload_rods_norm(2, i) = rods_normals->coeff(i,2);

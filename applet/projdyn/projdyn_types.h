@@ -48,7 +48,7 @@ namespace ProjDyn {
     constexpr static float E = 1; //Young's modulus
     constexpr static float cr_radius = 3;
     constexpr static float poisson = 0.377f;
-    constexpr static float cr_unit_weight = 0.5f;
+    constexpr static float cr_unit_weight = 0.8f;
     constexpr static float cr_density = 1.3f;
 
 }

@@ -28,6 +28,7 @@ namespace ProjDyn {
 			// Construct the simulator object
 			m_hasGrab = false;
             is_ready = false;
+            is_empty = true;
             is_simulating = false;
             use_cosserat_rods = false;
             m = 0;
@@ -42,6 +43,8 @@ namespace ProjDyn {
 
 		void setRods(const std::vector<Positions> rods) {
 		    assert(rods.size() >= 1); //At least one rod
+		    is_empty = false;
+		    is_ready = false;
             use_cosserat_rods = true;
             rod_indices.clear();
             cr_num_positions = 0;
@@ -49,9 +52,9 @@ namespace ProjDyn {
 
             size_t rod_index = 0;
             for (size_t i = 0; i < rods.size(); i++) {
-                rod_indices.push_back(rod_index);
                 Positions pos = rods.at(i);
                 assert(pos.rows() >= 2); //At least one segment in a rod
+                rod_indices.push_back(rod_index);
 
                 cr_segments_length.push_back((pos.row(1) - pos.row(0)).norm()); //Assuming all segments have same length
                 rod_index += pos.rows();
@@ -84,7 +87,7 @@ namespace ProjDyn {
 		    cr_constraints.clear();
 		    addSSConstraints();
 		    addBTConstraints();
-		    addMovingPosConstraints();
+            addMovingPointConstraints();
 		}
 
 		void resetPositions() {
@@ -100,7 +103,7 @@ namespace ProjDyn {
         }
 
 		bool isInitialized() {
-			return is_ready;
+			return is_ready and !is_empty;
 		}
 
 		bool isUsingCR() {
@@ -125,7 +128,7 @@ namespace ProjDyn {
 
         bool initializeSystem(bool default_constraints) {
 			// Setup simulation (collect constraints, set up and factorize global step system)
-			if (is_simulating) {
+			if (is_simulating or is_empty) {
 			    return false;
 			}
 
@@ -136,10 +139,11 @@ namespace ProjDyn {
                  * CR Variables *
                  ****************/
 
+                //Set default external forces
                 cr_f_ext.setZero(cr_num_coord);
                 for (size_t i = 0; i < cr_num_coord; i++) {
                     cr_f_ext.coeffRef(i) = 0;
-                    cr_f_ext.coeffRef(++i) = gravity;
+                    cr_f_ext.coeffRef(++i) = 0; //gravity;
                     cr_f_ext.coeffRef(++i) = 0;
                 }
 
@@ -150,6 +154,7 @@ namespace ProjDyn {
                 cr_masses = masses_flat.asDiagonal();
                 cr_masses_inv = cr_masses.cwiseInverse();
 
+                //Build J matrix
                 const float j_val = M_PI*cr_radius/4;
                 Vector J_flat_vec;
                 J_flat_vec.setZero(3);
@@ -186,9 +191,9 @@ namespace ProjDyn {
                     }
                 }
 
+                //Build M_star matrix
                 cr_M_star.resize(cr_size, cr_size);
                 cr_M_star.setZero();
-                //Build M_star matrix
                 for (size_t i = 0; i < cr_masses.rows(); i++) {
                     cr_M_star.row(i) = cr_masses.row(i);
                 }
@@ -225,7 +230,7 @@ namespace ProjDyn {
 
 		    Vector s_w = cr_angular_velocities + h*cr_J_vec_inv * (cr_torques - cross);
             Orientations s_w_u = pos2quat(s_w);
-		    Orientations s_u = pos2quat(quat2pos(cr_orientations) + h/2 * quat2pos(cr_orientations * s_w_u));
+            Orientations s_u = pos2quat(quat2pos(cr_orientations) + h/2 * quat2pos(cr_orientations * s_w_u));
 
 		    Vector s_t = posQuatConcat(s_x, s_u);
             cr_q_t = s_t;
@@ -334,7 +339,7 @@ namespace ProjDyn {
 
 		Positions* getRodsNormals() {
 		    upload_normals.resize(cr_num_positions, 3);
-		    Vector3 n = -Vector3::UnitX();
+		    Vector3 n = Vector3::UnitX();
 		    size_t j = 0;
 		    for (size_t i = 0; i < cr_num_quaternions; i++) {
 		        Quaternion q = cr_orientations[i];
@@ -404,13 +409,13 @@ namespace ProjDyn {
         SparseMatrix cr_lhs;
 
 		//State variables
-		bool is_ready;
+		bool is_ready, is_empty;
 		bool is_simulating;
 		bool use_cosserat_rods;
 		bool m_default_constraints = true;
 		Positions upload_pos, upload_tan, upload_normals;
 
-		void addSSConstraints(Scalar weight = 10.0) {
+		void addSSConstraints(Scalar weight = 100.0) {
 		    for (size_t ind = 0; ind < rod_indices.size(); ind++) {
 		        Index rod_index = rod_indices.at(ind);
 		        Index next_index = ind == rod_indices.size() - 1 ? cr_num_positions : rod_indices.at(ind + 1);
@@ -423,7 +428,7 @@ namespace ProjDyn {
             }
 		}
 
-		void addBTConstraints(Scalar weight = 10.0) {
+		void addBTConstraints(Scalar weight = 100.0) {
 		    for (Index ind = 0; ind < rod_indices.size(); ind++) {
 		        Index rod_index = rod_indices.at(ind);
 		        Index next_index = ind == rod_indices.size() - 1 ? cr_num_positions : rod_indices.at(ind + 1);
@@ -443,7 +448,7 @@ namespace ProjDyn {
             }
         }
 
-		void addMovingPosConstraints() {
+		void addMovingPointConstraints() {
 		    if (m_positions.size() == 0) return;
 
             Vector3 center = computeCenter(m_positions);
@@ -465,15 +470,16 @@ namespace ProjDyn {
                     }
                 }
 
-                auto mpc = new MovingPointConstraint(cr_size, 1000, i*3, &m_positions, index);
+                auto mpc = new MovingPointConstraint(cr_size, 1e5, i*3, &m_positions, index);
                 cr_constraints.push_back(mpc);
 
-                Vector3 normal = (closest_point - center).normalized();
-                auto nc = new NormalConstraint(cr_size, 1000, i*3, normal);
+                Vector3 normal = (center - closest_point).normalized();
+                auto nc = new NormalConstraint(cr_size, 1e4, i*3, normal);
                 //cr_constraints.push_back(nc);
 
-                Quaternion q_normal = cr_orientations.coeff(i);
-                auto ncq = new NormalConstraintQuat(cr_size, 1000, cr_num_coord + (i-ind)*4, q_normal);
+                //Quaternion q_normal = cr_orientations.coeff(i);
+                Quaternion q_normal = Quaternion::FromTwoVectors(-Vector3::UnitY(), normal);
+                auto ncq = new NormalConstraintQuat(cr_size, 1e4, cr_num_coord + (i-ind)*4, q_normal);
                 cr_constraints.push_back(ncq);
 
                 ind++;
@@ -486,8 +492,25 @@ namespace ProjDyn {
 		    assert(p.size() % 3 == 0);
 		    size_t q_size = p.size() / 3;
 		    Orientations u(q_size);
+#pragma omp parallel for
 		    for (size_t i = 0; i < q_size; i++) {
-                Quaternion quat(0, p[i*3], p[i*3 + 1], p[i*3 + 2]);
+		        //For a normalized quaternion q = w + xi + yj + zk
+		        Scalar w, x, y, z;
+		        x = p.coeff(i*3);
+		        y = p.coeff(i*3+1);
+		        z = p.coeff(i*3+2);
+		        //We need to clamp the values because of the numerical errors (to reduce damping ???)
+		        //TODO: check if quaternion values miust be between 0 and 1. If yes then clamping reduces damping
+		        //x = clamp(x);
+		        //y = clamp(y);
+		        //z = clamp(z);
+		        //Recover the real part
+		        w = sqrt(1.0 - x*x - y*y - z*z);
+		        w = isnan(w) ? 0.0 : w;
+                Quaternion quat(w, x, y, z);
+                if (isnan(x) or isnan(y) or isnan(z) or isnan(w)) {
+                    std::cout << "---------------found nan---------------" << std::endl;
+                }
                 u[i] = quat;
 		    }
 		    return u;
@@ -497,8 +520,9 @@ namespace ProjDyn {
 		static Vector quat2pos(const Orientations quat) {
 		    Vector pos;
 		    pos.setZero(quat.size() * 3);
+#pragma omp parallel for
 		    for (size_t i = 0; i < quat.size(); i++) {
-		        auto q = quat[i];
+		        Quaternion q = quat[i].normalized();
 		        pos[i*3] = q.x();
 		        pos[i*3 + 1] = q.y();
 		        pos[i*3 + 2] = q.z();
@@ -539,7 +563,7 @@ namespace ProjDyn {
 		    size_t num_pos = pos.size() / 3;
 		    Orientations quat;
 		    quat.resize(num_pos - rod_indices.size());
-		    const Vector3 tangent = -Vector3::UnitY();
+		    const Vector3 tangent = Vector3::UnitY();
 
 		    size_t j = 0;
 		    for (size_t i = 0; i < num_pos-1; i++) {
@@ -596,7 +620,7 @@ namespace ProjDyn {
 		    }
 
 		    for (size_t i = 0; i < u.rows(); i++) {
-		        auto quat = u(i);
+		        auto quat = u.coeff(i);
 		        fp(m + i*4) = quat.w();
 		        fp(m + i*4+1) = quat.x();
 		        fp(m + i*4+2) = quat.y();
@@ -614,10 +638,6 @@ namespace ProjDyn {
 		    pos.setZero(separation);
 
 		    quat.resize(num_quat);
-
-		    //for (size_t i = 0; i < separation; i++) {
-		    //    pos.coeffRef(i) = concat->coeff(i);
-		    //}
 
 		    pos = concat->head(separation);
 
@@ -642,6 +662,12 @@ namespace ProjDyn {
 		    }
 		    return concat;
 		}
+
+        static float clamp(float x, float min = 0.0f, float max = 1.0f) {
+            x = x < min ? min : x;
+            x = x > max ? max : x;
+            return x;
+        }
 
         Vector3 computeCenter(const Positions& positions) {
             Vector3 center = Vector3(0, 0, 0);

@@ -230,9 +230,10 @@ public:
 
         u_n = Quaternion(q.coeff(q_index), q.coeff(q_index+1), q.coeff(q_index+2), q.coeff(q_index+3));
 
-        d_3 = u_n.normalized().toRotationMatrix() * -Vector3::UnitY();
+        //TODO: Add constant default tangent variable
+        d_3 = u_n.normalized().toRotationMatrix() * Vector3::UnitY();
 
-        diff_u_n = Quaternion::FromTwoVectors(d_3, x_f);
+        diff_u_n = Quaternion::FromTwoVectors(x_f, d_3);
         u_n_star = u_n * diff_u_n;
 
         Vector p_i;
@@ -284,23 +285,16 @@ public:
         Quaternion u_n_1(q.coeff(q_index+4), q.coeff(q_index+5),q.coeff(q_index+6), q.coeff(q_index+7));
         Quaternion r_curvature = u_n.conjugate() * u_n_1;
 
-        Quaternion r_curvature_c(r_curvature.conjugate());
-
+        //Divide the quaternion by 2
         auto rotMatrix = r_curvature.normalized().toRotationMatrix();
         r_curvature = Quaternion(rotMatrix / 2);
-        //r_curvature = Quaternion(r_curvature.w()/2, r_curvature.x()/2, r_curvature.y()/2, r_curvature.z()/2);
-
-        rotMatrix = r_curvature_c.normalized().toRotationMatrix();
-        r_curvature_c = Quaternion(rotMatrix / 2);
-        //r_curvature_c = Quaternion(r_curvature_c.w()/2, r_curvature_c.x()/2, r_curvature_c.y()/2, r_curvature_c.z()/2);
 
         Quaternion u_n_star = u_n * r_curvature;
-        Quaternion u_n_1_star = u_n_1 * r_curvature_c;
-
-        std::cout << "u_n_star: " << u_n_star.x() << ", " << u_n_star.y() << ", " << u_n_star.z() << std::endl;
+        Quaternion u_n_1_star = u_n_1 * r_curvature.conjugate();
 
         Vector sol;
         sol.resize(8);
+
         sol <<  u_n_star.w(), u_n_star.x(), u_n_star.y(), u_n_star.z(),
                 u_n_1_star.w(), u_n_1_star.x(), u_n_1_star.y(), u_n_1_star.z();
 
@@ -347,7 +341,6 @@ protected:
 /*
  * Constraint describing a rod point sticking to another point (on a mesh for example)
  */
-//TODO: Add normal parameter
 class MovingPointConstraint: public CRConstraint {
 public:
     MovingPointConstraint(Index num_coord, Scalar weight, Index pos_index, Positions* positions, Index moving_pos_index)
@@ -414,7 +407,6 @@ public:
         Vector3 next(q.coeff(p_index+3), q.coeff(p_index+4), q.coeff(p_index+5));
         double dist = (pos - next).norm();
         Vector3 proj = pos + m_normal*dist;
-        std::cout << "normal constraint: pos = " << pos << ". next: " << next << ". proj: " << proj << std::endl;
         p_i << next.x(), next.y(), next.z();
         return p_i;
     }

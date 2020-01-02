@@ -113,7 +113,8 @@ public:
 		}
 	}
 
-    void defaultRods(const size_t res = 5, const size_t num_rods = 3) {
+    void defaultRods(const size_t res = 5, const size_t num_rods = 1) {
+        //TODO: Add rods hanging low and rods hanging horizontally
         using_rods = true;
         r_res = res;
         r_num_rods = num_rods;
@@ -125,9 +126,12 @@ public:
         const float distance_between_rods = 0.3;
         for (size_t j = 0; j < num_rods; j++) {
             for (int i = 0; i < res; i++) {
-                m_updated_rods_pos.col(i+j*res) << distance_between_rods*j, -i,0;
+                m_updated_rods_pos.col(i+j*res) << distance_between_rods*j, -i, 0;
+                //m_updated_rods_pos.col(i+j*res) << i,distance_between_rods*j , 0;
                 m_updated_rods_tangents.col(i+j*res) << 0,-1,0;
-                m_updated_rods_normals.col(i+j*res) << -1,0,0;
+                //m_updated_rods_tangents.col(i+j*res) << 1,0,0;
+                m_updated_rods_normals.col(i+j*res) << 1,0,0;
+                //m_updated_rods_normals.col(i+j*res) << 0,1,0;
             }
             m_rod_indices.push_back(j*res);
         }
@@ -144,14 +148,12 @@ public:
         m_rod_indices.clear();
         Vector3f default_tangent = -Vector3f::UnitX();
         Vector3f default_normal = -Vector3f::UnitY();
-        auto randVal = [](float max){ return float( (rand() * max) / float(RAND_MAX)); };
+        //Enable true random generation
+        srand(time(NULL));
+        auto randVal = [](float max){ return float( (rand() * max) / float(RAND_MAX) ); };
         for (size_t j = 0; j < num_rods; j++) {
-            Quaternionf rotQuat;
-            Vector3f tangent = Vector3f(randVal(2), randVal(2), randVal(2)).normalized();
-            rotQuat.FromTwoVectors(tangent, default_tangent);
-            std::cout << "random tangent: " << tangent << std::endl;
-            std::cout << "random normal: " << rotQuat.toRotationMatrix()  * default_normal;
-            std::cout << "dot product: " << tangent.dot(rotQuat.toRotationMatrix()  * default_normal);
+            Vector3f tangent = Vector3f(randVal(1), randVal(1), randVal(1)).normalized();
+            Quaternionf rotQuat = Quaternionf::FromTwoVectors(default_tangent, tangent);
             for (size_t i = 0; i < res; i++) {
                 Vector3f p = tangent * radius + tangent * i * seg_length;
                 m_updated_rods_pos.col(i+j*res) << p;
