@@ -65,7 +65,7 @@ bool projdyn_setmesh(Viewer* viewer, bool add_tets) {
 
 void setup_demo_scene(Viewer* viewer) {
     const float radius = 0.8;
-    viewer->addRodsOnBall(radius, 10, 10, 0.2);
+    viewer->addRodsOnBall(radius, 10, 1, 0.2);
     default_constraints = false;
 }
 

@@ -221,6 +221,7 @@ public:
     }
 
     Vector projectOnConstraintSet(const Vector& q) override {
+        assert(q.size() > q_index);
         Vector3 x_n, x_n_1, x_f, d_3;
         Quaternion u_n, diff_u_n, u_n_star;
 
@@ -281,6 +282,7 @@ public:
     }
 
     Vector projectOnConstraintSet(const Vector& q) override {
+        assert(q.size() > q_index);
         Quaternion u_n(q.coeff(q_index), q.coeff(q_index+1),q.coeff(q_index+2), q.coeff(q_index+3));
         Quaternion u_n_1(q.coeff(q_index+4), q.coeff(q_index+5),q.coeff(q_index+6), q.coeff(q_index+7));
         Quaternion r_curvature = u_n.conjugate() * u_n_1;
@@ -327,6 +329,7 @@ public:
     }
 
     Vector projectOnConstraintSet(const Vector& q) override {
+        assert(q.size() > p_index);
         Vector p_i;
         p_i.resize(3);
         p_i << f_pos.x(), f_pos.y(), f_pos.z();
@@ -364,6 +367,7 @@ public:
     }
 
     Vector projectOnConstraintSet(const Vector& q) override {
+        assert(q.size() > p_index);
         Vector p_i;
         p_i.resize(3);
         p_i << m_pos->coeff(m_pos_index, 0), m_pos->coeff(m_pos_index, 1), m_pos->coeff(m_pos_index, 2);
@@ -401,6 +405,7 @@ public:
     }
 
     Vector projectOnConstraintSet(const Vector& q) override {
+        assert(q.size() > p_index);
         Vector p_i;
         p_i.resize(3);
         Vector3 pos(q.coeff(p_index), q.coeff(p_index+1), q.coeff(p_index+2));
@@ -439,6 +444,7 @@ public:
     }
 
     Vector projectOnConstraintSet(const Vector& q) override {
+        assert(q.size() > q_index);
         Vector p_i;
         p_i.resize(4);
         p_i << m_normal.w(), m_normal.x(), m_normal.y(), m_normal.z();
@@ -448,6 +454,89 @@ public:
 protected:
     Index q_index;
     Quaternion m_normal;
+};
+
+class SphereConstraint : public CRConstraint {
+public:
+    SphereConstraint(Index num_coord, Scalar weight, Scalar radius, Index pos_index, Vector3 center_pos, Positions* positions, Index moving_pos_index, Scalar forceFactor = 1.)
+            :
+            CRConstraint(num_coord, weight)
+    {
+        m_center_pos = center_pos;
+        m_radius = radius;
+        m_pos_index = pos_index;
+        m_force_factor = forceFactor;
+        m_positions = positions;
+        m_mov_pos_index = moving_pos_index;
+        m_ref_point.x() = m_positions->coeff(moving_pos_index);
+        m_ref_point.y() = m_positions->coeff(moving_pos_index+1);
+        m_ref_point.z() = m_positions->coeff(moving_pos_index+2);
+
+        A_i.resize(3, 3);
+        A_i.setIdentity();
+
+        B_i.resize(3, 3);
+        B_i.setIdentity();
+
+        initSM(3, num_coord);
+        m_selectionMatrix.coeffRef(0, pos_index) = 1;
+        m_selectionMatrix.coeffRef(1, pos_index+1) = 1;
+        m_selectionMatrix.coeffRef(2, pos_index+2) = 1;
+
+        computeLHS();
+    }
+
+    Vector projectOnConstraintSet(const Vector& q) override {
+        // Check for correct size of the projection auxiliary variable;
+        assert(q.size() > m_pos_index);
+        //TODO: update sphere center
+        Vector3 new_ref, diff, new_center;
+        new_ref = m_positions->row(m_mov_pos_index);
+        diff = new_ref - m_ref_point;
+        new_center = m_center_pos + diff;
+
+        std::cout << "new ref = " << new_ref << std::endl;
+        std::cout << "new center = " << new_center << std::endl;
+        std::cout << "diff between center and ref = " << (new_center - new_ref).norm() << std::endl;
+
+        Vector3 pos;
+        Vector p_i;
+        p_i.resize(3);
+
+        pos.x() = q(m_pos_index);
+        pos.y() = q(m_pos_index + 1);
+        pos.z() = q(m_pos_index + 2);
+        Vector3 v = pos - new_center;
+        float distance = v.norm();
+        //TODO: compute distance with the rod radius too
+
+        if (distance < m_radius) {
+            v = v/v.norm();
+            v = v*m_radius;
+
+            //TODO: Add forceFactor!
+            p_i.x() = (1 + m_force_factor) * new_center(0) - m_force_factor * v(0);
+            p_i.y() = (1 + m_force_factor) * new_center(1) - m_force_factor * v(1);
+            p_i.z() = (1 + m_force_factor) * new_center(2) - m_force_factor * v(2);
+            std::cout << "INSIDE!" << std::endl;
+
+        } else {
+            p_i.x() = pos.x();
+            p_i.y() = pos.y();
+            p_i.z() = pos.z();
+        }
+
+        return p_i;
+    }
+
+private:
+    Index m_pos_index;
+    Scalar m_force_factor;
+    Vector3 m_center_pos;
+    Scalar m_radius;
+    Positions* m_positions;
+    Index m_mov_pos_index;
+    Vector3 m_ref_point;
 };
 
 #endif //APPLET_PDCONSTRAINT_H

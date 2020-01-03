@@ -85,9 +85,10 @@ namespace ProjDyn {
 
 		void addMeshConstraints() {
 		    cr_constraints.clear();
-		    addSSConstraints();
-		    addBTConstraints();
+		    addSSConstraints(10);
+		    addBTConstraints(10);
             addMovingPointConstraints();
+            addSphereCollisionConstraints();
 		}
 
 		void resetPositions() {
@@ -486,6 +487,29 @@ namespace ProjDyn {
             }
 		}
 
+		void addSphereCollisionConstraints(Scalar weight = 100, Scalar forceFactor = 2.0) {
+            if (m_positions.size() == 0) return;
+
+            const Index default_index = 0;
+
+            Vector3 center = computeCenter(m_positions);
+		    Vector3 random_point = m_positions.row(default_index);
+            Scalar radius = (center - random_point).norm();
+            std::cout << "radius = " << radius << std::endl;
+            std::cout << "center = " << center << std::endl;
+            std::cout << "random point = " << random_point << std::endl;
+
+            for (size_t ind = 0; ind < rod_indices.size(); ind++) {
+                Index rod_index = rod_indices.at(ind);
+                Index next_index = ind == rod_indices.size() - 1 ? cr_num_positions : rod_indices.at(ind + 1);
+
+                for (size_t i = rod_index; i < next_index; i++) {
+                    auto scc = new SphereConstraint(cr_size, weight, radius, i*3, center, &m_positions, default_index, forceFactor);
+                    cr_constraints.push_back(scc);
+                }
+            }
+		}
+
 		//Create imaginary parts of quaternions from vectors. Real part is 0
 		static Orientations pos2quat(const Vector p) {
 		    //The size of the vector must a multiple of 3
@@ -508,9 +532,6 @@ namespace ProjDyn {
 		        w = sqrt(1.0 - x*x - y*y - z*z);
 		        w = isnan(w) ? 0.0 : w;
                 Quaternion quat(w, x, y, z);
-                if (isnan(x) or isnan(y) or isnan(z) or isnan(w)) {
-                    std::cout << "---------------found nan---------------" << std::endl;
-                }
                 u[i] = quat;
 		    }
 		    return u;
