@@ -764,7 +764,7 @@ public:
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
 
-        colors << 0.0, 0.0, 0.88;
+        colors << 0.16, 0.65, 0.94;
         rShader.setUniform("intensity", colors);
         rShader.drawIndexed(GL_TRIANGLES, 0, r_faces);
 
