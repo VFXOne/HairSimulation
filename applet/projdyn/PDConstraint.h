@@ -5,6 +5,8 @@
 #ifndef APPLET_PDCONSTRAINT_H
 #define APPLET_PDCONSTRAINT_H
 
+# define M_PI 3.14159265358979323846
+
 #include <iostream>
 #include "Edge.h"
 #include "projdyn_types.h"

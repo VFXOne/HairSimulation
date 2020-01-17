@@ -15,6 +15,7 @@
 
 #define _USE_MATH_DEFINES
 #include <math.h>
+#include <time.h>
 
 #include <nanogui/opengl.h>
 #include <nanogui/glutil.h>
