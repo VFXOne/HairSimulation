@@ -497,10 +497,6 @@ public:
         diff = new_ref - m_ref_point;
         new_center = m_center_pos + diff;
 
-        std::cout << "new ref = " << new_ref << std::endl;
-        std::cout << "new center = " << new_center << std::endl;
-        std::cout << "diff between center and ref = " << (new_center - new_ref).norm() << std::endl;
-
         Vector3 pos;
         Vector p_i;
         p_i.resize(3);
@@ -520,7 +516,6 @@ public:
             p_i.x() = (1 + m_force_factor) * new_center(0) - m_force_factor * v(0);
             p_i.y() = (1 + m_force_factor) * new_center(1) - m_force_factor * v(1);
             p_i.z() = (1 + m_force_factor) * new_center(2) - m_force_factor * v(2);
-            std::cout << "INSIDE!" << std::endl;
 
         } else {
             p_i.x() = pos.x();

@@ -69,7 +69,7 @@ class Viewer : public nanogui::Screen {
 public:
     Viewer(std::string title, bool (*pre_draw_callback)(Viewer*) = nullptr, bool (*mesh_load_callback)(Viewer*) = nullptr)
         :
-        nanogui::Screen(Eigen::Vector2i(1024, 768), title) {
+        nanogui::Screen(Eigen::Vector2i(1024, 512), title) {
 
         initGUI();
         initShaders();

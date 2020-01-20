@@ -31,6 +31,7 @@ namespace ProjDyn {
             is_empty = true;
             is_simulating = false;
             use_cosserat_rods = false;
+            cr_wind = false;
             m = 0;
 		}
 
@@ -89,6 +90,7 @@ namespace ProjDyn {
 		    addBTConstraints(10);
             addMovingPointConstraints();
             addSphereCollisionConstraints();
+            cr_wind = true;
 		}
 
 		void resetPositions() {
@@ -276,6 +278,11 @@ namespace ProjDyn {
                 }
             }
 
+		    //Update external forces if enabled
+		    if (cr_wind) {
+		        updateWind();
+		    }
+
             is_simulating = false;
 		    return true;
 		}
@@ -309,6 +316,10 @@ namespace ProjDyn {
 		    h = timestep;
 		}
 
+		void toggleWind() {
+		    cr_wind = !cr_wind;
+		}
+
 		Positions* getPositions() {
 		    return &m_positions;
 		}
@@ -340,7 +351,7 @@ namespace ProjDyn {
 
 		Positions* getRodsNormals() {
 		    upload_normals.resize(cr_num_positions, 3);
-		    Vector3 n = Vector3::UnitX();
+		    Vector3 n = -Vector3::UnitZ();
 		    size_t j = 0;
 		    for (size_t i = 0; i < cr_num_quaternions; i++) {
 		        Quaternion q = cr_orientations[i];
@@ -414,6 +425,8 @@ namespace ProjDyn {
 		bool is_simulating;
 		bool use_cosserat_rods;
 		bool m_default_constraints = true;
+		bool cr_wind;
+		float time = 0.0f;
 		Positions upload_pos, upload_tan, upload_normals;
 
 		void addSSConstraints(Scalar weight = 100.0) {
@@ -449,7 +462,7 @@ namespace ProjDyn {
             }
         }
 
-		void addMovingPointConstraints() {
+		void addMovingPointConstraints(float weight = 1e5) {
 		    if (m_positions.size() == 0) return;
 
             Vector3 center = computeCenter(m_positions);
@@ -471,7 +484,7 @@ namespace ProjDyn {
                     }
                 }
 
-                auto mpc = new MovingPointConstraint(cr_size, 1e5, i*3, &m_positions, index);
+                auto mpc = new MovingPointConstraint(cr_size, weight, i*3, &m_positions, index);
                 cr_constraints.push_back(mpc);
 
                 Vector3 normal = (center - closest_point).normalized();
@@ -480,7 +493,7 @@ namespace ProjDyn {
 
                 //Quaternion q_normal = cr_orientations.coeff(i);
                 Quaternion q_normal = Quaternion::FromTwoVectors(-Vector3::UnitY(), normal);
-                auto ncq = new NormalConstraintQuat(cr_size, 1e4, cr_num_coord + (i-ind)*4, q_normal);
+                auto ncq = new NormalConstraintQuat(cr_size, weight, cr_num_coord + (i-ind)*4, q_normal);
                 cr_constraints.push_back(ncq);
 
                 ind++;
@@ -495,9 +508,6 @@ namespace ProjDyn {
             Vector3 center = computeCenter(m_positions);
 		    Vector3 random_point = m_positions.row(default_index);
             Scalar radius = (center - random_point).norm();
-            std::cout << "radius = " << radius << std::endl;
-            std::cout << "center = " << center << std::endl;
-            std::cout << "random point = " << random_point << std::endl;
 
             for (size_t ind = 0; ind < rod_indices.size(); ind++) {
                 Index rod_index = rod_indices.at(ind);
@@ -507,6 +517,26 @@ namespace ProjDyn {
                     auto scc = new SphereConstraint(cr_size, weight, radius, i*3, center, &m_positions, default_index, forceFactor);
                     cr_constraints.push_back(scc);
                 }
+            }
+		}
+
+		void updateWind() {
+		    time += h;
+		    const float force = 50.0;
+		    float factor1 = 5;
+		    float factor2 = 2;
+
+		    Vector3 vec(
+		            force*sin(time*factor1)*cos(time*factor2),
+		            force*sin(time*factor1)*sin(time*factor2),
+		            force*cos(time*factor1)
+		            );
+
+#pragma omp parallel for
+            for (size_t i = 0; i < cr_num_coord; i++) {
+                cr_f_ext.coeffRef(i) = vec.x();
+                cr_f_ext.coeffRef(++i) = vec.y();
+                cr_f_ext.coeffRef(++i) = vec.z();
             }
 		}
 
@@ -589,13 +619,12 @@ namespace ProjDyn {
 		    size_t j = 0;
 		    for (size_t i = 0; i < num_pos-1; i++) {
 		        size_t index = i * 3;
-		        size_t next_index = (i + 1) * 3;
 
                 Vector3 v_i, v_next;
                 v_i << pos[index], pos[index + 1], pos[index + 2];
-                v_next << pos[next_index], pos[next_index + 1], pos[next_index + 2];
+                v_next << pos[index + 3], pos[index + 4], pos[index + 5];
 
-                if (std::find(rod_indices.begin(), rod_indices.end(), i) != rod_indices.end() and i != 0) i++;
+                if (i != 0 and std::find(rod_indices.begin(), rod_indices.end(), i+1) != rod_indices.end()) i++;
 
                 Quaternion q = Quaternion::FromTwoVectors(tangent, (v_next - v_i).normalized());
                 quat[j++] = q;
