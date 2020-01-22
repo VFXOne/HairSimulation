@@ -42,6 +42,7 @@ namespace ProjDyn {
             m_positions = pos;
 		}
 
+		//Create the rods
 		void setRods(const std::vector<Positions> rods) {
 		    assert(rods.size() >= 1); //At least one rod
 		    is_empty = false;
@@ -57,10 +58,13 @@ namespace ProjDyn {
                 assert(pos.rows() >= 2); //At least one segment in a rod
                 rod_indices.push_back(rod_index);
 
-                cr_segments_length.push_back((pos.row(1) - pos.row(0)).norm()); //Assuming all segments have same length
+                //The length of the rod is defined as the length of the first segment, assuming all segments
+                //  have the same length
+                cr_segments_length.push_back((pos.row(1) - pos.row(0)).norm());
                 rod_index += pos.rows();
                 cr_num_positions += pos.rows();
 
+                //Update the positions
                 Vector new_pos = pos2flatVec(pos);
                 Vector temp_pos(cr_positions_init.size() + new_pos.size());
                 temp_pos << cr_positions_init, new_pos;
@@ -75,8 +79,11 @@ namespace ProjDyn {
 
 		    cr_velocities.setZero(cr_num_coord);
 		    cr_angular_velocities.setZero(cr_num_flat_pos);
+
+		    std::cout << "Successfully added " << rods.size() << " rods" << std::endl;
 		}
 
+		//Simple scene with only rods fixed to their initial placement
 		void addDefaultConstraints() {
 		    cr_constraints.clear();
             addFixedPosConstraint();
@@ -84,13 +91,13 @@ namespace ProjDyn {
             addBTConstraints();
 		}
 
+		//Rods stuck to a ball
 		void addMeshConstraints() {
 		    cr_constraints.clear();
 		    addSSConstraints(10);
 		    addBTConstraints(10);
-            addMovingPointConstraints();
-            addSphereCollisionConstraints();
-            cr_wind = true;
+            addMovingPointConstraints(1e5);
+            addSphereCollisionConstraints(100, 2);
 		}
 
 		void resetPositions() {
@@ -107,10 +114,6 @@ namespace ProjDyn {
 
 		bool isInitialized() {
 			return is_ready and !is_empty;
-		}
-
-		bool isUsingCR() {
-		    return use_cosserat_rods;
 		}
 
         void initializeLHS() {
@@ -212,7 +215,7 @@ namespace ProjDyn {
                     addMeshConstraints();
                 }
 
-                //Finally, precompute the left-hand side matrix
+                //Finally, pre-compute the left-hand side matrix
                 initializeLHS();
             }
 
@@ -367,8 +370,6 @@ namespace ProjDyn {
 
 
 	protected:
-        // If m_hasGrab is true, vertices with the indices in m_grabVerts will be forced
-		// to the positions set in m_grabPos
 		bool m_hasGrab = false;
         std::vector<Index> m_grabVerts;
         std::vector<Eigen::Vector3f> m_grabPos;
@@ -521,17 +522,21 @@ namespace ProjDyn {
 		}
 
 		void updateWind() {
+		    if (!isInitialized()) return;
 		    time += h;
 		    const float force = 50.0;
 		    float factor1 = 5;
 		    float factor2 = 2;
 
+		    //Using the sphere vector representation we
+		    // can make the force rotate
 		    Vector3 vec(
 		            force*sin(time*factor1)*cos(time*factor2),
 		            force*sin(time*factor1)*sin(time*factor2),
 		            force*cos(time*factor1)
 		            );
 
+		    //Set the external forces to the wind force
 #pragma omp parallel for
             for (size_t i = 0; i < cr_num_coord; i++) {
                 cr_f_ext.coeffRef(i) = vec.x();
@@ -581,6 +586,7 @@ namespace ProjDyn {
 		    return pos;
 		}
 
+		//Converts a flat vector of positions to a 3xN matrix
 		static Positions vec2pos(const Vector p) {
 		    assert(p.size() % 3 == 0);
 		    size_t q_size = p.size() / 3;
@@ -596,6 +602,7 @@ namespace ProjDyn {
 		    return q;
 		}
 
+		//Converts a 3xN matrix representation of positions to a flat vector
 		static Vector pos2flatVec(const Positions pos) {
 		    Vector v;
 		    v.setZero(pos.rows() * 3);
@@ -609,6 +616,8 @@ namespace ProjDyn {
 		    return v;
 		}
 
+		//Creates quaternions from the given positions.
+		// These quaternions represents the rotation from the tangent basis vector to the rod segment
 		Orientations quatFromPos(const Vector pos) {
 		    assert(pos.size() % 3 == 0);
 		    size_t num_pos = pos.size() / 3;
@@ -633,6 +642,7 @@ namespace ProjDyn {
 		    return quat;
 		}
 
+		//Given a list of quaternions, performs element-wise conjugation
 		static Orientations conjugateQuat(const Orientations quat) {
 		    Orientations new_quat;
 		    new_quat.resize(quat.size());
@@ -660,6 +670,8 @@ namespace ProjDyn {
 		    return cross;
 		}
 
+		//Concatenate the flat vector reprensentation of the positions and the
+		// list of quaternions in a big flat vector
 		static Vector posQuatConcat(const Vector pos, const Orientations u) {
 		    size_t m = pos.size();
 		    size_t dim = m + 4*u.rows();
@@ -680,6 +692,7 @@ namespace ProjDyn {
 		    return fp;
 		}
 
+		//Given a flat vector concatenation of the positions and the orientations, separates them
 		static void separatePosQuat(const Vector* concat, Vector& pos, Orientations& quat, size_t separation) {
 		    size_t size = concat->size();
 		    assert((size - separation) % 4 == 0);
@@ -700,6 +713,7 @@ namespace ProjDyn {
 		    }
 		}
 
+		//Stack a given vector N times
 		static SparseMatrix stackDiagonal(const Vector x, size_t times) {
 		    size_t size = x.size();
 		    SparseMatrix concat;
@@ -719,6 +733,7 @@ namespace ProjDyn {
             return x;
         }
 
+        //Compute the barycenter of a given list of positions
         Vector3 computeCenter(const Positions& positions) {
             Vector3 center = Vector3(0, 0, 0);
 

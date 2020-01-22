@@ -6,6 +6,10 @@
 
 // Global variables used by the callback functions
 int projdyn_num_iterations = PROJDYN_NUM_ITS_INITIAL;
+int projdyn_num_hairs = PROJDYN_NUM_HAIRS_INITIAL;
+int projdyn_res = PROJDYN_RES_INITIAL;
+float projdyn_ball_radius = PROJDYN_BALL_RADIUS_INITIAL;
+float projdyn_seg_length = PROJDYN_SEG_LENGTH_INITIAL;
 ProjDyn::Simulator sim;
 Eigen::MatrixXf upload_pos, upload_rods, upload_rods_tan, upload_rods_norm;
 std::thread projdyn_thread;
@@ -63,9 +67,8 @@ bool projdyn_setmesh(Viewer* viewer, bool add_tets) {
     return true;
 }
 
-void setup_demo_scene(Viewer* viewer) {
-    const float radius = 0.8;
-    viewer->addRodsOnBall(radius, 10, 5, 0.2);
+void setup_demo_scene(Viewer* viewer, float ball_radius, size_t resolution, size_t num_rods, float seg_length) {
+    viewer->addRodsOnBall(ball_radius, resolution, num_rods, seg_length);
     default_constraints = false;
 }
 
@@ -75,12 +78,45 @@ void init_projdyn_gui(Viewer* viewer) {
 	pd_win->setPosition(Vector2i(15, 230));
 	pd_win->setLayout(new GroupLayout());
 
-	Button* sim_setup = new Button(pd_win, "Set up demo scene");
-	sim_setup->setCallback([viewer]() {
-		setup_demo_scene(viewer);
-	});
+    PopupButton *setupPopup = new PopupButton(pd_win, "Set up demo scene", ENTYPO_ICON_EXPORT);
+    Popup *popup = setupPopup->popup();
+    popup->setLayout(new GroupLayout());
 
-	Button* runsim_b = new Button(pd_win, "Run Simulation");
+    new Label(popup, "Num hairs");
+    IntBox<int>* hairs_box = new IntBox<int>(popup, PROJDYN_NUM_HAIRS_INITIAL);
+    hairs_box->setEditable(true);
+    hairs_box->setCallback([](int num_hairs) {
+        projdyn_num_hairs = num_hairs;
+    });
+
+    new Label(popup, "Resolution");
+    IntBox<int>* res_box = new IntBox<int>(popup, PROJDYN_RES_INITIAL);
+    res_box->setEditable(true);
+    res_box->setCallback([](int res) {
+        projdyn_res = res;
+    });
+
+    new Label(popup, "Segment Length");
+    FloatBox<float>* seg_length_box = new FloatBox<float>(popup, PROJDYN_SEG_LENGTH_INITIAL);
+    seg_length_box->setEditable(true);
+    seg_length_box->setCallback([](float seg_length) {
+        projdyn_seg_length = seg_length;
+    });
+
+    new Label(popup, "Ball Radius");
+    FloatBox<float>* radius_box = new FloatBox<float>(popup, PROJDYN_BALL_RADIUS_INITIAL);
+    radius_box->setEditable(true);
+    radius_box->setCallback([](float radius) {
+        projdyn_ball_radius = radius;
+    });
+
+    Button* b = new Button(popup, "Create", ENTYPO_ICON_EXPORT);
+    b->setCallback([viewer,setupPopup]() {
+        setup_demo_scene(viewer, projdyn_ball_radius, projdyn_res, projdyn_num_hairs, projdyn_seg_length);
+        setupPopup->setPushed(false);
+    });
+
+    Button* runsim_b = new Button(pd_win, "Run Simulation");
 	runsim_b->setCallback([viewer]() {
 		projdyn_start(viewer);
 	});
@@ -102,10 +138,15 @@ void init_projdyn_gui(Viewer* viewer) {
 		}
 	});
 
+    Button* wind_toggle_b = new Button(pd_win, "Toggle Wind");
+    wind_toggle_b->setCallback([]() {
+        sim.toggleWind();
+    });
+
 	Label* iterations_label = new Label(pd_win, "Num of Iterations: ");
 	IntBox<int>* iterations_box = new IntBox<int>(pd_win, projdyn_num_iterations);
-	iterations_box->setEditable(true);
-	iterations_box->setCallback([viewer](int num_its) {
+    iterations_box->setEditable(true);
+    iterations_box->setCallback([viewer](int num_its) {
 		projdyn_num_iterations = num_its;
 	});
 

@@ -69,7 +69,7 @@ class Viewer : public nanogui::Screen {
 public:
     Viewer(std::string title, bool (*pre_draw_callback)(Viewer*) = nullptr, bool (*mesh_load_callback)(Viewer*) = nullptr)
         :
-        nanogui::Screen(Eigen::Vector2i(1024, 512), title) {
+        nanogui::Screen(Eigen::Vector2i(1024, 600), title) {
 
         initGUI();
         initShaders();
@@ -138,7 +138,7 @@ public:
         }
     }
 
-    void addRodsOnBall(float radius, size_t res = 5, size_t num_rods = 5, float seg_length = 0.5) {
+    void addRodsOnBall(float ball_radius, size_t res = 5, size_t num_rods = 5, float seg_length = 0.5) {
         using_rods = true;
         r_res = res;
         r_num_rods = num_rods;
@@ -156,7 +156,7 @@ public:
             Vector3f tangent = Vector3f(randVal(10), randVal(10), randVal(10)).normalized();
             Quaternionf rotQuat = Quaternionf::FromTwoVectors(default_tangent, tangent);
             for (size_t i = 0; i < res; i++) {
-                Vector3f p = tangent * radius + tangent * i * seg_length;
+                Vector3f p = tangent * ball_radius + tangent * i * seg_length;
                 m_updated_rods_pos.col(i+j*res) << p;
                 m_updated_rods_tangents.col(i+j*res) << p.normalized();
                 m_updated_rods_normals.col(i+j*res) << rotQuat.toRotationMatrix()  * default_normal;
@@ -169,7 +169,7 @@ public:
         Point center = computeCenter(&mesh);
         center += Point(0, 0, 0);
         for (auto v : mesh.vertices()) {
-            mesh.position(v) = (mesh.position(v) - center) * radius + center;
+            mesh.position(v) = (mesh.position(v) - center) * ball_radius + center;
         }
         meshProcess();
         m_mesh_load_callback(this); //Re-upload the positions to the simulator because we changed them
