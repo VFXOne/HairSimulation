@@ -36,6 +36,9 @@ copy_files_once(${DATA})
 if(MSVC)
 	add_compile_options("/openmp")
 endif()
+
+add_compile_options(-Og)
+
 # there is no target to link to
 
 #================================================================

@@ -5,6 +5,8 @@
 #ifndef APPLET_PDCONSTRAINT_H
 #define APPLET_PDCONSTRAINT_H
 
+# define M_PI 3.14159265358979323846
+
 #include <iostream>
 #include "Edge.h"
 #include "projdyn_types.h"
@@ -495,10 +497,6 @@ public:
         diff = new_ref - m_ref_point;
         new_center = m_center_pos + diff;
 
-        std::cout << "new ref = " << new_ref << std::endl;
-        std::cout << "new center = " << new_center << std::endl;
-        std::cout << "diff between center and ref = " << (new_center - new_ref).norm() << std::endl;
-
         Vector3 pos;
         Vector p_i;
         p_i.resize(3);
@@ -518,7 +516,6 @@ public:
             p_i.x() = (1 + m_force_factor) * new_center(0) - m_force_factor * v(0);
             p_i.y() = (1 + m_force_factor) * new_center(1) - m_force_factor * v(1);
             p_i.z() = (1 + m_force_factor) * new_center(2) - m_force_factor * v(2);
-            std::cout << "INSIDE!" << std::endl;
 
         } else {
             p_i.x() = pos.x();
@@ -537,6 +534,65 @@ private:
     Positions* m_positions;
     Index m_mov_pos_index;
     Vector3 m_ref_point;
+};
+
+class selfCollisionEllipseConstraint : public CRConstraint {
+public:
+    selfCollisionEllipseConstraint(Index num_coord, Scalar weight, Scalar radius_factor, Index pos_index, Index first_index, Index second_index, Scalar forceFactor = 1.)
+            :
+            CRConstraint(num_coord, weight)
+    {
+        m_first_index = first_index;
+        m_second_index = second_index;
+        m_pos_index = pos_index;
+        m_radius_factor = radius_factor;
+        m_force_factor = forceFactor;
+
+        A_i.resize(3, 3);
+        A_i.setIdentity();
+
+        B_i.resize(3, 3);
+        B_i.setIdentity();
+
+        initSM(3, num_coord);
+        m_selectionMatrix.coeffRef(0, m_pos_index) = 1;
+        m_selectionMatrix.coeffRef(1, m_pos_index+1) = 1;
+        m_selectionMatrix.coeffRef(2, m_pos_index+2) = 1;
+
+        computeLHS();
+    }
+
+    Vector projectOnConstraintSet(const Vector& q) override {
+        assert(q.size() > m_pos_index and q.size() > m_first_index and q.size() > m_second_index);
+        Vector3 pos, first, second;
+        pos = Vector3(q.coeff(m_pos_index), q.coeff(m_pos_index+1), q.coeff(m_pos_index+2));
+        first = Vector3(q.coeff(m_first_index), q.coeff(m_first_index+1), q.coeff(m_first_index+2));
+        second = Vector3(q.coeff(m_second_index), q.coeff(m_second_index+1), q.coeff(m_second_index+2));
+
+        Vector p_i(3);
+        p_i.x() = pos.x();
+        p_i.y() = pos.y();
+        p_i.z() = pos.z();
+
+        Scalar dist1 = (first - pos).norm();
+        Scalar dist2 = (second - pos).norm();
+        Scalar radius = m_radius_factor * (first - second).norm();
+        if (dist1 + dist2 < radius) {
+            Vector3 adjust1 = (pos - first).normalized() * (radius - dist1) * m_force_factor;
+            Vector3 adjust2 = (pos - second).normalized() * (radius - dist2) * m_force_factor;
+            p_i += adjust1;
+            p_i += adjust2;
+        }
+
+        return p_i;
+    }
+
+private:
+    Scalar m_radius_factor;
+    Scalar m_force_factor;
+    Index m_pos_index;
+    Index m_first_index;
+    Index m_second_index;
 };
 
 #endif //APPLET_PDCONSTRAINT_H
