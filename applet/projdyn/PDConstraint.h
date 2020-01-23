@@ -470,9 +470,7 @@ public:
         m_force_factor = forceFactor;
         m_positions = positions;
         m_mov_pos_index = moving_pos_index;
-        m_ref_point.x() = m_positions->coeff(moving_pos_index);
-        m_ref_point.y() = m_positions->coeff(moving_pos_index+1);
-        m_ref_point.z() = m_positions->coeff(moving_pos_index+2);
+        m_ref_point = m_positions->row(moving_pos_index);
 
         A_i.resize(3, 3);
         A_i.setIdentity();
@@ -489,9 +487,8 @@ public:
     }
 
     Vector projectOnConstraintSet(const Vector& q) override {
-        // Check for correct size of the projection auxiliary variable;
+        //Check for correct size of the projection auxiliary variable;
         assert(q.size() > m_pos_index);
-        //TODO: update sphere center
         Vector3 new_ref, diff, new_center;
         new_ref = m_positions->row(m_mov_pos_index);
         diff = new_ref - m_ref_point;
@@ -509,14 +506,18 @@ public:
         //TODO: compute distance with the rod radius too
 
         if (distance < m_radius) {
+            std::cout << "INSIDE!!!!!" << std::endl;
             v = v/v.norm();
             v = v*m_radius;
 
-            //TODO: Add forceFactor!
-            p_i.x() = (1 + m_force_factor) * new_center(0) - m_force_factor * v(0);
-            p_i.y() = (1 + m_force_factor) * new_center(1) - m_force_factor * v(1);
-            p_i.z() = (1 + m_force_factor) * new_center(2) - m_force_factor * v(2);
+            p_i.x() = (1 - m_force_factor) * new_center(0) - m_force_factor * v(0);
+            p_i.y() = (1 - m_force_factor) * new_center(1) - m_force_factor * v(1);
+            p_i.z() = (1 - m_force_factor) * new_center(2) - m_force_factor * v(2);
 
+            Vector3 adjust = v * m_force_factor;
+            p_i.x() = adjust.x();
+            p_i.y() = adjust.y();
+            p_i.z() = adjust.z();
         } else {
             p_i.x() = pos.x();
             p_i.y() = pos.y();
@@ -536,15 +537,15 @@ private:
     Vector3 m_ref_point;
 };
 
-class selfCollisionEllipseConstraint : public CRConstraint {
+class SelfCollisionEllipseConstraint : public CRConstraint {
 public:
-    selfCollisionEllipseConstraint(Index num_coord, Scalar weight, Scalar radius_factor, Index pos_index, Index first_index, Index second_index, Scalar forceFactor = 1.)
+    SelfCollisionEllipseConstraint(Index num_coord, Scalar weight, Scalar radius_factor, Index collide_index, Index first_index, Index second_index, Scalar forceFactor = 1.)
             :
             CRConstraint(num_coord, weight)
     {
         m_first_index = first_index;
         m_second_index = second_index;
-        m_pos_index = pos_index;
+        m_collide_index = collide_index;
         m_radius_factor = radius_factor;
         m_force_factor = forceFactor;
 
@@ -555,17 +556,17 @@ public:
         B_i.setIdentity();
 
         initSM(3, num_coord);
-        m_selectionMatrix.coeffRef(0, m_pos_index) = 1;
-        m_selectionMatrix.coeffRef(1, m_pos_index+1) = 1;
-        m_selectionMatrix.coeffRef(2, m_pos_index+2) = 1;
+        m_selectionMatrix.coeffRef(0, m_collide_index) = 1;
+        m_selectionMatrix.coeffRef(1, m_collide_index + 1) = 1;
+        m_selectionMatrix.coeffRef(2, m_collide_index + 2) = 1;
 
         computeLHS();
     }
 
     Vector projectOnConstraintSet(const Vector& q) override {
-        assert(q.size() > m_pos_index and q.size() > m_first_index and q.size() > m_second_index);
+        assert(q.size() > m_collide_index and q.size() > m_first_index and q.size() > m_second_index);
         Vector3 pos, first, second;
-        pos = Vector3(q.coeff(m_pos_index), q.coeff(m_pos_index+1), q.coeff(m_pos_index+2));
+        pos = Vector3(q.coeff(m_collide_index), q.coeff(m_collide_index + 1), q.coeff(m_collide_index + 2));
         first = Vector3(q.coeff(m_first_index), q.coeff(m_first_index+1), q.coeff(m_first_index+2));
         second = Vector3(q.coeff(m_second_index), q.coeff(m_second_index+1), q.coeff(m_second_index+2));
 
@@ -577,9 +578,11 @@ public:
         Scalar dist1 = (first - pos).norm();
         Scalar dist2 = (second - pos).norm();
         Scalar radius = m_radius_factor * (first - second).norm();
+
         if (dist1 + dist2 < radius) {
-            Vector3 adjust1 = (pos - first).normalized() * (radius - dist1) * m_force_factor;
-            Vector3 adjust2 = (pos - second).normalized() * (radius - dist2) * m_force_factor;
+            std::cout << "COLLIDE!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+            Vector3 adjust1 = (first - pos).normalized() * (radius - dist1) * m_force_factor;
+            Vector3 adjust2 = (second - pos).normalized() * (radius - dist2) * m_force_factor;
             p_i += adjust1;
             p_i += adjust2;
         }
@@ -590,7 +593,7 @@ public:
 private:
     Scalar m_radius_factor;
     Scalar m_force_factor;
-    Index m_pos_index;
+    Index m_collide_index;
     Index m_first_index;
     Index m_second_index;
 };

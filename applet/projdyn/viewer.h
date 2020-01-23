@@ -790,7 +790,7 @@ public:
 
     bool scrollEvent(const Vector2i &p, const Vector2f &rel) {
         if (!Screen::scrollEvent(p, rel)) {
-            mCamera.zoom = max(0.1, mCamera.zoom * (rel.y() > 0 ? 1.1 : 0.9));
+            mCamera.zoom = max(0.05, mCamera.zoom * (rel.y() > 0 ? 1.1 : 0.9));
             repaint();
         }
         return true;

@@ -78,7 +78,7 @@ void init_projdyn_gui(Viewer* viewer) {
 	pd_win->setPosition(Vector2i(15, 230));
 	pd_win->setLayout(new GroupLayout());
 
-    PopupButton *setupPopup = new PopupButton(pd_win, "Set up demo scene", ENTYPO_ICON_EXPORT);
+    PopupButton *setupPopup = new PopupButton(pd_win, "Setup scene", ENTYPO_ICON_COG);
     Popup *popup = setupPopup->popup();
     popup->setLayout(new GroupLayout());
 
@@ -110,23 +110,23 @@ void init_projdyn_gui(Viewer* viewer) {
         projdyn_ball_radius = radius;
     });
 
-    Button* b = new Button(popup, "Create", ENTYPO_ICON_EXPORT);
+    Button* b = new Button(popup, "Create", ENTYPO_ICON_THUMBS_UP);
     b->setCallback([viewer,setupPopup]() {
         setup_demo_scene(viewer, projdyn_ball_radius, projdyn_res, projdyn_num_hairs, projdyn_seg_length);
         setupPopup->setPushed(false);
     });
 
-    Button* runsim_b = new Button(pd_win, "Run Simulation");
+    Button* runsim_b = new Button(pd_win, "Run Simulation", ENTYPO_ICON_CONTROLLER_PLAY);
 	runsim_b->setCallback([viewer]() {
 		projdyn_start(viewer);
 	});
 
-	Button* stopsim_b = new Button(pd_win, "Stop Simulation");
+	Button* stopsim_b = new Button(pd_win, "Stop Simulation", ENTYPO_ICON_CONTROLLER_STOP);
 	stopsim_b->setCallback([]() {
 		projdyn_stop();
 	});
 
-	Button* reset_b = new Button(pd_win, "Reset Positions");
+	Button* reset_b = new Button(pd_win, "Reset Positions", ENTYPO_ICON_CW);
 	reset_b->setCallback([viewer]() {
 		bool was_active = projdyn_active;
 		projdyn_stop();
