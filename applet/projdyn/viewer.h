@@ -150,9 +150,9 @@ public:
         Vector3f default_normal = -Vector3f::UnitY();
         //Enable true random generation
         srand(time(NULL));
-        auto randVal = [](float max){ return float( (rand()) * 2*max - max ); };
+        auto randVal = [](float max, float min){ return float( (rand()) * max - min ); };
         for (size_t j = 0; j < num_rods; j++) {
-            Vector3f tangent = Vector3f(randVal(10), randVal(10), randVal(10)).normalized();
+            Vector3f tangent = Vector3f(randVal(2,1), randVal(2,1), randVal(1,0)).normalized();
             Quaternionf rotQuat = Quaternionf::FromTwoVectors(default_tangent, tangent);
             for (size_t i = 0; i < res; i++) {
                 Vector3f p = tangent * radius + tangent * i * seg_length;
