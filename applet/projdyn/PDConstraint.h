@@ -514,7 +514,7 @@ public:
             p_i.y() = (1 - m_force_factor) * new_center(1) - m_force_factor * v(1);
             p_i.z() = (1 - m_force_factor) * new_center(2) - m_force_factor * v(2);
 
-            Vector3 adjust = v * m_force_factor;
+            Vector3 adjust = pos + v * m_force_factor;
             p_i.x() = adjust.x();
             p_i.y() = adjust.y();
             p_i.z() = adjust.z();
@@ -537,16 +537,16 @@ private:
     Vector3 m_ref_point;
 };
 
-class SelfCollisionEllipseConstraint : public CRConstraint {
+class SelfCollisionConstraint : public CRConstraint {
 public:
-    SelfCollisionEllipseConstraint(Index num_coord, Scalar weight, Scalar radius_factor, Index collide_index, Index first_index, Index second_index, Scalar forceFactor = 1.)
+    SelfCollisionConstraint(Index num_coord, Scalar weight, Scalar radius, Index collide_index, Index first_index, Index second_index, Scalar forceFactor = 1.)
             :
             CRConstraint(num_coord, weight)
     {
         m_first_index = first_index;
         m_second_index = second_index;
         m_collide_index = collide_index;
-        m_radius_factor = radius_factor;
+        m_radius = radius;
         m_force_factor = forceFactor;
 
         A_i.resize(3, 3);
@@ -565,33 +565,45 @@ public:
 
     Vector projectOnConstraintSet(const Vector& q) override {
         assert(q.size() > m_collide_index and q.size() > m_first_index and q.size() > m_second_index);
-        Vector3 pos, first, second;
-        pos = Vector3(q.coeff(m_collide_index), q.coeff(m_collide_index + 1), q.coeff(m_collide_index + 2));
+        Vector3 collide_pos, first, second;
+        collide_pos = Vector3(q.coeff(m_collide_index), q.coeff(m_collide_index + 1), q.coeff(m_collide_index + 2));
         first = Vector3(q.coeff(m_first_index), q.coeff(m_first_index+1), q.coeff(m_first_index+2));
         second = Vector3(q.coeff(m_second_index), q.coeff(m_second_index+1), q.coeff(m_second_index+2));
 
         Vector p_i(3);
-        p_i.x() = pos.x();
-        p_i.y() = pos.y();
-        p_i.z() = pos.z();
+        p_i.x() = collide_pos.x();
+        p_i.y() = collide_pos.y();
+        p_i.z() = collide_pos.z();
 
-        Scalar dist1 = (first - pos).norm();
-        Scalar dist2 = (second - pos).norm();
-        Scalar radius = m_radius_factor * (first - second).norm();
+        float length = (first - second).norm();
 
-        if (dist1 + dist2 < radius) {
-            std::cout << "COLLIDE!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
-            Vector3 adjust1 = (first - pos).normalized() * (radius - dist1) * m_force_factor;
-            Vector3 adjust2 = (second - pos).normalized() * (radius - dist2) * m_force_factor;
-            p_i += adjust1;
-            p_i += adjust2;
+        Vector3 line_director = second - first;
+        Vector3 line_point = (first - collide_pos).cross(line_director);
+        float distance = line_point.norm() / line_director.norm();
+
+        float dist1 = sqrt((first - collide_pos).norm() - distance);
+        float dist2 = sqrt((second - collide_pos).norm() - distance);
+
+        if (isnan(dist1) or isnan(dist2)) {
+            std::cout << "FUCK! NaN!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+            std::cout << "index " << m_first_index << ": " << dist1 << ", " << dist2 << "collide with: " << m_collide_index << std::endl;
+            return p_i;
+        }
+
+        if (distance < m_radius and not isnan(dist1) and not isnan(dist2) and dist1 <= length and dist2 <= length) {
+            std::cout << "COLLIDE!" << std::endl;
+            Vector3 projection = collide_pos + line_director.normalized() * (m_radius - distance) * m_force_factor;
+
+            p_i.x() = projection.x();
+            p_i.y() = projection.y();
+            p_i.z() = projection.z();
         }
 
         return p_i;
     }
 
 private:
-    Scalar m_radius_factor;
+    Scalar m_radius;
     Scalar m_force_factor;
     Index m_collide_index;
     Index m_first_index;

@@ -94,15 +94,15 @@ namespace ProjDyn {
 		//Rods stuck to a ball
 		void addMeshConstraints() {
 		    cr_constraints.clear();
-		    addSSConstraints(1);
-		    addBTConstraints(1);
-            addMovingPointConstraints(1e5, 20);
-            //addSphereCollisionConstraints(1, 10);
-            //addSelfCollisionConstraints(10, 1);
+		    addSSConstraints(100);
+		    addBTConstraints(10);
+            addMovingPointConstraints(1e5, 1e4);
+            addSphereCollisionConstraints(10, 2);
+            addSelfCollisionConstraints(100, 1);
 		}
 
 		void resetPositions() {
-			// Reset vertex positions to initial state and set m_velocities to 0
+			//Reset vertex positions to initial state and set m_velocities to 0
 			m_positions = m_positions_init;
 			if (use_cosserat_rods) {
                 cr_positions = cr_positions_init;
@@ -546,13 +546,8 @@ namespace ProjDyn {
                         Index coll_curr_index = rod_indices.at(j);
                         Index coll_next_index = j == rod_indices.size() - 1 ? cr_num_positions : rod_indices.at(j + 1);
                         for (Index coll_index = coll_curr_index; coll_index < coll_next_index; coll_index++) {
-                            if (coll_index == i){
-                                std::cout << "fuck" << std::endl;
-                                int var = 0;
-                                var++;
-                            }
-                            auto scec = new SelfCollisionEllipseConstraint(cr_size, weight, 2, coll_index*3, i*3, i*3+1, forceFactor);
-                            cr_constraints.push_back(scec);
+                            auto scc = new SelfCollisionConstraint(cr_size, weight, cr_radius*0.2, coll_index * 3, i * 3, (i+1) * 3, forceFactor);
+                            cr_constraints.push_back(scc);
                         }
                     }
                 }
@@ -563,8 +558,8 @@ namespace ProjDyn {
 		    if (!isInitialized()) return;
 		    if (cr_wind) {
                 time += h;
-                float forceX = 10.0;
-                float forceY = 2.0;
+                float forceX = 30.0;
+                float forceY = 10.0;
                 float factorIntensity = 0.5;
                 float factorY = 0.2;
                 float factorX = 0.9;
