@@ -5,7 +5,7 @@
 
 constexpr int PROJDYN_FPS = 60;
 constexpr int PROJDYN_NUM_ITS_INITIAL = 10; //Default is 10
-constexpr int PROJDYN_NUM_HAIRS_INITIAL = 5;
+constexpr int PROJDYN_NUM_HAIRS_INITIAL = 10;
 constexpr int PROJDYN_RES_INITIAL = 10;
 constexpr float PROJDYN_BALL_RADIUS_INITIAL = 0.8f;
 constexpr float PROJDYN_SEG_LENGTH_INITIAL = 0.2f;

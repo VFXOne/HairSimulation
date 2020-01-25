@@ -98,7 +98,7 @@ namespace ProjDyn {
 		    addBTConstraints(10);
             addMovingPointConstraints(1e5, 1e4);
             addSphereCollisionConstraints(10, 2);
-            addSelfCollisionConstraints(100, 1);
+            addSelfCollisionConstraints(100, 2);
 		}
 
 		void resetPositions() {
@@ -558,8 +558,8 @@ namespace ProjDyn {
 		    if (!isInitialized()) return;
 		    if (cr_wind) {
                 time += h;
-                float forceX = 30.0;
-                float forceY = 10.0;
+                float forceX = 100.0;
+                float forceY = 30.0;
                 float factorIntensity = 0.5;
                 float factorY = 0.2;
                 float factorX = 0.9;

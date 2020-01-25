@@ -1,5 +1,6 @@
 #include "projdyn_api.h"
 #include <thread>
+#include <chrono>
 #include "projdyn.h"
 #include <nanogui/slider.h>
 #include "viewer.h"
@@ -15,6 +16,10 @@ Eigen::MatrixXf upload_pos, upload_rods, upload_rods_tan, upload_rods_norm;
 std::thread projdyn_thread;
 bool projdyn_active = false;
 bool default_constraints = true;
+
+//Store the execution time for averaging
+std::vector<int> exec_time;
+size_t num_iter;
 
 // Pass updated vertex positions to the viewer
 bool projdyn_setmesh(Viewer* viewer) {
@@ -157,9 +162,20 @@ bool projdyn_start(Viewer* viewer) {
 	projdyn_stop();
 
 	// Make sure the simulator is properly initialized
-	if (!sim.isInitialized())
-		if (!sim.initializeSystem(default_constraints))
+	if (!sim.isInitialized()) {
+        auto t1 = std::chrono::high_resolution_clock::now();
+
+        bool init = sim.initializeSystem(default_constraints);
+
+        auto t2 = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::seconds>(t2 - t1).count();
+
+        std::cout << "System initialized in: " << duration << "s" << std::endl;
+
+        if (!init)
             return false;
+
+    }
 
 	// Create a thread that runs the simulation
 	// It calls a function that triggers a time-step every 1000/PROJDYN_FPS milliseconds
@@ -175,14 +191,16 @@ bool projdyn_start(Viewer* viewer) {
 	}
 	);
 
+	num_iter = 0;
+
 	return true;
 }
 
 void projdyn_stop() {
 	if (projdyn_active) {
-		projdyn_active = false;
-		projdyn_thread.join();
-	}
+        projdyn_active = false;
+        projdyn_thread.join();
+    }
 }
 
 // Will be called every frame:
@@ -190,10 +208,33 @@ void projdyn_stop() {
 bool projdyn_update(Viewer* viewer) {
 	if (!sim.isInitialized()) return false;
 
-	// Simulate one time step
-	sim.step(projdyn_num_iterations);
+	const size_t max_iter = 100;
+	if (num_iter > max_iter) {
+	    num_iter = 0;
+        float avg = 0.0f;
+        for (size_t i = 0; i < exec_time.size(); i++) {
+            avg += exec_time.at(i);
+        }
+        avg /= exec_time.size();
+        exec_time.clear();
 
-	return projdyn_upload_positions(viewer);
+        std::cout << "Average execution: " << avg / 1e6 << "s" << std::endl;
+	}
+
+	//Measure the execution time
+    auto t1 = std::chrono::high_resolution_clock::now();
+
+    // Simulate one time step
+    sim.step(projdyn_num_iterations);
+
+    auto t2 = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
+
+    exec_time.push_back(duration);
+
+    num_iter++;
+
+    return projdyn_upload_positions(viewer);
 }
 
 // Extract positions, convert them to column-wise triples of floats and

@@ -506,7 +506,6 @@ public:
         //TODO: compute distance with the rod radius too
 
         if (distance < m_radius) {
-            std::cout << "INSIDE!!!!!" << std::endl;
             v = v/v.norm();
             v = v*m_radius;
 
@@ -584,14 +583,7 @@ public:
         float dist1 = sqrt((first - collide_pos).norm() - distance);
         float dist2 = sqrt((second - collide_pos).norm() - distance);
 
-        if (isnan(dist1) or isnan(dist2)) {
-            std::cout << "FUCK! NaN!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
-            std::cout << "index " << m_first_index << ": " << dist1 << ", " << dist2 << "collide with: " << m_collide_index << std::endl;
-            return p_i;
-        }
-
         if (distance < m_radius and not isnan(dist1) and not isnan(dist2) and dist1 <= length and dist2 <= length) {
-            std::cout << "COLLIDE!" << std::endl;
             Vector3 projection = collide_pos + line_director.normalized() * (m_radius - distance) * m_force_factor;
 
             p_i.x() = projection.x();
