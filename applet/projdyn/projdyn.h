@@ -216,6 +216,8 @@ namespace ProjDyn {
                     addMeshConstraints();
                 }
 
+                std::cout << "Number of constraints: " << cr_constraints.size() << std::endl;
+
                 //Finally, pre-compute the left-hand side matrix
                 initializeLHS();
             }
